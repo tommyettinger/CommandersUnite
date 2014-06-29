@@ -20,6 +20,10 @@ namespace CU
     {
         SE, SW, NW, NE
     }
+    public enum Mode
+    {
+        Selecting, Moving, Attacking
+    }
     public class DirectedPosition : Position
     {
         public Direction dir { get; set; }
@@ -157,6 +161,18 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             x = 3;
             y = 3;
         }
+        public Unit(Unit u)
+        {
+            unitIndex = u.unitIndex;
+            name = u.name;
+            speed = u.speed;
+            mobility = u.mobility;
+            color = u.color;
+            facing = u.facing;
+            facingNumber = u.facingNumber;
+            x = u.x;
+            y = u.y;
+        }
         public Unit(string name, int color, Direction facing, int x, int y)
         {
             this.name = name;
@@ -186,7 +202,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.unitIndex = unit;
             this.color = color;
             this.facing = facing;
-            switch(facing)
+            switch (facing)
             {
                 case Direction.SE: facingNumber = 0; break;
                 case Direction.SW: facingNumber = 1; break;
@@ -274,18 +290,34 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
     }
     public class Logic
     {
-
+        public Mode CurrentMode;
         public LocalMap FieldMap;
         public Unit[,] UnitGrid;
+        public Unit ActiveUnit;
         public int[] Colors;
         public int[] ReverseColors;
+        public int ActingFaction { get; set; }
+        public int TaskSteps { get; set; }
+        public int width;
+        public int height;
+        int[] targetX;
+        int[] targetY;
         public Logic(int MapWidth, int MapHeight)
         {
+            ActingFaction = 1;
+            TaskSteps = 0;
+            CurrentMode = Mode.Selecting;
             FieldMap = new LocalMap(MapWidth, MapHeight);
             UnitGrid = new Unit[FieldMap.Width, FieldMap.Height];
+
+            targetX = new int[] { width / 4, width / 2, width / 4, width / 2, };
+            targetY = new int[] { height / 2, height / 4, height / 2, height / 4 };
         }
         public Logic()
         {
+            ActingFaction = 1;
+            TaskSteps = 0;
+            CurrentMode = Mode.Selecting;
             FieldMap = new LocalMap(20, 20);
             UnitGrid = new Unit[FieldMap.Width, FieldMap.Height];
         }
@@ -303,74 +335,55 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 
         public static Random r = new Random();
 
-
-        static float[,] dijkstra(Unit self, int[,] grid, Unit[,] placing, int goalX, int goalY)
+        public static int ConvertDirection(Direction dir)
         {
-            /*
-            (defn find-cells [^doubles a cell-kind]
-                (persistent! (areduce ^doubles a i ret (transient {})
-                                      (if (= (hiphip/aget ^doubles a i) cell-kind) (assoc! ret i cell-kind) ret))))
+            int facingNumber;
+            switch (dir)
+            {
+                case Direction.SE: facingNumber = 0; break;
+                case Direction.SW: facingNumber = 1; break;
+                case Direction.NW: facingNumber = 2; break;
+                case Direction.NE: facingNumber = 3; break;
+                default: facingNumber = 0; break;
+            }
+            return facingNumber;
+        }
 
-            (defn find-goals [^doubles a]
-              (find-cells a GOAL))
-
-            (defn find-walls [^doubles a]
-                (persistent! (areduce ^doubles a i ret (transient {})
-                                      (if (>= (hiphip/aget ^doubles a i) (double wall)) (assoc! ret i wall) ret))))
-
-            (defn find-floors [^doubles a]
-              (find-cells a floor))
-
-            (defn find-lowest [^doubles a]
-              (let [low-val (hiphip/amin a)]
-                (find-cells a low-val)))
-
-            (defn find-monsters [m]
-                (into {} (for [mp (map #(:pos @%) m)] [mp 1.0])))
-
-            (defn dijkstra
-              ([a]
-                 (dijkstra a (find-walls a) (find-lowest a)))
-              ([dun _]
-                 (dijkstra (:dungeon dun) (merge (find-walls (:dungeon dun)) (find-monsters @(:monsters dun))) (find-lowest (:dungeon dun))))
-              ([a closed open-cells]
-                 (loop [open open-cells]
-                   (when (seq open)
-                     (recur (reduce (fn [newly-open [^long i ^double v]]
-                                      (reduce (fn [acc dir]
-                                                (if (or (closed dir) (open dir)
-                                                        (>= (+ 1.0 v) (hiphip/aget ^doubles a dir)))
-                                                  acc
-                                                  (do (hiphip/aset ^doubles a dir (+ 1.0 v))
-                                                      (assoc acc dir (+ 1.0 v)))))
-                                              newly-open, [(- i wide2)
-                                                           (+ i wide2)
-                                                           (- i 2)
-                                                           (+ i 2)]))
-                                    {}, open))))
-                 a))*/
+        static float[,] dijkstra(Unit self, int[,] grid, Unit[,] placing, int targetX, int targetY)
+        {
             int width = grid.GetLength(0);
             int height = grid.GetLength(1);
             float wall = 222;
             float unexplored = 111;
             float goal = 0;
             float[] d = new float[width * height];
+            Dictionary<int, int> open = new Dictionary<int, int>(),
+                fringe = new Dictionary<int, int>(),
+                closed = new Dictionary<int, int>();
+
+
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < height; j++)
                     d[i + width * j] = unexplored;
             }
+            d[targetX + width * targetY] = goal;
             for (int i = 0; i < width; i++)
             {
                 d[i] = wall;
                 d[i + width * (height - 1)] = wall;
+
+                closed[i] = 222;
+                closed[i + width * (height - 1)] = 222;
             }
-            for (int j = 1; j < height - 1; j += 2)
+            for (int j = 1; j < height - 1; j++)
             {
                 d[j * width] = wall;
-                d[(j + 1) * width + (width - 1)] = wall;
+                d[j * width + (width - 1)] = wall;
+
+                closed[j * width] = 222;
+                closed[j * width + (width - 1)] = 222;
             }
-            d[goalX + width * goalY] = goal;
             int[] ability =
             new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, };
             //plains forest desert jungle hills mountains ruins tundra road river
@@ -471,9 +484,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             };
                     break;
             }
-            Dictionary<int, int> open = new Dictionary<int, int> { { (goalX + width * goalY), 0 } },
-                fringe = new Dictionary<int, int>(),
-                closed = new Dictionary<int, int>();
+
             int[] moves = { width, -1, -width, 1 };
             while (open.Count > 0)
             {
@@ -511,7 +522,215 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 fringe.Clear();
 
             }
-            d[goalX + width * goalY] = wall;
+            d[targetX + width * targetY] = wall;
+            float[,] n = new float[width, height];
+
+            for (int j = 0; j < height; j++)
+            {
+                for (int i = 0; i < width; i++)
+                {
+                    n[i, j] = d[i + j * width];
+                    //                    Console.Write(string.Format("{0,4}", n[i, j]));
+                }
+                Console.WriteLine();
+            }
+            return n;
+        }
+        static float[,] dijkstra(Unit self, int[,] grid, Unit[,] placing, int[] targetColors)
+        {
+            int width = grid.GetLength(0);
+            int height = grid.GetLength(1);
+            float wall = 222;
+            float unexplored = 111;
+            float goal = 0;
+            float[] d = new float[width * height];
+            Dictionary<int, int> open = new Dictionary<int, int>(),
+                fringe = new Dictionary<int, int>(),
+                closed = new Dictionary<int, int>();
+
+
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                    d[i + width * j] = unexplored;
+            }
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (targetColors.Any(c => placing[i, j] != null && c == placing[i, j].color && (placing[i,j].name == "Castle" || placing[i,j].name == "Estate")))
+                    {
+                        d[i + width * j] = goal;
+                        open[i + width * j] = 0;
+                    }
+                }
+            }
+            for (int i = 0; i < width; i++)
+            {
+                d[i] = wall;
+                d[i + width * (height - 1)] = wall;
+
+                closed[i] = 222;
+                closed[i + width * (height - 1)] = 222;
+            }
+            for (int j = 1; j < height - 1; j++)
+            {
+                d[j * width] = wall;
+                d[j * width + (width - 1)] = wall;
+
+                closed[j * width] = 222;
+                closed[j * width + (width - 1)] = 222;
+            }
+            int[] ability =
+            new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, };
+            //plains forest desert jungle hills mountains ruins tundra road river
+            Dictionary<MovementType, bool> pass = new Dictionary<MovementType, bool>
+            {
+                {MovementType.Foot, true},
+                {MovementType.Treads, true},
+                {MovementType.Wheels, true},
+                {MovementType.TreadsAmphi, true},
+                {MovementType.WheelsTraverse, true},
+                {MovementType.Flight, true},
+                {MovementType.Immobile, false},
+            };
+            switch (self.mobility)
+            {
+                case MovementType.Foot:
+                    ability =
+            new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, };
+                    pass = new Dictionary<MovementType, bool>
+            {
+                {MovementType.Foot, false},
+                {MovementType.Treads, true},
+                {MovementType.Wheels, false},
+                {MovementType.TreadsAmphi, true},
+                {MovementType.WheelsTraverse, false},
+                {MovementType.Flight, true},
+                {MovementType.Immobile, false},
+            };
+                    break;
+                case MovementType.Treads:
+                    ability =
+            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, };
+                    pass = new Dictionary<MovementType, bool>
+            {
+                {MovementType.Foot, false},
+                {MovementType.Treads, false},
+                {MovementType.Wheels, false},
+                {MovementType.TreadsAmphi, false},
+                {MovementType.WheelsTraverse, false},
+                {MovementType.Flight, true},
+                {MovementType.Immobile, false},
+            };
+                    break;
+                case MovementType.Wheels:
+                    ability =
+            new int[] { 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, };
+                    pass = new Dictionary<MovementType, bool>
+            {
+                {MovementType.Foot, false},
+                {MovementType.Treads, false},
+                {MovementType.Wheels, false},
+                {MovementType.TreadsAmphi, false},
+                {MovementType.WheelsTraverse, false},
+                {MovementType.Flight, true},
+                {MovementType.Immobile, false},
+            };
+                    break;
+                case MovementType.TreadsAmphi:
+                    ability =
+            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, };
+                    pass = new Dictionary<MovementType, bool>
+            {
+                {MovementType.Foot, false},
+                {MovementType.Treads, false},
+                {MovementType.Wheels, false},
+                {MovementType.TreadsAmphi, false},
+                {MovementType.WheelsTraverse, false},
+                {MovementType.Flight, true},
+                {MovementType.Immobile, false},
+            };
+                    break;
+                case MovementType.WheelsTraverse:
+                    ability =
+            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, };
+                    pass = new Dictionary<MovementType, bool>
+            {
+                {MovementType.Foot, false},
+                {MovementType.Treads, false},
+                {MovementType.Wheels, false},
+                {MovementType.TreadsAmphi, false},
+                {MovementType.WheelsTraverse, false},
+                {MovementType.Flight, true},
+                {MovementType.Immobile, false},
+            };
+                    break;
+                case MovementType.Flight:
+                    ability =
+            new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, };
+                    pass = new Dictionary<MovementType, bool>
+            {
+                {MovementType.Foot, true},
+                {MovementType.Treads, true},
+                {MovementType.Wheels, true},
+                {MovementType.TreadsAmphi, true},
+                {MovementType.WheelsTraverse, true},
+                {MovementType.Flight, false},
+                {MovementType.Immobile, false},
+            };
+                    break;
+            }
+
+            int[] moves = { width, -1, -width, 1 };
+            while (open.Count > 0)
+            {
+                foreach (var idx_dijk in open)
+                {
+                    foreach (int mov in moves)
+                        if (open.ContainsKey(idx_dijk.Key + mov) ||
+                            closed.ContainsKey(idx_dijk.Key + mov) ||
+                            !(new Position((idx_dijk.Key + mov) % width, (idx_dijk.Key + mov) / width).ValidatePosition(width, height)) ||
+                            d[idx_dijk.Key + mov] == wall ||
+                            d[idx_dijk.Key + mov] <= idx_dijk.Value + 1)
+                        {
+
+                        }
+                        else if (
+                            ability[grid[(idx_dijk.Key + mov) % width, (idx_dijk.Key + mov) / width]] == 1 &&
+                            (placing[(idx_dijk.Key + mov) % width, (idx_dijk.Key + mov) / width] == null ||
+                            pass[placing[(idx_dijk.Key + mov) % width, (idx_dijk.Key + mov) / width].mobility] ||
+                            (placing[(idx_dijk.Key + mov) % width, (idx_dijk.Key + mov) / width].color == self.color &&
+                            placing[(idx_dijk.Key + mov) % width, (idx_dijk.Key + mov) / width].mobility != MovementType.Immobile)
+                            ))
+                        {
+                            fringe[idx_dijk.Key + mov] = (idx_dijk.Value + 1);
+                            d[idx_dijk.Key + mov] = idx_dijk.Value + 1;
+                        }
+                }
+                foreach (var kv in open)
+                {
+                    closed[kv.Key] = (kv.Value);
+                }
+                open.Clear();
+                foreach (var kv in fringe)
+                {
+                    open[kv.Key] = (kv.Value);
+                }
+                fringe.Clear();
+
+            }
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (d[i + width * j] == goal)
+                    {
+                        d[i + width * j] = ((pass[placing[i, j].mobility]) ? 0 : wall);
+
+                    }
+                }
+            }
             float[,] n = new float[width, height];
 
             for (int j = 0; j < height; j++)
@@ -527,34 +746,29 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         }
         static List<DirectedPosition> getDijkstraPath(Unit active, int[,] grid, Unit[,] placing, int targetX, int targetY)
         {
+            
             int width = grid.GetLength(0);
-            float[,] d_inv = dijkstra(active, grid, placing, targetX, targetY);
+            int height = grid.GetLength(1);
+            float[,] d_inv = dijkstra(active, grid, placing, ((active.color == 0) ? new int[]{1,2,3,4,5,6,7} : new int[]{0}));
             List<DirectedPosition> path = new List<DirectedPosition>();
             int currentX = active.x, currentY = active.y;
             Direction currentFacing = active.facing;
 
             for (int f = 0; f < active.speed; f++)
             {
-                Dictionary<int, float> near = new Dictionary<int, float>();
-                near[currentX + width * (currentY)] = d_inv[currentX, currentY];
-                near[currentX + width * (currentY + 1)] = d_inv[currentX, currentY + 1];
-                near[currentX + width * (currentY - 1)] = d_inv[currentX, currentY - 1];
-                if (currentY % 2 == 0)
+                Dictionary<Position, float> near = new Dictionary<Position, float>() { {new Position(currentX, currentY), d_inv[currentX, currentY]}};
+                foreach(Position pos in new Position(currentX, currentY).Adjacent(width, height))
                 {
-                    near[currentX + 1 + width * (currentY + 1)] = d_inv[currentX + 1, currentY + 1];
-                    near[currentX + 1 + width * (currentY - 1)] = d_inv[currentX + 1, currentY - 1];
+                    near[pos] = d_inv[pos.x, pos.y];
                 }
-                else
-                {
-                    near[currentX - 1 + width * (currentY + 1)] = d_inv[currentX - 1, currentY + 1];
-                    near[currentX - 1 + width * (currentY - 1)] = d_inv[currentX - 1, currentY - 1];
-                }
-                int newpos = near.OrderBy(kv => kv.Value).First().Key;
+                var ordered = near.OrderBy(kv => kv.Value); //.First().Key;;
+                Position newpos = ordered.TakeWhile(kv => kv.Value == ordered.First().Value).RandomElement().Key;
                 if (near.All(e => e.Value == near[newpos]))
+                
                 {
                     return new List<DirectedPosition>();
                 }
-                int newX = newpos % width, newY = newpos / width;
+                int newX = newpos.x, newY = newpos.y;
                 if (!(newX == currentX && newY == currentY))
                 {
                     if (newY > currentY)
@@ -569,9 +783,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     else
                     {
                         if (newX < currentX)
-                            currentFacing = Direction.NE;
-                        else
                             currentFacing = Direction.SW;
+                        else
+                            currentFacing = Direction.NE;
                     }
 
                     currentX = newX;
@@ -587,11 +801,11 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         }
 
         private static int failCount = 0;
-        void retryGamePreview()
+        void RetryPlacement()
         {
             failCount++;
             Console.WriteLine("\n\n!!!!! P L A C E M E N T   F A I L U R E   " + failCount + " !!!!!\n\n");
-            if (failCount > 10)
+            if (failCount > 20)
             {
                 Console.WriteLine("Too many placement failures.");
                 Console.In.ReadLine();
@@ -601,8 +815,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         }
         public void PlaceUnits()
         {
-            int width = FieldMap.Width;
-            int height = FieldMap.Height;
+            width = FieldMap.Width;
+            height = FieldMap.Height;
             //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
             /*string[] unitnames = { "Infantry", //foot 0 0
                                    "Tank", "Artillery", "Artillery_P", "Artillery_S", "Supply_P", //treads 1 5
@@ -642,8 +856,6 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             Colors[0] = 0;
             ReverseColors[0] = 0;
 
-            int[] targetX = { width / 4, width / 2, width / 4, width / 2, },
-                  targetY = { height / 2, height / 4, height / 2, height / 4 };
             for (int section = 0; section < 2; section++)
             {
                 int rx = (width / 4) + (width / 2) * (section % 2);
@@ -722,18 +934,18 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 }
                 if (guarantee.Count == section)
                 {
-                    int rgx = r.Next((width / 2) * (section % 2), (width / 2) + (width / 2) * (section % 2));
-                    int rgy = r.Next((section / 2 == 0) ? 0 : height / 2, ((section / 2 == 0) ? height / 2 : height));
+                    int rgx = r.Next((width / 2) * (section % 2) + 1, (width / 2) - 1 + (width / 2) * (section % 2));
+                    int rgy = r.Next((section / 2 == 0) ? 1 : height / 2, ((section / 2 == 0) ? height / 2 : height - 1));
                     int problems = 0;
                     while (UnitGrid[rgx, rgy] != null)
                     {
-                        rgx = r.Next((width / 2) * (section % 2), (width / 2) + (width / 2) * (section % 2));
-                        rgy = r.Next((section / 2 == 0) ? 0 : height / 2, ((section / 2 == 0) ? height / 2 : height));
+                        rgx = r.Next((width / 2) * (section % 2) + 1, (width / 2) - 1 + (width / 2) * (section % 2)); 
+                        rgy = r.Next((section / 2 == 0) ? 1 : height / 2, ((section / 2 == 0) ? height / 2 : height - 1));
                         if (UnitGrid[rgx, rgy] != null)
                             problems++;
                         if (problems > 10)
                         {
-                            retryGamePreview();
+                            RetryPlacement();
                             return;
                         }
                     }
@@ -741,9 +953,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 }
 
             }
-            for (int i = 0; i < width - 1; i++)
+            for (int i = 1; i < width - 1; i++)
             {
-                for (int j = 0; j < height - 1; j++)
+                for (int j = 1; j < height - 1; j++)
                 {
                     if (r.Next(22) <= 1 && UnitGrid[i, j] == null)
                     {
@@ -754,6 +966,70 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     }
                 }
             }
+            Unit temp = UnitGrid.RandomFactionUnit(Colors[ActingFaction]);
+            ActiveUnit = new Unit(temp.unitIndex, temp.color, temp.facingNumber, temp.x, temp.y);
+            UnitGrid[temp.x, temp.y] = null;
+        }
+        public List<DirectedPosition> BestPath;
+        public void ProcessStep()
+        {
+            switch (CurrentMode)
+            {
+                case Mode.Selecting:
+                    if (TaskSteps > 1)
+                    {
+                        BestPath = getDijkstraPath(ActiveUnit, FieldMap.Land, UnitGrid, targetX[ActingFaction], targetY[ActingFaction]);
+                        for (int i = 0; i < width; i++)
+                        {
+                            for (int j = 0; j < height; j++)
+                            {
+                                FieldMap.Highlight[i, j] = HighlightType.Plain;
+                            }
+                        }
+                        TaskSteps = 0;
+                        CurrentMode = Mode.Moving;
+                    }
+                    else
+                    {
+                        Effects.CenterCamera(ActiveUnit.x, ActiveUnit.y);
+                        float[,] d = dijkstra(ActiveUnit, FieldMap.Land, UnitGrid, ActiveUnit.x, ActiveUnit.y);
+                        for (int i = 0; i < width; i++)
+                        {
+                            for (int j = 0; j < height; j++)
+                            {
+                                FieldMap.Highlight[i, j] = (d[i, j] > 0 && d[i, j] <= ActiveUnit.speed) ? HighlightType.Bright : HighlightType.Plain;
+                            }
+                        }
+                        FieldMap.Highlight[ActiveUnit.x, ActiveUnit.y] = HighlightType.Spectrum;
+                    }
+                    break;
+                case Mode.Moving:
+                    if (BestPath.Count <= 0 || TaskSteps > ActiveUnit.speed)
+                    {
+                        UnitGrid[ActiveUnit.x, ActiveUnit.y] = new Unit(ActiveUnit);
+                        ActingFaction = (ActingFaction + 1) % 4;
+                        Unit temp = UnitGrid.RandomFactionUnit(Colors[ActingFaction]);
+                        ActiveUnit = new Unit(temp.unitIndex, temp.color, temp.facingNumber, temp.x, temp.y);
+                        UnitGrid[temp.x, temp.y] = null;
+
+                        CurrentMode = Mode.Selecting;
+
+                        TaskSteps = 0;
+                        break;
+                    }
+                    DirectedPosition node = BestPath.First();
+                    ActiveUnit.x = node.x;
+                    ActiveUnit.y = node.y;
+                    ActiveUnit.facing = node.dir;
+                    ActiveUnit.facingNumber = ConvertDirection(node.dir);
+                    Effects.CenterCamera(node);
+
+                    BestPath.RemoveAt(0);
+                    
+                    break;
+                case Mode.Attacking: break;
+            }
+            TaskSteps++;
         }
     }
 }

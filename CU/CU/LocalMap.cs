@@ -10,6 +10,7 @@ namespace CU
         public int Width { get; set; }
         public int Height { get; set; }
         public int[,] Land { get; set; }
+        public HighlightType[,] Highlight { get; set; }
         public int[,] takenLocations { get; set; }
         public static string[] Terrains = new string[]
         {"plains","forest","desert","jungle","hills"
@@ -27,6 +28,7 @@ namespace CU
             Width = MapWidth;
             Height = MapHeight;
             Land = new int[Width, Height];
+            Highlight = new HighlightType[Width, Height];
             takenLocations = new int[Width, Height];
             for (int i = 0; i < Width; i++)
             {
@@ -34,6 +36,7 @@ namespace CU
                 {
                     takenLocations[i, j] = 0;
                     Land[i, j] = 0;
+                    Highlight[i, j] = HighlightType.Plain;
                 }
             }
             List<Position> rivers = MakeSoftPath(RandomSpot(), RandomSpot());
@@ -42,7 +45,7 @@ namespace CU
                 Land[t.x, t.y] = 9;
                 takenLocations[t.x, t.y] = 2;
             }
-            int numMountains = r.Next((int)(Width * 0.25), (int)(Width * 0.75));
+            int numMountains = r.Next((int)(Width * 0.25), (int)(Width));
             MakeMountains(numMountains);
             List<Position> roads = MakeHardPath(RandomSpot(), RandomSpot());
             foreach (Position t in roads)
@@ -326,6 +329,7 @@ namespace CU
             } while (iter < numMountains);
             return;
         }
+
 
     }
 }

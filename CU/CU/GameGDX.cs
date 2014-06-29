@@ -10,18 +10,9 @@ using com.badlogic.gdx.utils;
 using com.badlogic.gdx.math;
 namespace CU
 {
-    class Launcher
-    {
-        public static void Main(string[] args)
-        {
-            //GdxNativesLoader.disableNativesLoading = true;
-            LwjglApplication app = new LwjglApplication(new GameGDX(), "Commanders Unite", 800, 800);
-            //Console.In.ReadLine();
-        }
-    }
     class GameGDX : ApplicationListener
     {
-        OrthographicCamera camera;
+        public static OrthographicCamera camera;
         SpriteBatch batch;
         TextureAtlas atlas;
         int width, height;
@@ -31,6 +22,7 @@ namespace CU
         Animation[][][] animations;
         float stateTime;
         TextureRegion currentFrame;
+        public static Timer timer;
         public void create()
         {
             brain = new Logic(15,15);
@@ -72,13 +64,14 @@ namespace CU
             
             batch = new SpriteBatch();
             stateTime = 0;
-            //atl.findRegion("color0/Estate_face0", 0);
+            timer = new Timer();
+            timer.scheduleTask(new NilTask(brain.ProcessStep), 0F, 0.8F);
         }
         public void render()
         {
             Gdx.gl.glClearColor(0.45F, 0.7F, 1f, 1);
             Gdx.gl.glClear(GL20.__Fields.GL_COLOR_BUFFER_BIT);
-            camera.position.set(new Vector3(1024 - 64, 32, 0));
+
             camera.update();
             stateTime += Gdx.graphics.getDeltaTime();
 
@@ -96,20 +89,15 @@ namespace CU
                     if (brain.UnitGrid[w, h] != null)
                     {
                         currentFrame = animations[brain.ReverseColors[brain.UnitGrid[w, h].color]][brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber].getKeyFrame(stateTime, true);
-                        batch.draw(currentFrame,20 +  w * 64 + h * 64, 14 +  w * 32 - h * 32);
+                        batch.draw(currentFrame, 20 + w * 64 + h * 64, 8 + w * 32 - h * 32 + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                    }
+                    if (w == brain.ActiveUnit.x && h == brain.ActiveUnit.y)
+                    {
+                        currentFrame = animations[brain.ReverseColors[brain.ActiveUnit.color]][brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber].getKeyFrame(stateTime, true);
+                        batch.draw(currentFrame, 20 + w * 64 + h * 64, 8 + w * 32 - h * 32 + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                     }
                 }
             }
-/*            for (int h = 0; h < height; h++)
-            {
-                for (int w = 0; w < height - h && w < width; w++)
-                {
-                    batch.draw(atlas.findRegion("Terrain/" + LocalMap.Terrains[brain.FieldMap.Land[w, h]]), w * 64 + h * 64, 0 - (h * 32 - w * 32) );
-                    if (brain.UnitGrid[w, h] != null)
-                        batch.draw(atlas.findRegion("color" + brain.UnitGrid[w, h].color + "/" + brain.UnitGrid[w, h].name + "_face" + brain.UnitGrid[w, h].facingNumber)
-                                        , w * 64 + h * 64, w * 32 - h * 32);
-                }
-            }*/
             batch.end();
         }
         public void resume()
@@ -129,6 +117,24 @@ namespace CU
         {
             camera.setToOrtho(false, wide, high);
             camera.update();
+        }
+        public void win()
+        {
+            timer.stop();
+            Console.WriteLine("Y O U   W I N !!!");
+        }
+        public void lose()
+        {
+            timer.stop();
+            Console.WriteLine("YOU LOSE...");
+        }
+    }
+
+    class Launcher
+    {
+        public static void Main(string[] args)
+        {
+            LwjglApplication app = new LwjglApplication(new GameGDX(), "Commanders Unite", 800, 800);
         }
     }
 }

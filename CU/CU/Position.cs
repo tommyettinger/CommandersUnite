@@ -46,5 +46,12 @@ namespace CU
             }
             return l;
         }
+
+        public bool ValidatePosition(int Width, int Height)
+        {
+            if (x < 0 || x >= Width || y < 0 || y >= Height)
+                return false;
+            return true;
+        }
     }
 }

@@ -52,13 +52,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.OpenJDK.SwingAWT.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.Text, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>libs\IKVM.OpenJDK.Text.dll</HintPath>
-    </Reference>
     <Reference Include="IKVM.OpenJDK.Tools, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.OpenJDK.Tools.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="IKVM.OpenJDK.Util, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -86,8 +83,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Effects.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GameGDX.cs" />
+    <Compile Include="InputHandling.cs" />
     <Compile Include="Logic.cs" />
     <Compile Include="LocalMap.cs" />
     <Compile Include="Position.cs" />

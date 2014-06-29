@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CU;
+
 namespace CU
 {
-    public static class Extensions
+    public static class Tools
     {
         private static Random r = new Random();
         public static T RandomElement<T>(this List<T> list)
@@ -21,6 +22,21 @@ namespace CU
                 return default(T);
 
             return mat[r.Next(mat.GetLength(0)), r.Next(mat.GetLength(1))];
+        }
+        public static T RandomElement<T>(this IEnumerable<T> list)
+        {
+            if (list.Count() == 0)
+                return default(T);
+            int idx = 0, tgt = r.Next(list.Count());
+            foreach (T t in list)
+            {
+                if (tgt == idx)
+                {
+                    return t;
+                }
+                idx++;
+            }
+            return default(T);
         }
         public static Unit RandomFactionUnit(this Unit[,] mat, int color)
         {
