@@ -72,16 +72,22 @@ void main() {
     }
     public class Effects
     {
-
+        private static Vector3 oldpos = GameGDX.camera.position, newpos, midpos = oldpos;
         public static void CenterCamera(float gridX, float gridY)
         {
-            GameGDX.camera.position.set(new Vector3(64 * (gridX + gridY), 32 * (gridX - gridY)+32, 0));
-            GameGDX.camera.update();
+            oldpos = new Vector3(GameGDX.camera.position);
+            newpos = new Vector3(64 * (gridX + gridY), 32 * (gridX - gridY) + 32, 0);
+            NilTask n = new NilTask(() => {
+                midpos = midpos.add((int)((newpos.x - oldpos.x) / 16F), (int)((newpos.y - oldpos.y) / 16F), 0);
+                GameGDX.camera.position.set(midpos);
+                GameGDX.camera.update(); });
+            GameGDX.timer.scheduleTask(n, 0, GameGDX.updateStep / 32F, 15);
+            GameGDX.timer.start();
+            
         }
         public static void CenterCamera(Position pos)
         {
-            GameGDX.camera.position.set(new Vector3(64 * (pos.x + pos.y), 32 * (pos.x - pos.y) + 32, 0));
-            GameGDX.camera.update();
+            CenterCamera(pos.x, pos.y);
         }
     }
 }

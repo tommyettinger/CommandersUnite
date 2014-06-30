@@ -59,6 +59,8 @@ namespace CU
         public MovementType mobility;
         public int x;
         public int y;
+        public int worldX;
+        public int worldY;
 
         public static string[] CurrentUnits = {
 "Infantry", "Infantry_P", "Infantry_S", "Infantry_T",
@@ -160,6 +162,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             facingNumber = 0;
             x = 3;
             y = 3;
+            worldX = 20 + x * 64 + y * 64;
+            worldY = 8 + x * 32 - y * 32;
         }
         public Unit(Unit u)
         {
@@ -172,12 +176,17 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             facingNumber = u.facingNumber;
             x = u.x;
             y = u.y;
+            worldX = 20 + x * 64 + y * 64;
+            worldY = 8 + x * 32 - y * 32;
         }
         public Unit(string name, int color, Direction facing, int x, int y)
         {
             this.name = name;
             this.x = x;
             this.y = y;
+
+            worldX = 20 + x * 64 + y * 64;
+            worldY = 8 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = UnitLookup[name];
             this.color = color;
@@ -198,6 +207,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.name = CurrentUnits[unit];
             this.x = x;
             this.y = y;
+
+            worldX = 20 + x * 64 + y * 64;
+            worldY = 8 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = unit;
             this.color = color;
@@ -218,6 +230,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.name = CurrentUnits[unit];
             this.x = x;
             this.y = y;
+
+            worldX = 20 + x * 64 + y * 64;
+            worldY = 8 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = unit;
             this.color = color;
@@ -236,6 +251,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.name = unit;
             this.x = x;
             this.y = y;
+
+            worldX = 20 + x * 64 + y * 64;
+            worldY = 8 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = UnitLookup[name];
             this.color = color;
@@ -254,6 +272,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.name = CurrentUnits[unit];
             this.x = x;
             this.y = y;
+
+            worldX = 20 + x * 64 + y * 64;
+            worldY = 8 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = unit;
             this.color = color;
@@ -273,6 +294,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.name = unit;
             this.x = x;
             this.y = y;
+
+            worldX = 20 + x * 64 + y * 64;
+            worldY = 8 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = UnitLookup[name];
             this.color = color;
@@ -791,7 +815,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     {
                         if (UnitGrid[i, j] != null)
                             continue;
-                        if (r.Next(12) <= 1 && (FieldMap.Land[i, j] == 0 || FieldMap.Land[i, j] == 1 || FieldMap.Land[i, j] == 2 || FieldMap.Land[i, j] == 4 || FieldMap.Land[i, j] == 8))
+                        if (r.Next(14) <= 2 && (FieldMap.Land[i, j] == 0 || FieldMap.Land[i, j] == 1 || FieldMap.Land[i, j] == 2 || FieldMap.Land[i, j] == 4 || FieldMap.Land[i, j] == 8))
                         {
                             //
                             UnitGrid[i, j] = new Unit(r.Next(24, 28), Colors[section], i, j);
@@ -813,7 +837,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     {
                         if (UnitGrid[i, j] != null)
                             continue;
-                        if (r.Next(12) <= 1 && (FieldMap.Land[i, j] == 0 || FieldMap.Land[i, j] == 1 || FieldMap.Land[i, j] == 2 || FieldMap.Land[i, j] == 4 || FieldMap.Land[i, j] == 8))
+                        if (r.Next(14) <= 2 && (FieldMap.Land[i, j] == 0 || FieldMap.Land[i, j] == 1 || FieldMap.Land[i, j] == 2 || FieldMap.Land[i, j] == 4 || FieldMap.Land[i, j] == 8))
                         {
                             UnitGrid[i, j] = new Unit(r.Next(24, 28), Colors[section], i, j);
                         }
@@ -832,7 +856,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                             continue;
                         int currentUnit = Unit.TerrainToUnits[FieldMap.Land[i, j]].RandomElement();
                         //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
-                        if (r.Next(20) <= 1)
+                        if (r.Next(25) <= 1)
                         {
                             UnitGrid[i, j] = new Unit(currentUnit, Colors[section], section, i, j);
                         }
@@ -864,7 +888,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             {
                 for (int j = 1; j < height - 1; j++)
                 {
-                    if (r.Next(25) <= 1 && UnitGrid[i, j] == null)
+                    if (r.Next(35) <= 1 && UnitGrid[i, j] == null)
                     {
                         int rs = r.Next(2);
                         int currentUnit = Unit.TerrainToUnits[FieldMap.Land[i, j]].RandomElement();
@@ -925,10 +949,18 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         break;
                     }
                     DirectedPosition node = BestPath.First();
+                    int oldx = ActiveUnit.x, oldy = ActiveUnit.y;
                     ActiveUnit.x = node.x;
                     ActiveUnit.y = node.y;
-                    ActiveUnit.facing = node.dir;
                     ActiveUnit.facingNumber = ConvertDirection(node.dir);
+                    NilTask n = new NilTask(() =>
+                    {
+                        ActiveUnit.worldX += (node.x - oldx) * 4 + (node.y - oldy) * 4;
+                        ActiveUnit.worldY += (node.x - oldx) * 2 - (node.y - oldy) * 2;
+                    });
+            GameGDX.timer.scheduleTask(n, 0, GameGDX.updateStep / 32F, 15);
+                    
+                    ActiveUnit.facing = node.dir;
                     Effects.CenterCamera(node);
 
                     BestPath.RemoveAt(0);

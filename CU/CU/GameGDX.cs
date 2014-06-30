@@ -24,10 +24,11 @@ namespace CU
         float stateTime, fastTime;
         TextureRegion currentFrame;
         public static Timer timer;
+        public static float updateStep = 0.4F;
         private static Random r = new Random();
         public void create()
         {
-            brain = new Logic(15,15);
+            brain = new Logic(25,25);
             width = brain.FieldMap.Width;
             height = brain.FieldMap.Height;
             brain.PlaceUnits();
@@ -62,7 +63,7 @@ namespace CU
                         {
                             units[i][Unit.UnitLookup[name]][j][k] = atlas.findRegion("color" + brain.Colors[i] + "/" + name + "_face" + j, k);
                         }
-                        animations[i][Unit.UnitLookup[name]][j] = new Animation(((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 0.4F : 0.2F),
+                        animations[i][Unit.UnitLookup[name]][j] = new Animation(((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 0.4F : 0.15F),
                             units[i][Unit.UnitLookup[name]][j]);
                     }
                 }
@@ -74,7 +75,7 @@ namespace CU
             stateTime = 0;
             fastTime = 0;
             timer = new Timer();
-            timer.scheduleTask(new NilTask(brain.ProcessStep), 2F, 0.4F);
+            timer.scheduleTask(new NilTask(brain.ProcessStep), 2F, updateStep);
         }
 
         public void render()
@@ -84,7 +85,7 @@ namespace CU
 
             camera.update();
             stateTime += Gdx.graphics.getDeltaTime();
-            fastTime += Gdx.graphics.getDeltaTime()*2;
+            fastTime += Gdx.graphics.getDeltaTime()*1.5F;
 
             batch.setProjectionMatrix(camera.combined);
             batch.begin();
@@ -92,7 +93,6 @@ namespace CU
 
             for (int h = 0; h < height; h++)
             {
-                //for (int w = 0; w < width; w++)
             
                 for (int w = width - 1; w >= 0; w--) 
                 {
@@ -115,15 +115,24 @@ namespace CU
                             break;
                     }
                     batch.draw(terrains[brain.FieldMap.Land[w, h], highlighter], w * 64 + h * 64, w * 32 - h * 32);
+                }
+            }
+                    //            worldX = 20 + x * 64 + y * 64;
+                    //            worldY = 8 + x * 32 - y * 32;
+
+            for (int h = 0; h < height; h++)
+            {
+                for (int w = width - 1; w >= 0; w--)
+                { 
                     if (brain.UnitGrid[w, h] != null)
                     {
                         currentFrame = animations[brain.ReverseColors[brain.UnitGrid[w, h].color]][brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber].getKeyFrame(stateTime, true);
-                        batch.draw(currentFrame, 20 + w * 64 + h * 64, 8 + w * 32 - h * 32 + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                        batch.draw(currentFrame, brain.UnitGrid[w, h].worldX, brain.UnitGrid[w, h].worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                     }
                     if (w == brain.ActiveUnit.x && h == brain.ActiveUnit.y)
                     {
                         currentFrame = animations[brain.ReverseColors[brain.ActiveUnit.color]][brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber].getKeyFrame(fastTime, true);
-                        batch.draw(currentFrame, 20 + w * 64 + h * 64, 8 + w * 32 - h * 32 + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                        batch.draw(currentFrame, brain.ActiveUnit.worldX, brain.ActiveUnit.worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                     }
                 }
             }
