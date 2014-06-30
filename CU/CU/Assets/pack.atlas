@@ -27120,76 +27120,496 @@ color7/Tank_face3
   index: 2
 
 pack41.png
-size: 650,204
+size: 910,1020
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-Terrain/desert
+Terrain/Desert
+  rotate: false
+  xy: 2, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Desert_bright
+  rotate: false
+  xy: 2, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Desert_dim
+  rotate: false
+  xy: 132, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Desert_spectrum0
+  rotate: false
+  xy: 2, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Desert_spectrum1
+  rotate: false
+  xy: 132, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Desert_spectrum2
+  rotate: false
+  xy: 262, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Desert_spectrum3
+  rotate: false
+  xy: 2, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Forest
+  rotate: false
+  xy: 132, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Forest_bright
+  rotate: false
+  xy: 262, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Forest_dim
+  rotate: false
+  xy: 392, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Forest_spectrum0
+  rotate: false
+  xy: 2, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Forest_spectrum1
+  rotate: false
+  xy: 132, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Forest_spectrum2
+  rotate: false
+  xy: 262, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Forest_spectrum3
+  rotate: false
+  xy: 392, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Hills
+  rotate: false
+  xy: 522, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Hills_bright
+  rotate: false
+  xy: 2, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Hills_dim
+  rotate: false
+  xy: 132, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Hills_spectrum0
+  rotate: false
+  xy: 262, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Hills_spectrum1
+  rotate: false
+  xy: 392, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Hills_spectrum2
+  rotate: false
+  xy: 522, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Hills_spectrum3
+  rotate: false
+  xy: 652, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle
+  rotate: false
+  xy: 2, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_bright
+  rotate: false
+  xy: 132, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_dim
+  rotate: false
+  xy: 262, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_spectrum0
+  rotate: false
+  xy: 392, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_spectrum1
+  rotate: false
+  xy: 522, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_spectrum2
+  rotate: false
+  xy: 652, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_spectrum3
+  rotate: false
+  xy: 782, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains
+  rotate: false
+  xy: 2, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_bright
+  rotate: false
+  xy: 132, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_dim
+  rotate: false
+  xy: 262, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_spectrum0
+  rotate: false
+  xy: 392, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_spectrum1
+  rotate: false
+  xy: 522, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_spectrum2
+  rotate: false
+  xy: 652, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_spectrum3
+  rotate: false
+  xy: 782, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains
   rotate: false
   xy: 2, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/forest
+Terrain/Plains_bright
+  rotate: false
+  xy: 132, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_dim
+  rotate: false
+  xy: 262, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_spectrum0
+  rotate: false
+  xy: 392, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_spectrum1
+  rotate: false
+  xy: 522, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_spectrum2
+  rotate: false
+  xy: 652, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_spectrum3
+  rotate: false
+  xy: 782, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River
   rotate: false
   xy: 2, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/hills
+Terrain/River_bright
   rotate: false
   xy: 132, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/jungle
+Terrain/River_dim
+  rotate: false
+  xy: 262, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_spectrum0
+  rotate: false
+  xy: 392, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_spectrum1
+  rotate: false
+  xy: 522, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_spectrum2
+  rotate: false
+  xy: 652, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_spectrum3
+  rotate: false
+  xy: 782, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road
   rotate: false
   xy: 132, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/mountains
+Terrain/Road_bright
   rotate: false
   xy: 262, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/plains
+Terrain/Road_dim
+  rotate: false
+  xy: 392, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_spectrum0
+  rotate: false
+  xy: 522, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_spectrum1
+  rotate: false
+  xy: 652, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_spectrum2
+  rotate: false
+  xy: 782, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_spectrum3
   rotate: false
   xy: 262, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/river
+Terrain/Ruins
   rotate: false
   xy: 392, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/road
+Terrain/Ruins_bright
+  rotate: false
+  xy: 522, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_dim
+  rotate: false
+  xy: 652, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_spectrum0
+  rotate: false
+  xy: 782, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_spectrum1
   rotate: false
   xy: 392, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/ruins
+Terrain/Ruins_spectrum2
   rotate: false
   xy: 522, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/tundra
+Terrain/Ruins_spectrum3
+  rotate: false
+  xy: 652, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra
+  rotate: false
+  xy: 782, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_bright
   rotate: false
   xy: 522, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_dim
+  rotate: false
+  xy: 652, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_spectrum0
+  rotate: false
+  xy: 782, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_spectrum1
+  rotate: false
+  xy: 652, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_spectrum2
+  rotate: false
+  xy: 782, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_spectrum3
+  rotate: false
+  xy: 782, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0

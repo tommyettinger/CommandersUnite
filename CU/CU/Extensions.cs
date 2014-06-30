@@ -48,7 +48,7 @@ namespace CU
             {
                 for (int j = 0; j < mat.GetLength(1); j++)
                 {
-                    if (mat[i, j] != null && mat[i, j].color == color)
+                    if (mat[i, j] != null && mat[i, j].color == color && mat[i, j].speed > 0)
                     {
                         units.Add(mat[i, j]);
                     }

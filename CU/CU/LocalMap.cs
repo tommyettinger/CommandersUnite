@@ -13,8 +13,8 @@ namespace CU
         public HighlightType[,] Highlight { get; set; }
         public int[,] takenLocations { get; set; }
         public static string[] Terrains = new string[]
-        {"plains","forest","desert","jungle","hills"
-        ,"mountains","ruins","tundra","road","river"};
+        {"Plains","Forest","Desert","Jungle","Hills"
+        ,"Mountains","Ruins","Tundra","Road","River"};
 
         public static int[] Depths = new int[]
             {
