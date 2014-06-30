@@ -74,7 +74,7 @@ namespace CU
             stateTime = 0;
             fastTime = 0;
             timer = new Timer();
-            timer.scheduleTask(new NilTask(brain.ProcessStep), 1F, 0.5F);
+            timer.scheduleTask(new NilTask(brain.ProcessStep), 2F, 0.4F);
         }
 
         public void render()
@@ -109,7 +109,7 @@ namespace CU
                             highlighter = 0;
                             break;
                         case HighlightType.Spectrum:
-                            highlighter= 3+ ((int)((stateTime * 5)%4));
+                            highlighter= 3+ ((int)((stateTime * 10)%4));
                             break;
                         default:
                             break;
@@ -131,14 +131,15 @@ namespace CU
         }
         public void resume()
         {
-
+            timer.start();
         }
         public void pause()
         {
-
+            timer.stop();
         }
         public void dispose()
         {
+            timer.stop();
             batch.dispose();
             atlas.dispose();
         }

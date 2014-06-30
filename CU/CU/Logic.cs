@@ -526,10 +526,10 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         d[i, j] = wall;// ((pass[placing[i - 1, j - 1].mobility]) ? 0 : wall);
 
                     }
-                    /*                    else if (placing[i-1,j-1] == null)
-                                        {
-                                            d[i, j] *= 0.8F;
-                                        }*/
+                    else if (placing[i-1,j-1] != null)
+                    {
+                        d[i, j] += 0.5F;
+                    }
                 }
             }
             return d;
@@ -619,17 +619,25 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             int width = grid.GetLength(0);
             int height = grid.GetLength(1);
             float[,] d_inv = dijkstra(active, grid, placing, ((active.color == 0) ? new int[] { 1, 2, 3, 4, 5, 6, 7 } : new int[] { 0 }));
-            List<DirectedPosition> path = new List<DirectedPosition>();
+            List<DirectedPosition> path = new List<DirectedPosition>(active.speed);
             int currentX = active.x, currentY = active.y;
             Direction currentFacing = active.facing;
             DirectedPosition oldpos = new DirectedPosition(currentX, currentY, currentFacing);
             Position newpos = new Position(currentX, currentY);
+            bool isOverlapping = false;
             for (int f = 0; f < active.speed; f++)
             {
                 Dictionary<Position, float> near = new Dictionary<Position, float>() { { oldpos, d_inv[currentX + 1, currentY + 1] } };
                 foreach (Position pos in oldpos.Adjacent(width, height))
                 {
-                    near[pos] = d_inv[pos.x + 1, pos.y + 1];
+                    if (isOverlapping && Math.Floor(d_inv[pos.x + 1, pos.y + 1]) == d_inv[pos.x + 1, pos.y + 1])
+                    {
+                        near[pos] = d_inv[pos.x + 1, pos.y + 1];
+                    }
+                    else
+                    {
+                        near[pos] = (float)(Math.Floor(d_inv[pos.x + 1, pos.y + 1]));
+                    }
                 }
                 var ordered = near.OrderBy(kv => kv.Value); //.First().Key;;
                 newpos = ordered.TakeWhile(kv => kv.Value == ordered.First().Value).RandomElement().Key;
@@ -665,9 +673,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {
                     path.Add(new DirectedPosition(currentX, currentY, currentFacing));
                 }
-                else if(active.speed - f > 1)
+                else if (active.speed - f > 1)
                 {
-                    d_inv[newX,newY] = wall;
+                    d_inv[newX, newY] = wall;
                     path.Add(new DirectedPosition(currentX, currentY, currentFacing));
                 }
 
@@ -856,7 +864,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             {
                 for (int j = 1; j < height - 1; j++)
                 {
-                    if (r.Next(22) <= 1 && UnitGrid[i, j] == null)
+                    if (r.Next(25) <= 1 && UnitGrid[i, j] == null)
                     {
                         int rs = r.Next(2);
                         int currentUnit = Unit.TerrainToUnits[FieldMap.Land[i, j]].RandomElement();
@@ -866,7 +874,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 }
             }
             Unit temp = UnitGrid.RandomFactionUnit(Colors[ActingFaction]);
-            ActiveUnit = new Unit(temp.unitIndex, temp.color, temp.facingNumber, temp.x, temp.y);
+            ActiveUnit = new Unit(temp);
             UnitGrid[temp.x, temp.y] = null;
         }
         public List<DirectedPosition> BestPath;
@@ -875,7 +883,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             switch (CurrentMode)
             {
                 case Mode.Selecting:
-                    if (TaskSteps > 1)
+                    if (TaskSteps > 3)
                     {
                         BestPath = getDijkstraPath(ActiveUnit, FieldMap.Land, UnitGrid, targetX[ActingFaction], targetY[ActingFaction]);
                         for (int i = 0; i < width; i++)
