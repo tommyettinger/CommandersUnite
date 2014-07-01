@@ -73,7 +73,7 @@ void main() {
     public class Effects
     {
         private static Vector3 oldpos = GameGDX.camera.position, newpos, midpos = oldpos;
-        public static void CenterCamera(float gridX, float gridY)
+        public static void CenterCamera(float gridX, float gridY, float stepPortion)
         {
             oldpos = new Vector3(GameGDX.camera.position);
             newpos = new Vector3(64 * (gridX + gridY), 32 * (gridX - gridY) + 32, 0);
@@ -81,13 +81,13 @@ void main() {
                 midpos = midpos.add((int)((newpos.x - oldpos.x) / 16F), (int)((newpos.y - oldpos.y) / 16F), 0);
                 GameGDX.camera.position.set(midpos);
                 GameGDX.camera.update(); });
-            GameGDX.timer.scheduleTask(n, 0, GameGDX.updateStep / 32F, 15);
+            GameGDX.timer.scheduleTask(n, 0, stepPortion * GameGDX.updateStep / 16F, 15);
             GameGDX.timer.start();
             
         }
-        public static void CenterCamera(Position pos)
+        public static void CenterCamera(Position pos, float stepPortion)
         {
-            CenterCamera(pos.x, pos.y);
+            CenterCamera(pos.x, pos.y, stepPortion);
         }
     }
 }

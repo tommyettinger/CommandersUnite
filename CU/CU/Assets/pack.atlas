@@ -27124,492 +27124,1400 @@ size: 910,1020
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-Terrain/Desert
+Terrain/Basement
   rotate: false
   xy: 2, 920
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Desert_bright
+Terrain/Basement_bold
   rotate: false
   xy: 2, 818
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Desert_dim
+Terrain/Basement_bold_color0
   rotate: false
   xy: 132, 920
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Desert_spectrum0
+Terrain/Basement_bold_color1
   rotate: false
   xy: 2, 716
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Desert_spectrum1
+Terrain/Basement_bold_color2
   rotate: false
   xy: 132, 818
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Desert_spectrum2
+Terrain/Basement_bold_color3
   rotate: false
   xy: 262, 920
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Desert_spectrum3
+Terrain/Basement_bold_color4
   rotate: false
   xy: 2, 614
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Forest
+Terrain/Basement_bold_color5
   rotate: false
   xy: 132, 716
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Forest_bright
+Terrain/Basement_bold_color6
   rotate: false
   xy: 262, 818
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Forest_dim
+Terrain/Basement_bold_color7
   rotate: false
   xy: 392, 920
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Forest_spectrum0
+Terrain/Basement_color0
   rotate: false
   xy: 2, 512
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Forest_spectrum1
+Terrain/Basement_color1
   rotate: false
   xy: 132, 614
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Forest_spectrum2
+Terrain/Basement_color2
   rotate: false
   xy: 262, 716
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Forest_spectrum3
+Terrain/Basement_color3
   rotate: false
   xy: 392, 818
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Hills
+Terrain/Basement_color4
   rotate: false
   xy: 522, 920
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Hills_bright
+Terrain/Basement_color5
   rotate: false
   xy: 2, 410
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Hills_dim
+Terrain/Basement_color6
   rotate: false
   xy: 132, 512
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Hills_spectrum0
+Terrain/Basement_color7
   rotate: false
   xy: 262, 614
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Hills_spectrum1
+Terrain/Desert
   rotate: false
   xy: 392, 716
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Hills_spectrum2
+Terrain/Desert_bold
   rotate: false
   xy: 522, 818
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Hills_spectrum3
+Terrain/Desert_bold_color0
   rotate: false
   xy: 652, 920
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Jungle
+Terrain/Desert_bold_color1
   rotate: false
   xy: 2, 308
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Jungle_bright
+Terrain/Desert_bold_color2
   rotate: false
   xy: 132, 410
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Jungle_dim
+Terrain/Desert_bold_color3
   rotate: false
   xy: 262, 512
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Jungle_spectrum0
+Terrain/Desert_bold_color4
   rotate: false
   xy: 392, 614
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Jungle_spectrum1
+Terrain/Desert_bold_color5
   rotate: false
   xy: 522, 716
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Jungle_spectrum2
+Terrain/Desert_bold_color6
   rotate: false
   xy: 652, 818
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Jungle_spectrum3
+Terrain/Desert_bold_color7
   rotate: false
   xy: 782, 920
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Mountains
+Terrain/Desert_color0
   rotate: false
   xy: 2, 206
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Mountains_bright
+Terrain/Desert_color1
   rotate: false
   xy: 132, 308
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Mountains_dim
+Terrain/Desert_color2
   rotate: false
   xy: 262, 410
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Mountains_spectrum0
+Terrain/Desert_color3
   rotate: false
   xy: 392, 512
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Mountains_spectrum1
+Terrain/Desert_color4
   rotate: false
   xy: 522, 614
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Mountains_spectrum2
+Terrain/Desert_color5
   rotate: false
   xy: 652, 716
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Mountains_spectrum3
+Terrain/Desert_color6
   rotate: false
   xy: 782, 818
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Plains
+Terrain/Desert_color7
   rotate: false
   xy: 2, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Plains_bright
+Terrain/Forest
   rotate: false
   xy: 132, 206
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Plains_dim
+Terrain/Forest_bold
   rotate: false
   xy: 262, 308
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Plains_spectrum0
+Terrain/Forest_bold_color0
   rotate: false
   xy: 392, 410
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Plains_spectrum1
+Terrain/Forest_bold_color1
   rotate: false
   xy: 522, 512
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Plains_spectrum2
+Terrain/Forest_bold_color2
   rotate: false
   xy: 652, 614
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Plains_spectrum3
+Terrain/Forest_bold_color3
   rotate: false
   xy: 782, 716
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/River
+Terrain/Forest_bold_color4
   rotate: false
   xy: 2, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/River_bright
+Terrain/Forest_bold_color5
   rotate: false
   xy: 132, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/River_dim
+Terrain/Forest_bold_color6
   rotate: false
   xy: 262, 206
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/River_spectrum0
+Terrain/Forest_bold_color7
   rotate: false
   xy: 392, 308
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/River_spectrum1
+Terrain/Forest_color0
   rotate: false
   xy: 522, 410
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/River_spectrum2
+Terrain/Forest_color1
   rotate: false
   xy: 652, 512
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/River_spectrum3
+Terrain/Forest_color2
   rotate: false
   xy: 782, 614
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Road
+Terrain/Forest_color3
   rotate: false
   xy: 132, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Road_bright
+Terrain/Forest_color4
   rotate: false
   xy: 262, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Road_dim
+Terrain/Forest_color5
   rotate: false
   xy: 392, 206
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Road_spectrum0
+Terrain/Forest_color6
   rotate: false
   xy: 522, 308
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Road_spectrum1
+Terrain/Forest_color7
   rotate: false
   xy: 652, 410
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Road_spectrum2
+Terrain/Hills
   rotate: false
   xy: 782, 512
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Road_spectrum3
+Terrain/Hills_bold
   rotate: false
   xy: 262, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Ruins
+Terrain/Hills_bold_color0
   rotate: false
   xy: 392, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Ruins_bright
+Terrain/Hills_bold_color1
   rotate: false
   xy: 522, 206
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Ruins_dim
+Terrain/Hills_bold_color2
   rotate: false
   xy: 652, 308
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Ruins_spectrum0
+Terrain/Hills_bold_color3
   rotate: false
   xy: 782, 410
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Ruins_spectrum1
+Terrain/Hills_bold_color4
   rotate: false
   xy: 392, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Ruins_spectrum2
+Terrain/Hills_bold_color5
   rotate: false
   xy: 522, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Ruins_spectrum3
+Terrain/Hills_bold_color6
   rotate: false
   xy: 652, 206
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Tundra
+Terrain/Hills_bold_color7
   rotate: false
   xy: 782, 308
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Tundra_bright
+Terrain/Hills_color0
   rotate: false
   xy: 522, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Tundra_dim
+Terrain/Hills_color1
   rotate: false
   xy: 652, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Tundra_spectrum0
+Terrain/Hills_color2
   rotate: false
   xy: 782, 206
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Tundra_spectrum1
+Terrain/Hills_color3
   rotate: false
   xy: 652, 2
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Tundra_spectrum2
+Terrain/Hills_color4
   rotate: false
   xy: 782, 104
   size: 128, 100
   orig: 128, 100
   offset: 0, 0
   index: -1
-Terrain/Tundra_spectrum3
+Terrain/Hills_color5
   rotate: false
   xy: 782, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+
+pack42.png
+size: 910,1020
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+Terrain/Hills_color6
+  rotate: false
+  xy: 2, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Hills_color7
+  rotate: false
+  xy: 2, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle
+  rotate: false
+  xy: 132, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_bold
+  rotate: false
+  xy: 2, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_bold_color0
+  rotate: false
+  xy: 132, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_bold_color1
+  rotate: false
+  xy: 262, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_bold_color2
+  rotate: false
+  xy: 2, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_bold_color3
+  rotate: false
+  xy: 132, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_bold_color4
+  rotate: false
+  xy: 262, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_bold_color5
+  rotate: false
+  xy: 392, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_bold_color6
+  rotate: false
+  xy: 2, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_bold_color7
+  rotate: false
+  xy: 132, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_color0
+  rotate: false
+  xy: 262, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_color1
+  rotate: false
+  xy: 392, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_color2
+  rotate: false
+  xy: 522, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_color3
+  rotate: false
+  xy: 2, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_color4
+  rotate: false
+  xy: 132, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_color5
+  rotate: false
+  xy: 262, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_color6
+  rotate: false
+  xy: 392, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Jungle_color7
+  rotate: false
+  xy: 522, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains
+  rotate: false
+  xy: 652, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_bold
+  rotate: false
+  xy: 2, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_bold_color0
+  rotate: false
+  xy: 132, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_bold_color1
+  rotate: false
+  xy: 262, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_bold_color2
+  rotate: false
+  xy: 392, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_bold_color3
+  rotate: false
+  xy: 522, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_bold_color4
+  rotate: false
+  xy: 652, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_bold_color5
+  rotate: false
+  xy: 782, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_bold_color6
+  rotate: false
+  xy: 2, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_bold_color7
+  rotate: false
+  xy: 132, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_color0
+  rotate: false
+  xy: 262, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_color1
+  rotate: false
+  xy: 392, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_color2
+  rotate: false
+  xy: 522, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_color3
+  rotate: false
+  xy: 652, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_color4
+  rotate: false
+  xy: 782, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_color5
+  rotate: false
+  xy: 2, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_color6
+  rotate: false
+  xy: 132, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Mountains_color7
+  rotate: false
+  xy: 262, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains
+  rotate: false
+  xy: 392, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_bold
+  rotate: false
+  xy: 522, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_bold_color0
+  rotate: false
+  xy: 652, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_bold_color1
+  rotate: false
+  xy: 782, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_bold_color2
+  rotate: false
+  xy: 2, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_bold_color3
+  rotate: false
+  xy: 132, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_bold_color4
+  rotate: false
+  xy: 262, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_bold_color5
+  rotate: false
+  xy: 392, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_bold_color6
+  rotate: false
+  xy: 522, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_bold_color7
+  rotate: false
+  xy: 652, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_color0
+  rotate: false
+  xy: 782, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_color1
+  rotate: false
+  xy: 132, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_color2
+  rotate: false
+  xy: 262, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_color3
+  rotate: false
+  xy: 392, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_color4
+  rotate: false
+  xy: 522, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_color5
+  rotate: false
+  xy: 652, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_color6
+  rotate: false
+  xy: 782, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Plains_color7
+  rotate: false
+  xy: 262, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River
+  rotate: false
+  xy: 392, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_bold
+  rotate: false
+  xy: 522, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_bold_color0
+  rotate: false
+  xy: 652, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_bold_color1
+  rotate: false
+  xy: 782, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_bold_color2
+  rotate: false
+  xy: 392, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_bold_color3
+  rotate: false
+  xy: 522, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_bold_color4
+  rotate: false
+  xy: 652, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_bold_color5
+  rotate: false
+  xy: 782, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_bold_color6
+  rotate: false
+  xy: 522, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_bold_color7
+  rotate: false
+  xy: 652, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_color0
+  rotate: false
+  xy: 782, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_color1
+  rotate: false
+  xy: 652, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_color2
+  rotate: false
+  xy: 782, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_color3
+  rotate: false
+  xy: 782, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+
+pack43.png
+size: 910,1020
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+Terrain/River_color4
+  rotate: false
+  xy: 2, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_color5
+  rotate: false
+  xy: 2, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_color6
+  rotate: false
+  xy: 132, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/River_color7
+  rotate: false
+  xy: 2, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road
+  rotate: false
+  xy: 132, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_bold
+  rotate: false
+  xy: 262, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_bold_color0
+  rotate: false
+  xy: 2, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_bold_color1
+  rotate: false
+  xy: 132, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_bold_color2
+  rotate: false
+  xy: 262, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_bold_color3
+  rotate: false
+  xy: 392, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_bold_color4
+  rotate: false
+  xy: 2, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_bold_color5
+  rotate: false
+  xy: 132, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_bold_color6
+  rotate: false
+  xy: 262, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_bold_color7
+  rotate: false
+  xy: 392, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_color0
+  rotate: false
+  xy: 522, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_color1
+  rotate: false
+  xy: 2, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_color2
+  rotate: false
+  xy: 132, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_color3
+  rotate: false
+  xy: 262, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_color4
+  rotate: false
+  xy: 392, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_color5
+  rotate: false
+  xy: 522, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_color6
+  rotate: false
+  xy: 652, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Road_color7
+  rotate: false
+  xy: 2, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins
+  rotate: false
+  xy: 132, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_bold
+  rotate: false
+  xy: 262, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_bold_color0
+  rotate: false
+  xy: 392, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_bold_color1
+  rotate: false
+  xy: 522, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_bold_color2
+  rotate: false
+  xy: 652, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_bold_color3
+  rotate: false
+  xy: 782, 920
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_bold_color4
+  rotate: false
+  xy: 2, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_bold_color5
+  rotate: false
+  xy: 132, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_bold_color6
+  rotate: false
+  xy: 262, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_bold_color7
+  rotate: false
+  xy: 392, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_color0
+  rotate: false
+  xy: 522, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_color1
+  rotate: false
+  xy: 652, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_color2
+  rotate: false
+  xy: 782, 818
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_color3
+  rotate: false
+  xy: 2, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_color4
+  rotate: false
+  xy: 132, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_color5
+  rotate: false
+  xy: 262, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_color6
+  rotate: false
+  xy: 392, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Ruins_color7
+  rotate: false
+  xy: 522, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra
+  rotate: false
+  xy: 652, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_bold
+  rotate: false
+  xy: 782, 716
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_bold_color0
+  rotate: false
+  xy: 2, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_bold_color1
+  rotate: false
+  xy: 132, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_bold_color2
+  rotate: false
+  xy: 262, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_bold_color3
+  rotate: false
+  xy: 392, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_bold_color4
+  rotate: false
+  xy: 522, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_bold_color5
+  rotate: false
+  xy: 652, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_bold_color6
+  rotate: false
+  xy: 782, 614
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_bold_color7
+  rotate: false
+  xy: 132, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_color0
+  rotate: false
+  xy: 262, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_color1
+  rotate: false
+  xy: 392, 206
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_color2
+  rotate: false
+  xy: 522, 308
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_color3
+  rotate: false
+  xy: 652, 410
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_color4
+  rotate: false
+  xy: 782, 512
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_color5
+  rotate: false
+  xy: 262, 2
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_color6
+  rotate: false
+  xy: 392, 104
+  size: 128, 100
+  orig: 128, 100
+  offset: 0, 0
+  index: -1
+Terrain/Tundra_color7
+  rotate: false
+  xy: 522, 206
   size: 128, 100
   orig: 128, 100
   offset: 0, 0

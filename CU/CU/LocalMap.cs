@@ -14,11 +14,14 @@ namespace CU
         public int[,] takenLocations { get; set; }
         public static string[] Terrains = new string[]
         {"Plains","Forest","Desert","Jungle","Hills"
-        ,"Mountains","Ruins","Tundra","Road","River"};
+        ,"Mountains","Ruins","Tundra","Road","River",
+        "Basement","Basement","Basement","Basement",
+        "Basement","Basement","Basement","Basement"};
 
         public static int[] Depths = new int[]
             {
-                2,4,1,5,7,10,5,3,2,1,
+                2, 3, 1, 4, 6, 8, 4, 2, 2, 1,
+                7,7,7,7,7,7,7,7
             };
         private static Random r = new Random();
 

@@ -403,8 +403,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
 
             int[] ability =
-            new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, };
-            //plains forest desert jungle hills mountains ruins tundra road river
+            new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10-17};
+            //plains forest desert jungle hills mountains ruins tundra road river basement
             Dictionary<MovementType, bool> pass = new Dictionary<MovementType, bool>
             {
                 {MovementType.Foot, true},
@@ -419,7 +419,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             {
                 case MovementType.Foot:
                     ability =
-            new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, };
+            new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
                     pass = new Dictionary<MovementType, bool>
             {
                 {MovementType.Foot, false},
@@ -433,7 +433,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     break;
                 case MovementType.Treads:
                     ability =
-            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, };
+            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                     pass = new Dictionary<MovementType, bool>
             {
                 {MovementType.Foot, false},
@@ -447,7 +447,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     break;
                 case MovementType.Wheels:
                     ability =
-            new int[] { 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, };
+            new int[] { 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                     pass = new Dictionary<MovementType, bool>
             {
                 {MovementType.Foot, false},
@@ -461,7 +461,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     break;
                 case MovementType.TreadsAmphi:
                     ability =
-            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, };
+            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
                     pass = new Dictionary<MovementType, bool>
             {
                 {MovementType.Foot, false},
@@ -475,7 +475,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     break;
                 case MovementType.WheelsTraverse:
                     ability =
-            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, };
+            new int[] { 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                     pass = new Dictionary<MovementType, bool>
             {
                 {MovementType.Foot, false},
@@ -489,7 +489,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     break;
                 case MovementType.Flight:
                     ability =
-            new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, };
+            new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
                     pass = new Dictionary<MovementType, bool>
             {
                 {MovementType.Foot, true},
@@ -808,7 +808,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     targetX[0] = rx;
                     targetY[0] = ry;
                 }
-                FieldMap.Land[rx, ry] = 0;
+                FieldMap.Land[rx, ry] = 10 + Colors[section];
                 for (int i = rx - (width / 6); i < rx + (width / 6); i++)
                 {
                     for (int j = ry - (height / 6); j < ry + (height / 6); j++)
@@ -819,6 +819,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         {
                             //
                             UnitGrid[i, j] = new Unit(r.Next(24, 28), Colors[section], i, j);
+                            FieldMap.Land[i, j] = 10 + Colors[section];
                             //processSingleOutlined(facilityps[r.Next(3) % 2], colors[section], dirs[r.Next(4)]);
                         }
 
@@ -830,7 +831,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 int rx = (width / 4) + (width / 2) * (section % 2);
                 int ry = height - 3 - (height / 6);
                 UnitGrid[rx, ry] = new Unit(((Colors[section] == 0) ? Unit.UnitLookup["Estate"] : Unit.UnitLookup["Castle"]), Colors[section], rx, ry);
-                FieldMap.Land[rx, ry] = 0;
+                FieldMap.Land[rx, ry] = 10 + Colors[section];
                 for (int i = rx - (width / 8); i < rx + (width / 8); i++)
                 {
                     for (int j = ry - (height / 8); j < ry + (height / 8); j++)
@@ -840,6 +841,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         if (r.Next(14) <= 2 && (FieldMap.Land[i, j] == 0 || FieldMap.Land[i, j] == 1 || FieldMap.Land[i, j] == 2 || FieldMap.Land[i, j] == 4 || FieldMap.Land[i, j] == 8))
                         {
                             UnitGrid[i, j] = new Unit(r.Next(24, 28), Colors[section], i, j);
+                            FieldMap.Land[i, j] = 10 + Colors[section];
+
                         }
 
                     }
@@ -902,14 +905,16 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             UnitGrid[temp.x, temp.y] = null;
         }
         public List<DirectedPosition> BestPath;
+        public DirectedPosition FuturePosition;
         public void ProcessStep()
         {
             switch (CurrentMode)
             {
                 case Mode.Selecting:
-                    if (TaskSteps > 3)
+                    if (TaskSteps > 5)
                     {
                         BestPath = getDijkstraPath(ActiveUnit, FieldMap.Land, UnitGrid, targetX[ActingFaction], targetY[ActingFaction]);
+                        FuturePosition = new DirectedPosition(ActiveUnit.x, ActiveUnit.y, ActiveUnit.facing);
                         for (int i = 0; i < width; i++)
                         {
                             for (int j = 0; j < height; j++)
@@ -922,7 +927,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     }
                     else
                     {
-                        Effects.CenterCamera(ActiveUnit.x, ActiveUnit.y);
+                        Effects.CenterCamera(ActiveUnit.x, ActiveUnit.y, 0.5F);
                         float[,] d = dijkstra(ActiveUnit, FieldMap.Land, UnitGrid, ActiveUnit.x, ActiveUnit.y);
                         for (int i = 0; i < width; i++)
                         {
@@ -935,6 +940,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     }
                     break;
                 case Mode.Moving:
+                    ActiveUnit.x = FuturePosition.x;
+                    ActiveUnit.y = FuturePosition.y;
                     if (BestPath.Count <= 0 || TaskSteps > ActiveUnit.speed)
                     {
                         UnitGrid[ActiveUnit.x, ActiveUnit.y] = new Unit(ActiveUnit);
@@ -948,20 +955,25 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         TaskSteps = 0;
                         break;
                     }
-                    DirectedPosition node = BestPath.First();
+                    FuturePosition = new DirectedPosition(BestPath.First().x, BestPath.First().y, BestPath.First().dir);
                     int oldx = ActiveUnit.x, oldy = ActiveUnit.y;
-                    ActiveUnit.x = node.x;
-                    ActiveUnit.y = node.y;
-                    ActiveUnit.facingNumber = ConvertDirection(node.dir);
+                    
+                    ActiveUnit.facingNumber = ConvertDirection(FuturePosition.dir);
+                    ActiveUnit.facing = FuturePosition.dir;
                     NilTask n = new NilTask(() =>
                     {
-                        ActiveUnit.worldX += (node.x - oldx) * 4 + (node.y - oldy) * 4;
-                        ActiveUnit.worldY += (node.x - oldx) * 2 - (node.y - oldy) * 2;
+                        ActiveUnit.worldX += (FuturePosition.x - oldx) * 4 + (FuturePosition.y - oldy) * 4;
+                        ActiveUnit.worldY += (FuturePosition.x - oldx) * 2 - (FuturePosition.y - oldy) * 2;
+                        /*if (ActiveUnit.worldX >= node.x * 61 + node.y * 61 && ActiveUnit.worldX <= node.x * 67 + node.y * 67 &&
+                            ActiveUnit.worldY >= node.x * 31 - node.y * 31 && ActiveUnit.worldY <= node.x * 33 - node.y * 33)
+                        {
+                            ActiveUnit.x = node.x;
+                            ActiveUnit.y = node.y;
+                        }*/
                     });
-            GameGDX.timer.scheduleTask(n, 0, GameGDX.updateStep / 32F, 15);
+            GameGDX.timer.scheduleTask(n, 0, GameGDX.updateStep / 16F, 15);
                     
-                    ActiveUnit.facing = node.dir;
-                    Effects.CenterCamera(node);
+                    Effects.CenterCamera(FuturePosition, 1F);
 
                     BestPath.RemoveAt(0);
 

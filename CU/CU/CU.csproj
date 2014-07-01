@@ -207,6 +207,12 @@
     <Content Include="Assets\pack41.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\pack42.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\pack43.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\pack5.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

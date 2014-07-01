@@ -24,7 +24,7 @@ namespace CU
         float stateTime, fastTime;
         TextureRegion currentFrame;
         public static Timer timer;
-        public static float updateStep = 0.4F;
+        public static float updateStep = 1/3F;
         private static Random r = new Random();
         public void create()
         {
@@ -33,16 +33,26 @@ namespace CU
             height = brain.FieldMap.Height;
             brain.PlaceUnits();
             atlas = new TextureAtlas(Gdx.files.@internal("Assets/pack.atlas"));
-            terrains = new TextureRegion[10,7];
+            terrains = new TextureRegion[18,18];
             for (int i = 0; i < 10; i++ )
             {
                 terrains[i, 0] = atlas.findRegion("Terrain/" + LocalMap.Terrains[i]);
-                terrains[i, 1] = atlas.findRegion("Terrain/" + LocalMap.Terrains[i] + "_bright");
-                terrains[i, 2] = atlas.findRegion("Terrain/" + LocalMap.Terrains[i] + "_dim");
-                terrains[i, 3] = atlas.findRegion("Terrain/" + LocalMap.Terrains[i] + "_spectrum0");
-                terrains[i, 4] = atlas.findRegion("Terrain/" + LocalMap.Terrains[i] + "_spectrum1");
-                terrains[i, 5] = atlas.findRegion("Terrain/" + LocalMap.Terrains[i] + "_spectrum2");
-                terrains[i, 6] = atlas.findRegion("Terrain/" + LocalMap.Terrains[i] + "_spectrum3");
+                terrains[i, 1] = atlas.findRegion("Terrain/" + LocalMap.Terrains[i] + "_bold");
+                for (int j = 0; j < 8; j++)
+                {
+                    terrains[i, 2 + j*2] = atlas.findRegion("Terrain/" + LocalMap.Terrains[i] + "_color" + j);
+                    terrains[i, 3 + j*2] = atlas.findRegion("Terrain/" + LocalMap.Terrains[i] + "_bold_color" + j);
+                }
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                terrains[10 + i, 0] = atlas.findRegion("Terrain/" + LocalMap.Terrains[10] + "_color" + i);
+                terrains[10 + i, 1] = atlas.findRegion("Terrain/" + LocalMap.Terrains[10] + "_bold_color" + i);
+            for (int j = 0; j < 8; j++)
+            {
+                terrains[10 + i, 2 + j * 2] = atlas.findRegion("Terrain/" + LocalMap.Terrains[10] + "_color" + i); ////ALL THE SAME COLOR
+                terrains[10 + i, 3 + j * 2] = atlas.findRegion("Terrain/" + LocalMap.Terrains[10] + "_bold_color" + i);
+            }
             }
             units = new TextureRegion[4][][][];
             animations = new Animation[4][][];
@@ -75,7 +85,7 @@ namespace CU
             stateTime = 0;
             fastTime = 0;
             timer = new Timer();
-            timer.scheduleTask(new NilTask(brain.ProcessStep), 2F, updateStep);
+            timer.scheduleTask(new NilTask(brain.ProcessStep), 1F, updateStep);
         }
 
         public void render()
@@ -91,16 +101,18 @@ namespace CU
             batch.begin();
             //            for (int h = 0; h < height; h++)
 
-            for (int h = 0; h < height; h++)
+            for (int row = 0; row < width+height-1; row++)
             {
-            
-                for (int w = width - 1; w >= 0; w--) 
+                for (int col = 0; col <= ((row < width) ? row : (width+height - 1) - row); col++ )
                 {
+
+                    int w = ((row < width) ? width - 1 - row + col : col); //height + (width - 1 - row) + 
+                    int h = (row < width) ?  col : row - width + col;
                     int highlighter = 0;
-                    switch(brain.FieldMap.Highlight[w,h])
+                    switch (brain.FieldMap.Highlight[w, h])
                     {
                         case HighlightType.Bright:
-                            highlighter = 1;
+                            highlighter = 3 + (2 * brain.ActiveUnit.color);
                             break;
                         case HighlightType.Dim:
                             highlighter = 2;
@@ -109,7 +121,7 @@ namespace CU
                             highlighter = 0;
                             break;
                         case HighlightType.Spectrum:
-                            highlighter= 3+ ((int)((stateTime * 10)%4));
+                            highlighter = 7 + (2 * ((int)((stateTime * 9) % 6)));
                             break;
                         default:
                             break;
@@ -117,6 +129,27 @@ namespace CU
                     batch.draw(terrains[brain.FieldMap.Land[w, h], highlighter], w * 64 + h * 64, w * 32 - h * 32);
                 }
             }
+
+            for (int row = 0; row < width + height - 1; row++)
+            {
+                for (int col = 0; col <= ((row < width) ? row : (width + height - 1) - row); col++)
+                {
+
+                    int w = ((row < width) ? width - 1 - row + col : col); //height + (width - 1 - row) + 
+                    int h = (row < width) ? col : row - width + col;
+                    if (brain.UnitGrid[w, h] != null)
+                    {
+                        currentFrame = animations[brain.ReverseColors[brain.UnitGrid[w, h].color]][brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber].getKeyFrame(stateTime, true);
+                        batch.draw(currentFrame, brain.UnitGrid[w, h].worldX, brain.UnitGrid[w, h].worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                    }
+                    if (brain.ActiveUnit.x == w && brain.ActiveUnit.y == h)
+                    {
+                        currentFrame = animations[brain.ReverseColors[brain.ActiveUnit.color]][brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber].getKeyFrame(fastTime, true);
+                        batch.draw(currentFrame, brain.ActiveUnit.worldX, brain.ActiveUnit.worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                    }
+                }
+            }
+
                     //            worldX = 20 + x * 64 + y * 64;
                     //            worldY = 8 + x * 32 - y * 32;
 
@@ -124,16 +157,16 @@ namespace CU
             {
                 for (int w = width - 1; w >= 0; w--)
                 { 
-                    if (brain.UnitGrid[w, h] != null)
-                    {
-                        currentFrame = animations[brain.ReverseColors[brain.UnitGrid[w, h].color]][brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber].getKeyFrame(stateTime, true);
-                        batch.draw(currentFrame, brain.UnitGrid[w, h].worldX, brain.UnitGrid[w, h].worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
-                    }
-                    if (w == brain.ActiveUnit.x && h == brain.ActiveUnit.y)
-                    {
-                        currentFrame = animations[brain.ReverseColors[brain.ActiveUnit.color]][brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber].getKeyFrame(fastTime, true);
-                        batch.draw(currentFrame, brain.ActiveUnit.worldX, brain.ActiveUnit.worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
-                    }
+                    //if (brain.UnitGrid[w, h] != null)
+                    //{
+                    //    currentFrame = animations[brain.ReverseColors[brain.UnitGrid[w, h].color]][brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber].getKeyFrame(stateTime, true);
+                    //    batch.draw(currentFrame, brain.UnitGrid[w, h].worldX, brain.UnitGrid[w, h].worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                    //}
+                    //if (w == brain.ActiveUnit.x && h == brain.ActiveUnit.y)
+                    //{
+                    //    currentFrame = animations[brain.ReverseColors[brain.ActiveUnit.color]][brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber].getKeyFrame(fastTime, true);
+                    //    batch.draw(currentFrame, brain.ActiveUnit.worldX, brain.ActiveUnit.worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                    //}
                 }
             }
             batch.end();
