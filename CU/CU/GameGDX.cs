@@ -101,9 +101,9 @@ namespace CU
             batch.begin();
             //            for (int h = 0; h < height; h++)
 
-            for (int row = 0; row < width+height-1; row++)
+            for (int row = 0; row < width+height; row++)
             {
-                for (int col = 0; col <= ((row < width) ? row : (width+height - 1) - row); col++ )
+                for (int col = 0; col <= ((row < width) ? row : (width+height-1) - row); col++ )
                 {
 
                     int w = ((row < width) ? width - 1 - row + col : col); //height + (width - 1 - row) + 
