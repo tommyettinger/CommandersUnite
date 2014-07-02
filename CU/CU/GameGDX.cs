@@ -8,6 +8,8 @@ using com.badlogic.gdx.graphics.g2d;
 using com.badlogic.gdx.backends.lwjgl;
 using com.badlogic.gdx.graphics.glutils;
 using com.badlogic.gdx.math;
+using lwjglgl = org.lwjgl.opengl;
+using Nibb = java.nio.ByteBuffer;
 namespace CU
 {
     class GameGDX : ApplicationListener
@@ -138,12 +140,12 @@ namespace CU
                     if (brain.UnitGrid[w, h] != null)
                     {
                         currentFrame = animations[brain.ReverseColors[brain.UnitGrid[w, h].color]][brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber].getKeyFrame(stateTime, true);
-                        batch.draw(currentFrame, brain.UnitGrid[w, h].worldX, brain.UnitGrid[w, h].worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                        batch.draw(currentFrame, (int)(brain.UnitGrid[w, h].worldX), (int)(brain.UnitGrid[w, h].worldY) + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                     }
                     if (brain.ActiveUnit.x == w && brain.ActiveUnit.y == h)
                     {
                         currentFrame = animations[brain.ReverseColors[brain.ActiveUnit.color]][brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber].getKeyFrame(fastTime, true);
-                        batch.draw(currentFrame, brain.ActiveUnit.worldX, brain.ActiveUnit.worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                        batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX), (int)(brain.ActiveUnit.worldY) + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                     }
                 }
             }
@@ -210,7 +212,27 @@ namespace CU
             cfg.backgroundFPS = 45;
             cfg.foregroundFPS = 45;
             cfg.fullscreen = false;
+
+
+            
+//            cfg.addIcon("Assets/CU32.png", Files.FileType.Local);
+            //cfg.addIcon("Assets/CU16.png", Files.FileType.Local);
+            //cfg.addIcon("Assets/CU128.png", Files.FileType.Local);
             LwjglApplication app = new LwjglApplication(new GameGDX(), cfg);
+
+            string[] iconPaths = { "Assets/CU32.png", "Assets/CU16.png", "Assets/CU128.png" };
+            int[] sizes = { 32, 16, 128 };
+            Nibb[] icons = new Nibb[3];
+            for (int i = 0, n = 3; i < n; i++)
+            {
+                Pixmap rgba = new Pixmap(sizes[i], sizes[i], Pixmap.Format.RGBA8888);
+                rgba.drawPixmap(new Pixmap(Gdx.files.getFileHandle(iconPaths[i], Files.FileType.Internal)), 0, 0);
+
+                icons[i] = rgba.getPixels();
+                rgba.dispose();
+            }
+            lwjglgl.Display.setIcon(icons);
+
         }
     }
 }

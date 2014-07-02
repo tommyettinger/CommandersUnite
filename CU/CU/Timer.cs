@@ -15,7 +15,6 @@ public class Timer {
  private const int FOREVER = -2;
 
     private List<Task> tasks = new List<Task>();
-    private int maxTaskIndex=-1;
     public static Timer inst = new Timer();
 	static public Timer instance () {
 		if (inst == null) {

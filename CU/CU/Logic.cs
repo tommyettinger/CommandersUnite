@@ -57,8 +57,8 @@ namespace CU
         public MovementType mobility;
         public int x;
         public int y;
-        public int worldX;
-        public int worldY;
+        public float worldX;
+        public float worldY;
 
         public static string[] CurrentUnits = {
 "Infantry", "Infantry_P", "Infantry_S", "Infantry_T",
@@ -161,7 +161,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             x = 3;
             y = 3;
             worldX = 20 + x * 64 + y * 64;
-            worldY = 8 + x * 32 - y * 32;
+            worldY = 6 + x * 32 - y * 32;
         }
         public Unit(Unit u)
         {
@@ -175,7 +175,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             x = u.x;
             y = u.y;
             worldX = 20 + x * 64 + y * 64;
-            worldY = 8 + x * 32 - y * 32;
+            worldY = 6 + x * 32 - y * 32;
         }
         public Unit(string name, int color, Direction facing, int x, int y)
         {
@@ -184,7 +184,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.y = y;
 
             worldX = 20 + x * 64 + y * 64;
-            worldY = 8 + x * 32 - y * 32;
+            worldY = 6 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = UnitLookup[name];
             this.color = color;
@@ -207,7 +207,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.y = y;
 
             worldX = 20 + x * 64 + y * 64;
-            worldY = 8 + x * 32 - y * 32;
+            worldY = 6 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = unit;
             this.color = color;
@@ -230,7 +230,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.y = y;
 
             worldX = 20 + x * 64 + y * 64;
-            worldY = 8 + x * 32 - y * 32;
+            worldY = 6 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = unit;
             this.color = color;
@@ -251,7 +251,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.y = y;
 
             worldX = 20 + x * 64 + y * 64;
-            worldY = 8 + x * 32 - y * 32;
+            worldY = 6 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = UnitLookup[name];
             this.color = color;
@@ -272,7 +272,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.y = y;
 
             worldX = 20 + x * 64 + y * 64;
-            worldY = 8 + x * 32 - y * 32;
+            worldY = 6 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = unit;
             this.color = color;
@@ -294,7 +294,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             this.y = y;
 
             worldX = 20 + x * 64 + y * 64;
-            worldY = 8 + x * 32 - y * 32;
+            worldY = 6 + x * 32 - y * 32;
             //                this.unit = index_matches[unit];
             this.unitIndex = UnitLookup[name];
             this.color = color;
@@ -962,6 +962,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     {
                         ActiveUnit.worldX += (FuturePosition.x - oldx) * 4 + (FuturePosition.y - oldy) * 4;
                         ActiveUnit.worldY += (FuturePosition.x - oldx) * 2 - (FuturePosition.y - oldy) * 2;
+                        ActiveUnit.worldY += ((LocalMap.Depths[FieldMap.Land[FuturePosition.x, FuturePosition.y]] - LocalMap.Depths[FieldMap.Land[oldx,oldy]])*3F) /16F;
                         /*if (ActiveUnit.worldX >= node.x * 61 + node.y * 61 && ActiveUnit.worldX <= node.x * 67 + node.y * 67 &&
                             ActiveUnit.worldY >= node.x * 31 - node.y * 31 && ActiveUnit.worldY <= node.x * 33 - node.y * 33)
                         {
