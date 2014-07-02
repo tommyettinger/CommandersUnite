@@ -6,8 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Diagnostics;
-
 
 namespace CU
 {
@@ -911,7 +909,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             switch (CurrentMode)
             {
                 case Mode.Selecting:
-                    if (TaskSteps > 5)
+                    if (TaskSteps > 4)
                     {
                         BestPath = getDijkstraPath(ActiveUnit, FieldMap.Land, UnitGrid, targetX[ActingFaction], targetY[ActingFaction]);
                         FuturePosition = new DirectedPosition(ActiveUnit.x, ActiveUnit.y, ActiveUnit.facing);
@@ -971,7 +969,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                             ActiveUnit.y = node.y;
                         }*/
                     });
-            GameGDX.timer.scheduleTask(n, 0, GameGDX.updateStep / 16F, 15);
+                    Timer.instance().scheduleTask(n, 0, GameGDX.updateStep / 16F, 15);
                     
                     Effects.CenterCamera(FuturePosition, 1F);
 

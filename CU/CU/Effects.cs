@@ -8,7 +8,6 @@ using com.badlogic.gdx.graphics;
 using com.badlogic.gdx.graphics.g2d;
 using com.badlogic.gdx.graphics.glutils;
 using com.badlogic.gdx.math;
-using com.badlogic.gdx.utils;
 
 namespace CU
 {
@@ -81,8 +80,8 @@ void main() {
                 midpos = midpos.add((int)((newpos.x - oldpos.x) / 16F), (int)((newpos.y - oldpos.y) / 16F), 0);
                 GameGDX.camera.position.set(midpos);
                 GameGDX.camera.update(); });
-            GameGDX.timer.scheduleTask(n, 0, stepPortion * GameGDX.updateStep / 16F, 15);
-            GameGDX.timer.start();
+            Timer.instance().scheduleTask(n, 0, stepPortion * GameGDX.updateStep / 16F, 15);
+            Timer.instance().start();
             
         }
         public static void CenterCamera(Position pos, float stepPortion)

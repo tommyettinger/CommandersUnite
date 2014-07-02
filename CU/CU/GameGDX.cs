@@ -7,7 +7,6 @@ using com.badlogic.gdx.graphics;
 using com.badlogic.gdx.graphics.g2d;
 using com.badlogic.gdx.backends.lwjgl;
 using com.badlogic.gdx.graphics.glutils;
-using com.badlogic.gdx.utils;
 using com.badlogic.gdx.math;
 namespace CU
 {
@@ -23,7 +22,6 @@ namespace CU
         Animation[][][] animations;
         float stateTime, fastTime;
         TextureRegion currentFrame;
-        public static Timer timer;
         public static float updateStep = 1/3F;
         private static Random r = new Random();
         public void create()
@@ -79,17 +77,17 @@ namespace CU
                 }
             }
             camera = new OrthographicCamera();
-            camera.setToOrtho(false, 800, 800);
+            camera.setToOrtho(false, 1280, 720);
             
             batch = new SpriteBatch();
             stateTime = 0;
             fastTime = 0;
-            timer = new Timer();
-            timer.scheduleTask(new NilTask(brain.ProcessStep), 1F, updateStep);
+            Timer.instance().scheduleTask(new NilTask(brain.ProcessStep), 0F, updateStep);
         }
 
         public void render()
         {
+            Timer.instance().start();
             Gdx.gl.glClearColor(0.45F, 0.7F, 1f, 1);
             Gdx.gl.glClear(GL20.__Fields.GL_COLOR_BUFFER_BIT);
 
@@ -173,15 +171,14 @@ namespace CU
         }
         public void resume()
         {
-            timer.start();
+            Timer.instance().start();
         }
         public void pause()
         {
-            timer.stop();
         }
         public void dispose()
         {
-            timer.stop();
+            Timer.instance().kill();
             batch.dispose();
             atlas.dispose();
         }
@@ -192,12 +189,12 @@ namespace CU
         }
         public void win()
         {
-            timer.stop();
+            Timer.instance().kill();
             Console.WriteLine("Y O U   W I N !!!");
         }
         public void lose()
         {
-            timer.stop();
+            Timer.instance().kill();
             Console.WriteLine("YOU LOSE...");
         }
     }
@@ -205,8 +202,15 @@ namespace CU
     class Launcher
     {
         public static void Main(string[] args)
-        {
-            LwjglApplication app = new LwjglApplication(new GameGDX(), "Commanders Unite", 800, 800);
+        { //"Commanders Unite", 800, 800
+            LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+            cfg.title = "Commanders Unite";
+            cfg.width = 1280;
+            cfg.height = 720;
+            cfg.backgroundFPS = 45;
+            cfg.foregroundFPS = 45;
+            cfg.fullscreen = false;
+            LwjglApplication app = new LwjglApplication(new GameGDX(), cfg);
         }
     }
 }
