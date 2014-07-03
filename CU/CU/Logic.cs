@@ -401,7 +401,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
 
             int[] ability =
-            new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10-17};
+            new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
             //plains forest desert jungle hills mountains ruins tundra road river basement
             Dictionary<MovementType, bool> pass = new Dictionary<MovementType, bool>
             {
@@ -806,7 +806,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     targetX[0] = rx;
                     targetY[0] = ry;
                 }
-                FieldMap.Land[rx, ry] = 10 + Colors[section];
+                FieldMap.Land[rx, ry] = 10;// +Colors[section];
                 for (int i = rx - (width / 6); i < rx + (width / 6); i++)
                 {
                     for (int j = ry - (height / 6); j < ry + (height / 6); j++)
@@ -817,7 +817,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         {
                             //
                             UnitGrid[i, j] = new Unit(r.Next(24, 28), Colors[section], i, j);
-                            FieldMap.Land[i, j] = 10 + Colors[section];
+                            FieldMap.Land[i, j] = 10;// +Colors[section];
                             //processSingleOutlined(facilityps[r.Next(3) % 2], colors[section], dirs[r.Next(4)]);
                         }
 
@@ -829,7 +829,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 int rx = (width / 4) + (width / 2) * (section % 2);
                 int ry = height - 3 - (height / 6);
                 UnitGrid[rx, ry] = new Unit(((Colors[section] == 0) ? Unit.UnitLookup["Estate"] : Unit.UnitLookup["Castle"]), Colors[section], rx, ry);
-                FieldMap.Land[rx, ry] = 10 + Colors[section];
+                FieldMap.Land[rx, ry] = 10;// +Colors[section];
                 for (int i = rx - (width / 8); i < rx + (width / 8); i++)
                 {
                     for (int j = ry - (height / 8); j < ry + (height / 8); j++)
@@ -839,7 +839,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         if (r.Next(14) <= 2 && (FieldMap.Land[i, j] == 0 || FieldMap.Land[i, j] == 1 || FieldMap.Land[i, j] == 2 || FieldMap.Land[i, j] == 4 || FieldMap.Land[i, j] == 8))
                         {
                             UnitGrid[i, j] = new Unit(r.Next(24, 28), Colors[section], i, j);
-                            FieldMap.Land[i, j] = 10 + Colors[section];
+                            FieldMap.Land[i, j] = 10;// +Colors[section];
 
                         }
 
