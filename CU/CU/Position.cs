@@ -32,6 +32,19 @@ namespace CU
                 l.Add(new Position(x, y + 1));
             return l;
         }
+        public static List<Position> Adjacent(int x, int y, int width, int height)
+        {
+            List<Position> l = new List<Position>();
+            if (x > 0)
+                l.Add(new Position(x - 1, y));
+            if (y > 0)
+                l.Add(new Position(x, y - 1));
+            if (x < width - 1)
+                l.Add(new Position(x + 1, y));
+            if (y < height - 1)
+                l.Add(new Position(x, y + 1));
+            return l;
+        }
         public List<Position> Nearby(int width, int height, int radius)
         {
             List<Position> l = new List<Position>();

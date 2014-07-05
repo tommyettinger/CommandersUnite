@@ -19,28 +19,30 @@ namespace CU
         TextureAtlas atlas;
         int width, height;
         Logic brain;
-        Texture pieces, palette;
+        Texture palette;
+        Texture[] pieces;
         TextureRegion[,] terrains;
-        TextureRegion[][][] units;
-        Animation[][] animations;
-        float stateTime, fastTime;
+        TextureRegion[][][][] units;
+        Animation[][][] animations;
+        public static float stateTime;
         TextureRegion currentFrame;
-        public static float updateStep = 1/3F;
+        public static float updateStep = 1 / 3F;
         public ShaderProgram shader;
         private static Random r = new Random();
         public void create()
         {
-            pieces =  new Texture(Gdx.files.local("Assets/pack.png"), Pixmap.Format.RGBA8888, false);
+            pieces = new Texture[] {new Texture(Gdx.files.local("Assets/pack.png"), Pixmap.Format.RGBA8888, false),
+                new Texture(Gdx.files.local("Assets/pack2.png"), Pixmap.Format.RGBA8888, false)};
             palette = new Texture(Gdx.files.local("Assets/Palette.png"), Pixmap.Format.RGBA8888, false);
             palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-            brain = new Logic(25,25);
+            brain = new Logic(25, 25);
             width = brain.FieldMap.Width;
             height = brain.FieldMap.Height;
             brain.PlaceUnits();
             atlas = new TextureAtlas(Gdx.files.local("Assets/pack.atlas"));
-            terrains = new TextureRegion[11,2];
-            for (int i = 0; i < 11; i++ )
+            terrains = new TextureRegion[11, 2];
+            for (int i = 0; i < 11; i++)
             {
                 terrains[i, 0] = atlas.findRegion(LocalMap.Terrains[i]); //"Terrain/" + 
                 terrains[i, 1] = atlas.findRegion(LocalMap.Terrains[i] + "_bold");
@@ -60,38 +62,84 @@ namespace CU
             //    terrains[10 + i, 3 + j * 2] = atlas.findRegion(LocalMap.Terrains[10] + "_bold_color" + i);
             //}
 
-            units = new TextureRegion[Unit.CurrentUnits.Length][][];
-            animations = new Animation[Unit.CurrentUnits.Length][];
+            units = new TextureRegion[Unit.CurrentUnits.Length][][][];
+            animations = new Animation[Unit.CurrentUnits.Length][][];
 
-                foreach (string name in Unit.CurrentUnits)
+            foreach (string name in Unit.CurrentUnits)
+            {
+                units[Unit.UnitLookup[name]] = new TextureRegion[4][][];
+                animations[Unit.UnitLookup[name]] = new Animation[4][];
+
+                for (int i = 0; i < 4; i++)
                 {
-                    units[Unit.UnitLookup[name]] = new TextureRegion[4][];
-                    animations[Unit.UnitLookup[name]] = new Animation[4];
-
-                    for (int j = 0; j < 4; j++)
+                    units[Unit.UnitLookup[name]][i] = new TextureRegion[((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 3)][];
+                    for (int j = 0; j < ((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 3); j++)
                     {
-                        units[Unit.UnitLookup[name]][j] = new TextureRegion[((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4)];
-                        for (int k = 0; k < ((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4); k++)
+                        switch (j)
                         {
-                            units[Unit.UnitLookup[name]][j][k] = atlas.findRegion(name + "_face" + j, k);
+                            case 0:
+                                units[Unit.UnitLookup[name]][i][j] = new TextureRegion[(Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4];
+                                for (int k = 0; k < ((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4); k++)
+                                {
+                                    units[Unit.UnitLookup[name]][i][j][k] = atlas.findRegion(name + "_face" + i, k);
+                                }
+                                break;
+                            case 1:
+                                units[Unit.UnitLookup[name]][i][j] = new TextureRegion[9];
+                                for (int k = 0; k < 8; k++)
+                                {
+                                    units[Unit.UnitLookup[name]][i][j][k] = atlas.findRegion(name + "_Explode_face" + i, k);
+                                }
+                                units[Unit.UnitLookup[name]][i][j][8] = atlas.findRegion("clear_large");
+                                break;
+                            case 2:
+                                units[Unit.UnitLookup[name]][i][j] = new TextureRegion[(Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4];
+                                for (int k = 0; k < ((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4); k++)
+                                {
+                                    if (name == "Infantry" || name == "Infantry_P" || name == "Infantry_T")
+                                    {
+                                        units[Unit.UnitLookup[name]][i][j][k] = atlas.findRegion(name + "_Firing_face" + i, k);
+                                    }
+                                    else
+                                    {
+                                        units[Unit.UnitLookup[name]][i][j][k] = atlas.findRegion(name + "_face" + i, k);
+                                    }
+                                }
+                                break;
                         }
-                        animations[Unit.UnitLookup[name]][j] = new Animation(((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 0.4F : 0.15F),
-                            units[Unit.UnitLookup[name]][j]);
+                    }
+                    animations[Unit.UnitLookup[name]][i] = new Animation[3];
+                    for (int j = 0; j < ((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 3); j++)
+                    {
+                        switch (j)
+                        {
+                            case 0: animations[Unit.UnitLookup[name]][i][j] = new Animation(((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 0.4F : 0.15F),
+                            units[Unit.UnitLookup[name]][i][j]);
+                                break;
+                            case 1: animations[Unit.UnitLookup[name]][i][j] = new Animation(0.11F,
+                                    units[Unit.UnitLookup[name]][i][j]);
+//                                units[Unit.UnitLookup[name]][i][j].Concat(new TextureRegion[] {units[Unit.UnitLookup[name]][i][j][7],  }).ToArray());
+                                break;
+                            case 2: animations[Unit.UnitLookup[name]][i][j] = new Animation(0.11F,
+                            units[Unit.UnitLookup[name]][i][j]);
+                                break;
+                        }
                     }
                 }
-            
+
+            }
+
             camera = new OrthographicCamera();
             camera.setToOrtho(false, 1280, 720);
-            
+
             batch = new SpriteBatch();
 
-            
+
 
 
 
             shader = createChannelShader();
             stateTime = 0;
-            fastTime = 0;
             Timer.instance().scheduleTask(new NilTask(brain.ProcessStep), 0F, updateStep);
         }
 
@@ -103,41 +151,40 @@ namespace CU
 
             camera.update();
             stateTime += Gdx.graphics.getDeltaTime();
-            fastTime += Gdx.graphics.getDeltaTime()*1.5F;
+//            fastTime += Gdx.graphics.getDeltaTime() * 1.5F;
 
             batch.setProjectionMatrix(camera.combined);
 
             //shader.begin();
-            
+
             Color faction = new Color();
             faction.a = 1;
             faction.b = 0.5F;
             faction.g = 0.9F;
-            faction.r = 9/16;
+            faction.r = 9 / 16;
 
             batch.setShader(shader);
             Gdx.gl.glActiveTexture(GL20.__Fields.GL_TEXTURE0);
             batch.begin();
 
-            palette.bind(3);
+            palette.bind(4);
 
-            shader.setUniformi("u_texPalette", 3);
-
-            pieces.bind(2);
+            shader.setUniformi("u_texPalette", 4);
+            pieces[0].bind(2);
             shader.setUniformi("u_texture", 2);
 
-//            shader.setUniformf("u_paletteIndex", 0.5F);
+            //            shader.setUniformf("u_paletteIndex", 0.5F);
 
             faction.r = 10 / 16.0F;
             batch.setColor(faction);
             //            for (int h = 0; h < height; h++)
-            for (int row = 0; row < width+height; row++)
+            for (int row = 0; row < width + height; row++)
             {
-                for (int col = 0; col <= ((row < width) ? row : (width+height-1) - row); col++ )
+                for (int col = 0; col <= ((row < width) ? row : (width + height - 1) - row); col++)
                 {
 
                     int w = ((row < width) ? width - 1 - row + col : col); //height + (width - 1 - row) + 
-                    int h = (row < width) ?  col : row - width + col;
+                    int h = (row < width) ? col : row - width + col;
                     int boldness = 0, highlighter = 10;
                     switch (brain.FieldMap.Highlight[w, h])
                     {
@@ -166,7 +213,7 @@ namespace CU
                     batch.draw(terrains[brain.FieldMap.Land[w, h], boldness], w * 64 + h * 64, w * 32 - h * 32);
                 }
             }
-            
+
             for (int row = 0; row < width + height - 1; row++)
             {
                 for (int col = 0; col <= ((row < width) ? row : (width + height - 1) - row); col++)
@@ -174,31 +221,56 @@ namespace CU
                     int w = ((row < width) ? width - 1 - row + col : col); //height + (width - 1 - row) + 
                     int h = (row < width) ? col : row - width + col;
                     if (brain.UnitGrid[w, h] != null)
-                    {//[brain.ReverseColors[brain.UnitGrid[w, h].color]]
-
-                        faction.r = (brain.UnitGrid[w, h].color+1) / 32.0F;
+                    {
+                        faction.r = (brain.UnitGrid[w, h].color + 1) / 32.0F;
                         batch.setColor(faction);
-                        currentFrame = animations[brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber].getKeyFrame(stateTime, true);
-                        batch.draw(currentFrame, (int)(brain.UnitGrid[w, h].worldX), (int)(brain.UnitGrid[w, h].worldY) + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                        switch(brain.UnitGrid[w, h].visual)
+                        {
+                            case VisualAction.Normal:
+                                currentFrame = animations[brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber][0].getKeyFrame(stateTime, true);
+                                batch.draw(currentFrame, (int)(brain.UnitGrid[w, h].worldX), (int)(brain.UnitGrid[w, h].worldY) + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                                break;
+                            case VisualAction.Exploding:
+                                currentFrame = animations[brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber][1].getKeyFrame(stateTime, false);
+                                batch.draw(currentFrame, (int)(brain.UnitGrid[w, h].worldX - 20), (int)(brain.UnitGrid[w, h].worldY - 10) + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                                break;
+                            case VisualAction.Firing:
+                                currentFrame = animations[brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber][2].getKeyFrame(stateTime, false);
+                                batch.draw(currentFrame, (int)(brain.UnitGrid[w, h].worldX), (int)(brain.UnitGrid[w, h].worldY) + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                                break;
+                        }
                     }
                     if (brain.ActiveUnit.x == w && brain.ActiveUnit.y == h)
                     {
-                        faction.r = (brain.ActiveUnit.color+1) / 32.0F;
+                        faction.r = (brain.ActiveUnit.color + 1) / 32.0F;
                         batch.setColor(faction);
                         //[brain.ReverseColors[brain.ActiveUnit.color]]
-                        currentFrame = animations[brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber].getKeyFrame(fastTime, true);
-                        batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX), (int)(brain.ActiveUnit.worldY) + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                        switch (brain.ActiveUnit.visual)
+                        {
+                            case VisualAction.Normal:
+                                currentFrame = animations[brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber][0].getKeyFrame(stateTime, true);
+                                batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX), (int)(brain.ActiveUnit.worldY) + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                                break;
+                            case VisualAction.Exploding:
+                                currentFrame = animations[brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber][1].getKeyFrame(stateTime, false);
+                                batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX - 20), (int)(brain.ActiveUnit.worldY - 10) + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                                break;
+                            case VisualAction.Firing:
+                                currentFrame = animations[brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber][2].getKeyFrame(stateTime, true);
+                                batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX), (int)(brain.ActiveUnit.worldY) + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
+                                break;
+                        }
                     }
                 }
             }
 
-                    //            worldX = 20 + x * 64 + y * 64;
-                    //            worldY = 8 + x * 32 - y * 32;
+            //            worldX = 20 + x * 64 + y * 64;
+            //            worldY = 8 + x * 32 - y * 32;
 
             for (int h = 0; h < height; h++)
             {
                 for (int w = width - 1; w >= 0; w--)
-                { 
+                {
                     //if (brain.UnitGrid[w, h] != null)
                     //{
                     //    currentFrame = animations[brain.ReverseColors[brain.UnitGrid[w, h].color]][brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber].getKeyFrame(stateTime, true);
@@ -256,7 +328,7 @@ namespace CU
                       "{                            \n" +
                       "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" +
                       "   v_color.a = v_color.a * (256.0/255.0);\n" +
-                      "   v_texCoords = "+ShaderProgram.TEXCOORD_ATTRIBUTE + "0; \n" +
+                      "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0; \n" +
                       "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" +
                       "}                            \n";
             string fragment = @"
@@ -277,7 +349,7 @@ void main()
         vec2 index = vec2(color.r, v_color.r);
         gl_FragColor = vec4(texture2D(u_texPalette, index).rgb, color.a);
 }";
-            
+
             ShaderProgram shader = new ShaderProgram(vertex, fragment);
             if (shader.isCompiled() == false) throw new ArgumentException("Error compiling shader: " + shader.getLog());
             return shader;
@@ -297,8 +369,8 @@ void main()
             cfg.fullscreen = false;
 
 
-            
-//            cfg.addIcon("Assets/CU32.png", Files.FileType.Local);
+
+            //            cfg.addIcon("Assets/CU32.png", Files.FileType.Local);
             //cfg.addIcon("Assets/CU16.png", Files.FileType.Local);
             //cfg.addIcon("Assets/CU128.png", Files.FileType.Local);
             LwjglApplication app = new LwjglApplication(new GameGDX(), cfg);

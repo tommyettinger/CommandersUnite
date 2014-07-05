@@ -22,6 +22,10 @@ namespace CU
     {
         Selecting, Moving, Attacking
     }
+    public enum VisualAction
+    {
+        Normal, Exploding, Firing
+    }
     public class DirectedPosition : Position
     {
         public Direction dir { get; set; }
@@ -52,7 +56,7 @@ namespace CU
         public int color;
         public Direction facing;
         public int facingNumber;
-
+        public VisualAction visual;
         public int speed;
         public MovementType mobility;
         public int x;
@@ -176,6 +180,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             y = u.y;
             worldX = 20 + x * 64 + y * 64;
             worldY = 6 + x * 32 - y * 32;
+            visual = VisualAction.Normal;
         }
         public Unit(string name, int color, Direction facing, int x, int y)
         {
@@ -193,12 +198,13 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             {
                 case Direction.SE: facingNumber = 0; break;
                 case Direction.SW: facingNumber = 1; break;
-                case Direction.NE: facingNumber = 2; break;
-                case Direction.NW: facingNumber = 3; break;
+                case Direction.NW: facingNumber = 2; break;
+                case Direction.NE: facingNumber = 3; break;
                 default: facingNumber = 0; break;
             }
             this.speed = CurrentSpeeds[this.unitIndex];
             this.mobility = CurrentMobilities[this.unitIndex];
+            visual = VisualAction.Normal;
         }
         public Unit(int unit, int color, Direction facing, int x, int y)
         {
@@ -216,12 +222,13 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             {
                 case Direction.SE: facingNumber = 0; break;
                 case Direction.SW: facingNumber = 1; break;
-                case Direction.NE: facingNumber = 2; break;
-                case Direction.NW: facingNumber = 3; break;
+                case Direction.NW: facingNumber = 2; break;
+                case Direction.NE: facingNumber = 3; break;
                 default: facingNumber = 0; break;
             }
             this.speed = CurrentSpeeds[this.unitIndex];
             this.mobility = CurrentMobilities[this.unitIndex];
+            visual = VisualAction.Normal;
         }
         public Unit(int unit, int color, int x, int y)
         {
@@ -243,6 +250,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             this.speed = CurrentSpeeds[this.unitIndex];
             this.mobility = CurrentMobilities[this.unitIndex];
+            visual = VisualAction.Normal;
         }
         public Unit(string unit, int color, int x, int y)
         {
@@ -264,6 +272,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             this.speed = CurrentSpeeds[this.unitIndex];
             this.mobility = CurrentMobilities[this.unitIndex];
+            visual = VisualAction.Normal;
         }
         public Unit(int unit, int color, int dir, int x, int y)
         {
@@ -286,6 +295,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             this.speed = CurrentSpeeds[this.unitIndex];
             this.mobility = CurrentMobilities[this.unitIndex];
+            visual = VisualAction.Normal;
         }
         public Unit(string unit, int color, int dir, int x, int y)
         {
@@ -308,6 +318,14 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             this.speed = CurrentSpeeds[this.unitIndex];
             this.mobility = CurrentMobilities[this.unitIndex];
+            visual = VisualAction.Normal;
+        }
+        public bool isOpposed(Unit u)
+        {
+            if (color == 0)
+                return u.color != 0;
+            else
+                return u.color == 0;
         }
     }
     public class Logic
@@ -401,7 +419,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
 
             int[] ability =
-            new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+            new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
             //plains forest desert jungle hills mountains ruins tundra road river basement
             Dictionary<MovementType, bool> pass = new Dictionary<MovementType, bool>
             {
@@ -515,15 +533,22 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         }
                         else if (
                         ability[grid[mov.x - 1, mov.y - 1]] == 1 &&
-                          (placing[mov.x - 1, mov.y - 1] == null ||
+                          placing[mov.x - 1, mov.y - 1] == null)
+                        {
+                            fringe[mov] = (idx_dijk.Value + 1);
+                            d[mov.x, mov.y] = idx_dijk.Value + 1;
+                        }
+                        else if (
+                        ability[grid[mov.x - 1, mov.y - 1]] == 1 &&
+                          (placing[mov.x - 1, mov.y - 1] != null &&
                             (Math.Abs(self.x - (mov.x - 1)) + Math.Abs(self.y - (mov.y - 1)) < self.speed &&
                               (pass[placing[mov.x - 1, mov.y - 1].mobility] ||
                                 (placing[mov.x - 1, mov.y - 1].color == self.color &&
                                  placing[mov.x - 1, mov.y - 1].mobility != MovementType.Immobile)
                             ))))
                         {
-                            fringe[mov] = (idx_dijk.Value + 1);
-                            d[mov.x, mov.y] = idx_dijk.Value + 1;
+                            fringe[mov] = (idx_dijk.Value + 2);
+                            d[mov.x, mov.y] = idx_dijk.Value + 2;
                         }
                 }
                 foreach (var kv in open)
@@ -548,7 +573,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         d[i, j] = wall;// ((pass[placing[i - 1, j - 1].mobility]) ? 0 : wall);
 
                     }
-                    else if (placing[i-1,j-1] != null)
+                    else if (placing[i - 1, j - 1] != null)
                     {
                         d[i, j] += 0.5F;
                     }
@@ -624,8 +649,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {
                     if (targetColors.Any(c => placing[i - 1, j - 1] != null && c == placing[i - 1, j - 1].color))
                     {
-                        if (placing[i - 1, j - 1].name == "Castle" || placing[i - 1, j - 1].name == "Estate")
-                            d[i, j] = goal;
+                        //if (placing[i - 1, j - 1].name == "Castle" || placing[i - 1, j - 1].name == "Estate")
+                        d[i, j] = goal;
                     }
                 }
             }
@@ -889,9 +914,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             {
                 for (int j = 1; j < height - 1; j++)
                 {
-                    if (r.Next(35) <= 1 && UnitGrid[i, j] == null)
+                    if (r.Next(30) <= 1 && UnitGrid[i, j] == null)
                     {
-                        int rs = r.Next(2);
+                        int rs = r.Next(4);
                         int currentUnit = Unit.TerrainToUnits[FieldMap.Land[i, j]].RandomElement();
                         UnitGrid[i, j] = new Unit(currentUnit, Colors[rs], rs, i, j);
 
@@ -904,6 +929,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         }
         public List<DirectedPosition> BestPath;
         public DirectedPosition FuturePosition;
+        private Position target;
         public void ProcessStep()
         {
             switch (CurrentMode)
@@ -921,6 +947,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                             }
                         }
                         TaskSteps = 0;
+                        GameGDX.stateTime = 0;
                         CurrentMode = Mode.Moving;
                     }
                     else
@@ -942,6 +969,17 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     ActiveUnit.y = FuturePosition.y;
                     if (BestPath.Count <= 0 || TaskSteps > ActiveUnit.speed)
                     {
+                        if (Position.Adjacent(ActiveUnit.x, ActiveUnit.y, width, height).Any(pos => UnitGrid[pos.x, pos.y] != null && ActiveUnit.isOpposed(UnitGrid[pos.x, pos.y])))
+                        {
+
+                            ActiveUnit.worldX = 20 + ActiveUnit.x * 64 + ActiveUnit.y * 64;
+                            ActiveUnit.worldY = 6 + ActiveUnit.x * 32 - ActiveUnit.y * 32;
+                            CurrentMode = Mode.Attacking;
+                            TaskSteps = 0;
+                            //GameGDX.stateTime = 0;
+                            break;
+                        }
+
                         UnitGrid[ActiveUnit.x, ActiveUnit.y] = new Unit(ActiveUnit);
                         ActingFaction = (ActingFaction + 1) % 4;
                         Unit temp = UnitGrid.RandomFactionUnit(Colors[ActingFaction]);
@@ -949,20 +987,20 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         UnitGrid[temp.x, temp.y] = null;
 
                         CurrentMode = Mode.Selecting;
-
+                        //GameGDX.stateTime = 0;
                         TaskSteps = 0;
                         break;
                     }
                     FuturePosition = new DirectedPosition(BestPath.First().x, BestPath.First().y, BestPath.First().dir);
                     int oldx = ActiveUnit.x, oldy = ActiveUnit.y;
-                    
+
                     ActiveUnit.facingNumber = ConvertDirection(FuturePosition.dir);
                     ActiveUnit.facing = FuturePosition.dir;
                     NilTask n = new NilTask(() =>
                     {
                         ActiveUnit.worldX += (FuturePosition.x - oldx) * 4 + (FuturePosition.y - oldy) * 4;
                         ActiveUnit.worldY += (FuturePosition.x - oldx) * 2 - (FuturePosition.y - oldy) * 2;
-                        ActiveUnit.worldY += ((LocalMap.Depths[FieldMap.Land[FuturePosition.x, FuturePosition.y]] - LocalMap.Depths[FieldMap.Land[oldx,oldy]])*3F) /16F;
+                        ActiveUnit.worldY += ((LocalMap.Depths[FieldMap.Land[FuturePosition.x, FuturePosition.y]] - LocalMap.Depths[FieldMap.Land[oldx, oldy]]) * 3F) / 16F;
                         /*if (ActiveUnit.worldX >= node.x * 61 + node.y * 61 && ActiveUnit.worldX <= node.x * 67 + node.y * 67 &&
                             ActiveUnit.worldY >= node.x * 31 - node.y * 31 && ActiveUnit.worldY <= node.x * 33 - node.y * 33)
                         {
@@ -971,13 +1009,62 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                         }*/
                     });
                     Timer.instance().scheduleTask(n, 0, GameGDX.updateStep / 16F, 15);
-                    
+
                     Effects.CenterCamera(FuturePosition, 1F);
 
                     BestPath.RemoveAt(0);
 
                     break;
-                case Mode.Attacking: break;
+                case Mode.Attacking:
+                    if (TaskSteps > 4)
+                    {
+                        UnitGrid[target.x, target.y] = null;
+                        UnitGrid[ActiveUnit.x, ActiveUnit.y] = new Unit(ActiveUnit);
+                        ActingFaction = (ActingFaction + 1) % 4;
+                        Unit temp = UnitGrid.RandomFactionUnit(Colors[ActingFaction]);
+                        ActiveUnit = new Unit(temp);
+                        UnitGrid[temp.x, temp.y] = null;
+
+                        CurrentMode = Mode.Selecting;
+                        TaskSteps = 0;
+
+                        break;
+                    }
+                    else if (TaskSteps == 1)
+                    {
+                        target = Position.Adjacent(ActiveUnit.x, ActiveUnit.y, width, height).Where(pos => UnitGrid[pos.x, pos.y] != null && ActiveUnit.isOpposed(UnitGrid[pos.x, pos.y])).RandomElement();
+                        if (target.y > ActiveUnit.y)
+                        {
+                            ActiveUnit.facing = Direction.SE;
+                            ActiveUnit.facingNumber = 0;
+                        }
+                        else if (target.y < ActiveUnit.y)
+                        {
+                            ActiveUnit.facing = Direction.NW;
+                            ActiveUnit.facingNumber = 2;
+                        }
+                        else
+                        {
+                            if (target.x < ActiveUnit.x)
+                            {
+                                ActiveUnit.facing = Direction.SW;
+                                ActiveUnit.facingNumber = 1;
+                            }
+                            else
+                            {
+                                ActiveUnit.facing = Direction.NE;
+                                ActiveUnit.facingNumber = 3;
+                            }
+                        }
+                        ActiveUnit.visual = VisualAction.Firing;
+                    }
+                    else if (TaskSteps == 2)
+                    {
+                        GameGDX.stateTime = 0;
+                        UnitGrid[target.x, target.y].visual = VisualAction.Exploding;
+                        
+                    }
+                    break;
             }
             TaskSteps++;
         }

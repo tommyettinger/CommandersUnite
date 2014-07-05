@@ -126,6 +126,9 @@
     <Content Include="Assets\pack.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\pack2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\Palette.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
