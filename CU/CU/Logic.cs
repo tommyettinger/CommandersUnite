@@ -12,7 +12,7 @@ namespace CU
 
     public enum MovementType
     {
-        Foot, Treads, TreadsAmphi, Wheels, WheelsTraverse, Flight, Immobile
+        Foot, Treads, TreadsAmphi, Wheels, WheelsTraverse, Flight, FlightFlyby, Immobile
     }
     public enum Direction
     {
@@ -82,6 +82,15 @@ namespace CU
 "Transport Copter", "Gunship Copter", "Blitz Copter", "Comm Copter",
 "City", "Factory", "Airport", "Laboratory", "Castle", "Estate"
 };
+        public static int[][] Weapons = {
+new int[] {1, -1}, new int[] {0, 5}, new int[] {1, -1}, new int[] {0, 0},
+new int[] {-1, 4}, new int[] {3, -1}, new int[] {-1, 6}, new int[] {-1, 6},
+new int[] {3, 1}, new int[] {3, 1}, new int[] {2, 1}, new int[] {1, 3},
+new int[] {1, -1}, new int[] {-1, 7}, new int[] {5, -1}, new int[] {5, -1},
+new int[] {-1, -1}, new int[] {-1, -1}, new int[] {-1, -1}, new int[] {-1, -1},
+new int[] {-1, -1}, new int[] {1, 5}, new int[] {1, -1}, new int[] {-1, -1},
+new int[] {-1, -1}, new int[] {-1, -1}, new int[] {-1, -1}, new int[] {-1, -1}, new int[] {-1, -1}, new int[] {-1, -1}
+};
         public static Dictionary<string, int> UnitLookup = new Dictionary<string, int>(30), TerrainLookup = new Dictionary<string, int>(10), NameLookup = new Dictionary<string, int>(30);
         public static Dictionary<MovementType, List<int>> MobilityToUnits = new Dictionary<MovementType, List<int>>(30), MobilityToTerrains = new Dictionary<MovementType, List<int>>();
         public static List<int>[] TerrainToUnits = new List<int>[30];
@@ -98,9 +107,9 @@ namespace CU
 MovementType.Foot, MovementType.Foot, MovementType.WheelsTraverse, MovementType.Foot,
 MovementType.Treads, MovementType.Treads, MovementType.Treads, MovementType.Wheels,
 MovementType.Treads, MovementType.Treads, MovementType.Treads, MovementType.TreadsAmphi,
-MovementType.Flight, MovementType.Flight, MovementType.Flight, MovementType.Flight,
+MovementType.Flight, MovementType.Flight, MovementType.Flight, MovementType.FlightFlyby,
 MovementType.Wheels, MovementType.Treads, MovementType.TreadsAmphi, MovementType.Wheels,
-MovementType.Flight, MovementType.Flight, MovementType.Flight, MovementType.Flight, 
+MovementType.Flight, MovementType.Flight, MovementType.Flight, MovementType.FlightFlyby, 
 MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, 
                                                          };
 
@@ -429,6 +438,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {MovementType.TreadsAmphi, true},
                 {MovementType.WheelsTraverse, true},
                 {MovementType.Flight, true},
+                {MovementType.FlightFlyby, true},
                 {MovementType.Immobile, false},
             };
             switch (self.mobility)
@@ -444,6 +454,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {MovementType.TreadsAmphi, true},
                 {MovementType.WheelsTraverse, false},
                 {MovementType.Flight, true},
+                {MovementType.FlightFlyby, true},
                 {MovementType.Immobile, false},
             };
                     break;
@@ -458,6 +469,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {MovementType.TreadsAmphi, false},
                 {MovementType.WheelsTraverse, false},
                 {MovementType.Flight, true},
+                {MovementType.FlightFlyby, true},
                 {MovementType.Immobile, false},
             };
                     break;
@@ -472,6 +484,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {MovementType.TreadsAmphi, false},
                 {MovementType.WheelsTraverse, false},
                 {MovementType.Flight, true},
+                {MovementType.FlightFlyby, true},
                 {MovementType.Immobile, false},
             };
                     break;
@@ -486,6 +499,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {MovementType.TreadsAmphi, false},
                 {MovementType.WheelsTraverse, false},
                 {MovementType.Flight, true},
+                {MovementType.FlightFlyby, true},
                 {MovementType.Immobile, false},
             };
                     break;
@@ -500,6 +514,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {MovementType.TreadsAmphi, false},
                 {MovementType.WheelsTraverse, false},
                 {MovementType.Flight, true},
+                {MovementType.FlightFlyby, true},
                 {MovementType.Immobile, false},
             };
                     break;
@@ -514,6 +529,22 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {MovementType.TreadsAmphi, true},
                 {MovementType.WheelsTraverse, true},
                 {MovementType.Flight, false},
+                {MovementType.FlightFlyby, false},
+                {MovementType.Immobile, false},
+            };
+                    break;
+                case MovementType.FlightFlyby:
+                    ability =
+            new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    pass = new Dictionary<MovementType, bool>
+            {
+                {MovementType.Foot, true},
+                {MovementType.Treads, true},
+                {MovementType.Wheels, true},
+                {MovementType.TreadsAmphi, true},
+                {MovementType.WheelsTraverse, true},
+                {MovementType.Flight, true},
+                {MovementType.FlightFlyby, true},
                 {MovementType.Immobile, false},
             };
                     break;
@@ -716,14 +747,22 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     currentY = newY;
                     //                    d_inv = dijkstraInner(active, grid, placing, d_inv);
                 }
+                if (d_inv[newX, newY] < 2)// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
+                {
+                    path.Add(new DirectedPosition(currentX, currentY, currentFacing));
+                    break;
+                }
                 if (placing[newX, newY] == null)
                 {
                     path.Add(new DirectedPosition(currentX, currentY, currentFacing));
+                    isOverlapping = false;
                 }
+                
                 else if (active.speed - f > 1)
                 {
                     d_inv[newX, newY] = wall;
                     path.Add(new DirectedPosition(currentX, currentY, currentFacing));
+                    isOverlapping = true;
                 }
 
                 oldpos = new DirectedPosition(currentX, currentY, currentFacing);
@@ -916,7 +955,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {
                     if (r.Next(30) <= 1 && UnitGrid[i, j] == null)
                     {
-                        int rs = r.Next(4);
+                        int rs = 0;// r.Next(4);
                         int currentUnit = Unit.TerrainToUnits[FieldMap.Land[i, j]].RandomElement();
                         UnitGrid[i, j] = new Unit(currentUnit, Colors[rs], rs, i, j);
 
@@ -1016,7 +1055,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 
                     break;
                 case Mode.Attacking:
-                    if (TaskSteps > 4)
+                    if (TaskSteps > 6)
                     {
                         UnitGrid[target.x, target.y] = null;
                         UnitGrid[ActiveUnit.x, ActiveUnit.y] = new Unit(ActiveUnit);
@@ -1056,11 +1095,12 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                                 ActiveUnit.facingNumber = 3;
                             }
                         }
+                        GameGDX.attackTime = 0;
                         ActiveUnit.visual = VisualAction.Firing;
                     }
-                    else if (TaskSteps == 2)
+                    else if (TaskSteps == 4)
                     {
-                        GameGDX.stateTime = 0;
+                        GameGDX.explodeTime = 0;
                         UnitGrid[target.x, target.y].visual = VisualAction.Exploding;
                         
                     }
