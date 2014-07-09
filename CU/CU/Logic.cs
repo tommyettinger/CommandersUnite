@@ -134,6 +134,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             MobilityToTerrains[MovementType.Flight] =
                 new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            MobilityToTerrains[MovementType.FlightFlyby] =
+                new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             MobilityToTerrains[MovementType.Foot] =
                 new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             MobilityToTerrains[MovementType.Treads] =
@@ -401,7 +403,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
         {
             int width = d.GetLength(0);
             int height = d.GetLength(1);
-            int wall = 222;
+            int wall = 2222;
             int goal = 0;
 
             Dictionary<Position, float> open = new Dictionary<Position, float>(),
@@ -601,7 +603,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {
                     if (d[i, j] == goal && placing[i - 1, j - 1] != null)
                     {
-                        d[i, j] = 333;// ((pass[placing[i - 1, j - 1].mobility]) ? 0 : wall);
+                        d[i, j] = 3333;// ((pass[placing[i - 1, j - 1].mobility]) ? 0 : wall);
 
                     }
                     else if (placing[i - 1, j - 1] != null)
@@ -617,9 +619,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 
             int width = grid.GetLength(0) + 2;
             int height = grid.GetLength(1) + 2;
-            float unexplored = 111;
+            float unexplored = 1111;
             float goal = 0;
-            int wall = 222;
+            int wall = 2222;
 
             float[,] d = new float[width, height];
 
@@ -651,9 +653,9 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 
             int width = grid.GetLength(0) + 2;
             int height = grid.GetLength(1) + 2;
-            float unexplored = 111;
+            float unexplored = 1111;
             float goal = 0;
-            int wall = 222;
+            int wall = 2222;
 
             float[,] d = new float[width, height];
 
@@ -692,7 +694,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
 
         static List<DirectedPosition> getDijkstraPath(Unit active, int[,] grid, Unit[,] placing, int targetX, int targetY)
         {
-            int wall = 222;
+            int wall = 2222;
 
             int width = grid.GetLength(0);
             int height = grid.GetLength(1);
@@ -703,7 +705,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             DirectedPosition oldpos = new DirectedPosition(currentX, currentY, currentFacing);
             Position newpos = new Position(currentX, currentY);
             bool isOverlapping = false;
-            if (Position.Adjacent(currentX, currentY, width, height).Any(p => d_inv[p.x+1, p.y+1] == 333))// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
+            if (Position.Adjacent(currentX, currentY, width, height).Any(p => d_inv[p.x+1, p.y+1] == 3333))// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
             {
                 return path;
             }
@@ -752,7 +754,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     //                    d_inv = dijkstraInner(active, grid, placing, d_inv);
                 }
                 DirectedPosition dp = new DirectedPosition(currentX, currentY, currentFacing);
-                if (dp.Adjacent(width, height).Any(p => d_inv[p.x+1, p.y+1] == 333) )// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
+                if (dp.Adjacent(width, height).Any(p => d_inv[p.x+1, p.y+1] == 3333) )// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
                 {
                     oldpos = new DirectedPosition(currentX, currentY, currentFacing);
 
@@ -767,7 +769,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 
                 else if (active.speed - f > 1)
                 {
-                    d_inv[newX, newY] = (d_inv[newX,newY] == 333) ? 333 : wall;
+                    d_inv[newX, newY] = (d_inv[newX,newY] == 3333) ? 3333 : wall;
                     path.Add(dp);
                     isOverlapping = true;
                 }
@@ -853,11 +855,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             Colors[0] = 0;
             ReverseColors[0] = 0;
-            Colors[2] = 1;
-            ReverseColors[1] = 2;
-            Colors[1] = 4;
-            ReverseColors[4] = 1;
-
+            
             for (int section = 0; section < 2; section++)
             {
                 int rx = (width / 4) + (width / 2) * (section % 2);
