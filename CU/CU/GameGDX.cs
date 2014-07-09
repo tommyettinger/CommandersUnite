@@ -38,9 +38,9 @@ namespace CU
             width = brain.FieldMap.Width;
             height = brain.FieldMap.Height;
             brain.PlaceUnits();
-            atlas = new TextureAtlas(Gdx.files.local("Assets/pack.atlas"));
+            atlas = new TextureAtlas(new CustomAtlasData(Gdx.files.local("Assets/pack.atlas"), Gdx.files.local("Assets"), false));
             
-            palette = new Texture(Gdx.files.local("Assets/Palette.png"), Pixmap.Format.RGBA8888, false);
+            palette = new Texture(Gdx.files.local("Assets/PaletteDark.png"), Pixmap.Format.RGBA8888, false);
             palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
             terrains = new TextureRegion[11, 2];

@@ -420,7 +420,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     {
                         open[new Position(i, j)] = goal;
                     }*/
-                    else if (d[i, j] == wall)
+                    else if (d[i, j] >= wall)
                     {
                         closed[new Position(i, j)] = wall;
                     }
@@ -557,7 +557,7 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     foreach (Position mov in moves)
                         if (open.ContainsKey(mov) ||
                             closed.ContainsKey(mov) ||
-                            d[mov.x, mov.y] == wall ||
+                            d[mov.x, mov.y] >= wall ||
                             d[mov.x, mov.y] <= idx_dijk.Value + 1)
                         {
 
@@ -578,8 +578,8 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                                  placing[mov.x - 1, mov.y - 1].mobility != MovementType.Immobile)
                             ))))
                         {
-                            fringe[mov] = (idx_dijk.Value + 2);
-                            d[mov.x, mov.y] = idx_dijk.Value + 2;
+                            fringe[mov] = (idx_dijk.Value + 1);
+                            d[mov.x, mov.y] = idx_dijk.Value + 1;
                         }
                 }
                 foreach (var kv in open)
@@ -601,12 +601,12 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                 {
                     if (d[i, j] == goal && placing[i - 1, j - 1] != null)
                     {
-                        d[i, j] = wall;// ((pass[placing[i - 1, j - 1].mobility]) ? 0 : wall);
+                        d[i, j] = 333;// ((pass[placing[i - 1, j - 1].mobility]) ? 0 : wall);
 
                     }
                     else if (placing[i - 1, j - 1] != null)
                     {
-                        d[i, j] += 0.5F;
+                        //d[i, j] += 0.5F;
                     }
                 }
             }
@@ -703,6 +703,10 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             DirectedPosition oldpos = new DirectedPosition(currentX, currentY, currentFacing);
             Position newpos = new Position(currentX, currentY);
             bool isOverlapping = false;
+            if (Position.Adjacent(currentX, currentY, width, height).Any(p => d_inv[p.x+1, p.y+1] == 333))// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
+            {
+                return path;
+            }
             for (int f = 0; f < active.speed; f++)
             {
                 Dictionary<Position, float> near = new Dictionary<Position, float>() { { oldpos, d_inv[currentX + 1, currentY + 1] } };
@@ -747,26 +751,27 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
                     currentY = newY;
                     //                    d_inv = dijkstraInner(active, grid, placing, d_inv);
                 }
-                if (d_inv[newX, newY] < 2)// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
+                DirectedPosition dp = new DirectedPosition(currentX, currentY, currentFacing);
+                if (dp.Adjacent(width, height).Any(p => d_inv[p.x+1, p.y+1] == 333) )// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
                 {
-                    path.Add(new DirectedPosition(currentX, currentY, currentFacing));
+                    oldpos = new DirectedPosition(currentX, currentY, currentFacing);
+
+                    path.Add(dp);
                     break;
                 }
-                if (placing[newX, newY] == null)
+                else if (placing[newX, newY] == null)
                 {
-                    path.Add(new DirectedPosition(currentX, currentY, currentFacing));
+                    path.Add(dp);
                     isOverlapping = false;
                 }
                 
                 else if (active.speed - f > 1)
                 {
-                    d_inv[newX, newY] = wall;
-                    path.Add(new DirectedPosition(currentX, currentY, currentFacing));
+                    d_inv[newX, newY] = (d_inv[newX,newY] == 333) ? 333 : wall;
+                    path.Add(dp);
                     isOverlapping = true;
                 }
-
                 oldpos = new DirectedPosition(currentX, currentY, currentFacing);
-
             }
             while (placing[path.Last().x, path.Last().y] != null && path.Count > 0)
             {
@@ -848,6 +853,10 @@ MovementType.Immobile, MovementType.Immobile, MovementType.Immobile, MovementTyp
             }
             Colors[0] = 0;
             ReverseColors[0] = 0;
+            Colors[2] = 1;
+            ReverseColors[1] = 2;
+            Colors[1] = 4;
+            ReverseColors[4] = 1;
 
             for (int section = 0; section < 2; section++)
             {

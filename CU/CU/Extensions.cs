@@ -56,5 +56,50 @@ namespace CU
             }
             return units.RandomElement();
         }
-    }   
+    }
+    public class JUComparator<T> : java.util.Comparator
+    {
+        private readonly Func<T, T, int> _lambdaComparer;
+        private readonly Func<T, int> _lambdaHash;
+
+        public JUComparator(Func<T, T, int> lambdaComparer) :
+            this(lambdaComparer, EqualityComparer<T>.Default.GetHashCode)
+        {
+
+        }
+
+        public JUComparator(Func<T, T, int> lambdaComparer,
+            Func<T, int> lambdaHash)
+        {
+            if (lambdaComparer == null)
+                throw new ArgumentNullException("lambdaComparer");
+            if (lambdaHash == null)
+                throw new ArgumentNullException("lambdaHash");
+
+            _lambdaComparer = lambdaComparer;
+            _lambdaHash = lambdaHash;
+        }
+
+        public int compare(T x, T y)
+        {
+            return _lambdaComparer(x, y);
+        }
+        public int compare(object x, object y)
+        {
+            if (x.GetType() != typeof(T))
+                return Int32.MaxValue;
+            else if (y.GetType() != typeof(T))
+                return Int32.MaxValue;
+            else
+                return _lambdaComparer((T)x, (T)y);
+        }
+        public bool equals(object o)
+        {
+            return base.Equals(o);
+        }
+        public int GetHashCode(T obj)
+        {
+            return _lambdaHash(obj);
+        }
+    }
 }
