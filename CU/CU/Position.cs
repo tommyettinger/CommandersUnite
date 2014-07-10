@@ -50,11 +50,53 @@ namespace CU
             List<Position> l = new List<Position>();
             for (int i = (x - radius >= 0) ? x - radius : 0; i <= x + radius && i < width; i++)
             {
-                for (int j = (y - radius >= 0) ? y - radius : 0; j <= y + radius && y < height; j++)
+                for (int j = (y - radius >= 0) ? y - radius : 0; j <= y + radius && j < height; j++)
                 {
                     if (Math.Abs(i - x) + Math.Abs(j - y) > radius || (x == i && y == j))
                         continue;
-                    l.Add(new Position(i,j));
+                    l.Add(new Position(i, j));
+                }
+            }
+            return l;
+        }
+        public static List<Position> Nearby(int x, int y, int width, int height, int radius)
+        {
+            List<Position> l = new List<Position>();
+            for (int i = (x - radius >= 0) ? x - radius : 0; i <= x + radius && i < width; i++)
+            {
+                for (int j = (y - radius >= 0) ? y - radius : 0; j <= y + radius && j < height; j++)
+                {
+                    if (Math.Abs(i - x) + Math.Abs(j - y) > radius || (x == i && y == j))
+                        continue;
+                    l.Add(new Position(i, j));
+                }
+            }
+            return l;
+        }
+        public List<Position> WithinRange(int width, int height, int min, int max)
+        {
+            List<Position> l = new List<Position>();
+            for (int i = (x - max >= 0) ? x - max : 0; i <= x + max && i < width; i++)
+            {
+                for (int j = (y - max >= 0) ? y - max : 0; j <= y + max && j < height; j++)
+                {
+                    if (Math.Abs(i - x) + Math.Abs(j - y) < min || Math.Abs(i - x) + Math.Abs(j - y) > max || (x == i && y == j))
+                        continue;
+                    l.Add(new Position(i, j));
+                }
+            }
+            return l;
+        }
+        public static List<Position> WithinRange(int x, int y, int lowerX, int lowerY, int width, int height, int min, int max)
+        {
+            List<Position> l = new List<Position>();
+            for (int i = (x - max >= lowerX) ? x - max : lowerX; i <= x + max && i < width; i++)
+            {
+                for (int j = (y - max >= lowerY) ? y - max : lowerY; j <= y + max && j < height; j++)
+                {
+                    if (Math.Abs(i - x) + Math.Abs(j - y) < min || Math.Abs(i - x) + Math.Abs(j - y) > max || (x == i && y == j))
+                        continue;
+                    l.Add(new Position(i, j));
                 }
             }
             return l;

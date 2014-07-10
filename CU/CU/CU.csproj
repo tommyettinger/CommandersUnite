@@ -179,6 +179,9 @@
     <Content Include="libs\IKVM.Reflection.dll" />
     <Content Include="libs\IKVM.Runtime.dll" />
     <Content Include="libs\IKVM.Runtime.JNI.dll" />
+    <Content Include="Assets\PaletteDarkMod.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="spin_soft.png" />
   </ItemGroup>
   <ItemGroup>

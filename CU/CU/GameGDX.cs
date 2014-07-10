@@ -216,7 +216,7 @@ namespace CU
                     {
                         case HighlightType.Bright:
                             boldness = 1;
-                            highlighter += brain.ActiveUnit.color + 1;
+                            highlighter += brain.ActiveUnit.color + 1; //3 + ((brain.gradient[w + 1, h + 1]) % 6);
                             break;
                         case HighlightType.Dim:
                             boldness = 0;
