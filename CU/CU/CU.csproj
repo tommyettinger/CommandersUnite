@@ -145,6 +145,9 @@
     <Content Include="Assets\pack7.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\pack8.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\Palette.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -179,9 +182,7 @@
     <Content Include="libs\IKVM.Reflection.dll" />
     <Content Include="libs\IKVM.Runtime.dll" />
     <Content Include="libs\IKVM.Runtime.JNI.dll" />
-    <Content Include="Assets\PaletteDarkMod.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Assets\PaletteDarkMod.png" />
     <Content Include="spin_soft.png" />
   </ItemGroup>
   <ItemGroup>

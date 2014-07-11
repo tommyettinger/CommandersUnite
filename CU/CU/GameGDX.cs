@@ -24,9 +24,9 @@ namespace CU
         TextureRegion[,] terrains;
         TextureAtlas.AtlasRegion[][][][] units;
         Animation[][][] animations;
-        public static float stateTime, attackTime, explodeTime;
+        public static float stateTime, attackTime, explodeTime, receiveTime;
         TextureAtlas.AtlasRegion currentFrame;
-        public static float updateStep = 1 / 3F;
+        public static float updateStep = 0.33F;
         public ShaderProgram shader;
         private static Random r = new Random();
         public void create()
@@ -66,7 +66,8 @@ namespace CU
 
             units = new TextureAtlas.AtlasRegion[Unit.CurrentUnits.Length][][][];
             animations = new Animation[Unit.CurrentUnits.Length][][];
-
+            TextureAtlas.AtlasRegion clear = atlas.findRegion("clear");
+            TextureAtlas.AtlasRegion clearLarge = atlas.findRegion("clear_large");
             foreach (string name in Unit.CurrentUnits)
             {
                 units[Unit.UnitLookup[name]] = new TextureAtlas.AtlasRegion[4][][];
@@ -74,14 +75,14 @@ namespace CU
 
                 for (int dir = 0; dir < 4; dir++)
                 {
-                    units[Unit.UnitLookup[name]][dir] = new TextureAtlas.AtlasRegion[((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4)][];
-                    for (int j = 0; j < ((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4); j++)
+                    units[Unit.UnitLookup[name]][dir] = new TextureAtlas.AtlasRegion[((Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 6)][];
+                    for (int j = 0; j < ((Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 6); j++)
                     {
                         switch (j)
                         {
                             case 0:
-                                units[Unit.UnitLookup[name]][dir][j] = new TextureAtlas.AtlasRegion[(Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4];
-                                for (int k = 0; k < ((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4); k++)
+                                units[Unit.UnitLookup[name]][dir][j] = new TextureAtlas.AtlasRegion[(Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4];
+                                for (int k = 0; k < ((Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4); k++)
                                 {
                                     units[Unit.UnitLookup[name]][dir][j][k] = atlas.findRegion(name + "_face" + dir, k);
                                 }
@@ -92,13 +93,13 @@ namespace CU
                                 {
                                     units[Unit.UnitLookup[name]][dir][j][k] = atlas.findRegion(name + "_Explode_face" + dir, k);
                                 }
-                                units[Unit.UnitLookup[name]][dir][j][8] = atlas.findRegion("clear_large");
+                                units[Unit.UnitLookup[name]][dir][j][8] = clearLarge;
                                 break;
                             case 2:
-                                units[Unit.UnitLookup[name]][dir][j] = new TextureAtlas.AtlasRegion[(Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16];
-                                for (int k = 0; k < ((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16); k++)
+                                units[Unit.UnitLookup[name]][dir][j] = new TextureAtlas.AtlasRegion[(Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16];
+                                for (int k = 0; k < ((Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16); k++)
                                 {
-                                    if (Unit.Weapons[Unit.UnitLookup[name]][0] > -1)
+                                    if (Unit.WeaponDisplays[Unit.UnitLookup[name]][0] > -1)
                                     {
                                         units[Unit.UnitLookup[name]][dir][j][k] = atlas.findRegion(name + "_Attack_0_face" + dir, k);
                                     }
@@ -109,10 +110,10 @@ namespace CU
                                 }
                                 break;
                             case 3:
-                                units[Unit.UnitLookup[name]][dir][j] = new TextureAtlas.AtlasRegion[(Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16];
-                                for (int k = 0; k < ((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16); k++)
+                                units[Unit.UnitLookup[name]][dir][j] = new TextureAtlas.AtlasRegion[(Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16];
+                                for (int k = 0; k < ((Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16); k++)
                                 {
-                                    if (Unit.Weapons[Unit.UnitLookup[name]][1] > -1)
+                                    if (Unit.WeaponDisplays[Unit.UnitLookup[name]][1] > -1)
                                     {
                                         units[Unit.UnitLookup[name]][dir][j][k] = atlas.findRegion(name + "_Attack_1_face" + dir, k);
                                     }
@@ -122,27 +123,67 @@ namespace CU
                                     }
                                 }
                                 break;
+                            case 4:
+                                units[Unit.UnitLookup[name]][dir][j] = new TextureAtlas.AtlasRegion[(Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16];
+                                for (int k = 0; k < ((Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16); k++)
+                                {
+                                    if (Unit.WeaponDisplays[Unit.UnitLookup[name]][0] > -1)
+                                    {
+                                        units[Unit.UnitLookup[name]][dir][j][k] = atlas.findRegion(name + "_Receive_0_face" + dir, k);
+                                    }
+                                    else
+                                    {
+                                        units[Unit.UnitLookup[name]][dir][j][k] = clearLarge;
+                                    }
+                                }
+                                break;
+                            case 5:
+                                units[Unit.UnitLookup[name]][dir][j] = new TextureAtlas.AtlasRegion[(Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16];
+                                for (int k = 0; k < ((Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 16); k++)
+                                {
+                                    if (Unit.WeaponDisplays[Unit.UnitLookup[name]][1] > -1)
+                                    {
+                                        units[Unit.UnitLookup[name]][dir][j][k] = atlas.findRegion(name + "_Receive_1_face" + dir, k);
+                                    }
+                                    else
+                                    {
+                                        units[Unit.UnitLookup[name]][dir][j][k] = clearLarge;
+                                    }
+                                }
+                                break;
                         }
                     }
-                    animations[Unit.UnitLookup[name]][dir] = new Animation[4];
-                    for (int j = 0; j < ((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 4); j++)
+                    animations[Unit.UnitLookup[name]][dir] = new Animation[((Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 6)];
+                    for (int j = 0; j < ((Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 2 : 6); j++)
                     {
                         switch (j)
                         {
-                            case 0: animations[Unit.UnitLookup[name]][dir][j] = new Animation(((Unit.CurrentMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 0.4F : 0.15F),
+                            case 0: animations[Unit.UnitLookup[name]][dir][j] = new Animation(((Unit.AllMobilities[Unit.UnitLookup[name]] == MovementType.Immobile) ? 0.4F : 0.15F),
                             units[Unit.UnitLookup[name]][dir][j]);
                                 break;
                             case 1: animations[Unit.UnitLookup[name]][dir][j] = new Animation(0.11F,
                                     units[Unit.UnitLookup[name]][dir][j]);
 //                                units[Unit.UnitLookup[name]][i][j].Concat(new TextureRegion[] {units[Unit.UnitLookup[name]][i][j][7],  }).ToArray());
                                 break;
-                            case 2: if (Unit.Weapons[Unit.UnitLookup[name]][0] > -1)
+                            case 2: if (Unit.WeaponDisplays[Unit.UnitLookup[name]][0] > -1)
                                 {
                                     animations[Unit.UnitLookup[name]][dir][j] = new Animation(0.11F,
                                         units[Unit.UnitLookup[name]][dir][j]);
                                 }
                                 break;
-                            case 3: if (Unit.Weapons[Unit.UnitLookup[name]][1] > -1)
+                            case 3: if (Unit.WeaponDisplays[Unit.UnitLookup[name]][1] > -1)
+                                {
+                                    animations[Unit.UnitLookup[name]][dir][j] = new Animation(0.11F,
+                                        units[Unit.UnitLookup[name]][dir][j]);
+                                }
+                                break;
+                            case 4: if (Unit.WeaponDisplays[Unit.UnitLookup[name]][0] > -1)
+                                {
+                                    animations[Unit.UnitLookup[name]][dir][j] = new Animation(0.11F,
+                                        units[Unit.UnitLookup[name]][dir][j]);
+                                }
+                                break;
+                            case 5: if (Unit.WeaponDisplays[Unit.UnitLookup[name]][1] > -1)
                                 {
                                     animations[Unit.UnitLookup[name]][dir][j] = new Animation(0.11F,
                                         units[Unit.UnitLookup[name]][dir][j]);
@@ -163,6 +204,7 @@ namespace CU
             stateTime = 0;
             attackTime = 0;
             explodeTime = 0;
+            receiveTime = 0;
             Timer.instance().scheduleTask(new NilTask(brain.ProcessStep), 0F, updateStep);
         }
 
@@ -176,6 +218,7 @@ namespace CU
             stateTime += Gdx.graphics.getDeltaTime();
             attackTime += Gdx.graphics.getDeltaTime();
             explodeTime += Gdx.graphics.getDeltaTime();
+            receiveTime += Gdx.graphics.getDeltaTime();
             //            fastTime += Gdx.graphics.getDeltaTime() * 1.5F;
 
             batch.setProjectionMatrix(camera.combined);
@@ -261,7 +304,7 @@ namespace CU
                                 batch.draw(currentFrame, (int)(brain.UnitGrid[w, h].worldX - 80) + currentFrame.offsetX, (int)(brain.UnitGrid[w, h].worldY - 40) + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                                 break;
                             case VisualAction.Firing:
-                                if (Unit.Weapons[brain.UnitGrid[w, h].unitIndex][0] > -1)
+                                if (Unit.WeaponDisplays[brain.UnitGrid[w, h].unitIndex][0] > -1)
                                 {
                                     currentFrame = (TextureAtlas.AtlasRegion)animations[brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber][2].getKeyFrame(attackTime, false);
                                     batch.draw(currentFrame, (int)(brain.UnitGrid[w, h].worldX - 80) + currentFrame.offsetX, (int)(brain.UnitGrid[w, h].worldY - 40) + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
@@ -279,6 +322,17 @@ namespace CU
                         faction.r = (brain.ActiveUnit.color+1) / 32.0F;
                         batch.setColor(faction);
                         //[brain.ReverseColors[brain.ActiveUnit.color]]
+                        foreach(DirectedPosition dp in brain.ActiveUnit.targetingAbove)
+                        {
+                            if (brain.currentlyFiring > -1)
+                            {
+
+                                int tx = 20 - 80 + dp.x * 64 + dp.y * 64;
+                                int ty = 6 - 40 + dp.x * 32 - dp.y * 32;
+                                currentFrame = (TextureAtlas.AtlasRegion)animations[brain.ActiveUnit.unitIndex][Logic.ConvertDirection(dp.dir)][4 + brain.currentlyFiring].getKeyFrame(receiveTime, false);
+                                batch.draw(currentFrame, tx + currentFrame.offsetX, ty + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[dp.x, dp.y]] * 3);
+                            }
+                        }
                         switch (brain.ActiveUnit.visual)
                         {
                             case VisualAction.Normal:
@@ -290,14 +344,9 @@ namespace CU
                                 batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX - 80) + currentFrame.offsetX, (int)(brain.ActiveUnit.worldY - 40) + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                                 break;
                             case VisualAction.Firing:
-                                if (Unit.Weapons[brain.ActiveUnit.unitIndex][1] > -1)
+                                if (brain.currentlyFiring > -1)
                                 {
-                                    currentFrame = (TextureAtlas.AtlasRegion)animations[brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber][3].getKeyFrame(attackTime, false);
-                                    batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX - 80) + currentFrame.offsetX, (int)(brain.ActiveUnit.worldY - 40) + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
-                                }
-                                else if (Unit.Weapons[brain.ActiveUnit.unitIndex][0] > -1)
-                                {
-                                    currentFrame = (TextureAtlas.AtlasRegion)animations[brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber][2].getKeyFrame(attackTime, false);
+                                    currentFrame = (TextureAtlas.AtlasRegion)animations[brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber][2+brain.currentlyFiring].getKeyFrame(attackTime, false);
                                     batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX - 80) + currentFrame.offsetX, (int)(brain.ActiveUnit.worldY - 40) + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                                 }
                                 else
@@ -306,6 +355,17 @@ namespace CU
                                     batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX) + currentFrame.offsetX, (int)(brain.ActiveUnit.worldY) + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                                 }
                                 break;
+                        }
+                        foreach (DirectedPosition dp in brain.ActiveUnit.targetingBelow)
+                        {
+                            if (brain.currentlyFiring > -1)
+                            {
+
+                                int tx = 20 - 80 + dp.x * 64 + dp.y * 64;
+                                int ty = 6 - 40 + dp.x * 32 - dp.y * 32;
+                                currentFrame = (TextureAtlas.AtlasRegion)animations[brain.ActiveUnit.unitIndex][Logic.ConvertDirection(dp.dir)][4 + brain.currentlyFiring].getKeyFrame(receiveTime, false);
+                                batch.draw(currentFrame, tx + currentFrame.offsetX, ty + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[dp.x, dp.y]] * 3);
+                            }
                         }
                     }
                 }
