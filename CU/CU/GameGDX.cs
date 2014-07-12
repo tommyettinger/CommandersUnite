@@ -403,6 +403,7 @@ namespace CU
         }
         public void dispose()
         {
+            brain.dispose();
             Timer.instance().kill();
             batch.dispose();
             atlas.dispose();
