@@ -71,19 +71,19 @@ namespace CU
                 {
                     if (Math.Abs(i - x) + Math.Abs(j - y) < min || Math.Abs(i - x) + Math.Abs(j - y) > max || (x == i && y == j))
                         continue;
-                    else if (i - x < j - y && (i - x) * -1 <= j - y)
+                    else if (i - x <= j - y && (i - x) * -1 <= j - y)
                     {
                         l.Add(new DirectedPosition(i, j, Direction.NW));
                     }
-                    else if ((i - x) * -1 <= j - y && i - x > j - y)
+                    else if ((i - x) * -1 <= j - y && i - x >= j - y)
                     {
                         l.Add(new DirectedPosition(i, j, Direction.SW));
                     }
-                    else if (i - x > j - y && (i - x) * -1 >= j - y)
+                    else if (i - x >= j - y && (i - x) * -1 >= j - y)
                     {
                         l.Add(new DirectedPosition(i, j, Direction.SE));
                     }
-                    else if ((i - x) * -1 >= j - y && i - x < j - y)
+                    else if ((i - x) * -1 >= j - y && i - x <= j - y)
                     {
                         l.Add(new DirectedPosition(i, j, Direction.NE));
                     }
@@ -178,7 +178,7 @@ namespace CU
         public Weapon[] weaponry;
         public UnitType kind;
 
-        public List<DirectedPosition> targetingAbove, targetingBelow;
+        public List<DirectedPosition> targeting;
         public VisualAction visual;
         public int x;
         public int y;
@@ -227,7 +227,7 @@ new Weapon[]{new Weapon(WeaponType.LightGun, 10, new float[]{1, 0.5f, 0.5f, 0, 0
 new Weapon[]{new Weapon(WeaponType.None, 0, new float[]{0, 0, 0, 0, 0}, ""), new Weapon(WeaponType.Cannon, 13, new float[]{1, 2, 2, 0, 0}, "Indirect", 2, 4), },
 new Weapon[]{new Weapon(WeaponType.Cannon, 16, new float[]{1, 2, 2, 0, 0}, "Indirect", 1, 3), new Weapon(WeaponType.None, 0, new float[]{0, 0, 0, 0, 0}, ""), },
 new Weapon[]{new Weapon(WeaponType.None, 0, new float[]{0, 0, 0, 0, 0}, ""), new Weapon(WeaponType.Missile, 13, new float[]{0, 0.5f, 0.5f, 2, 2}, "Indirect", 2, 6), },
-new Weapon[]{new Weapon(WeaponType.None, 0, new float[]{0, 0, 0, 0, 0}, ""), new Weapon(WeaponType.Missile, 19, new float[]{1, 2, 2, 0, 0}, "Indirect", 3, 7), },
+new Weapon[]{new Weapon(WeaponType.None, 0, new float[]{0, 0, 0, 0, 0}, ""), new Weapon(WeaponType.Missile, 19, new float[]{1, 2, 2, 0, 0}, "Indirect", 3, 6), },
 
 new Weapon[]{new Weapon(WeaponType.Cannon, 16, new float[]{0.5f, 2, 2, 0, 0}, ""), new Weapon(WeaponType.LightGun, 13, new float[]{1.5f, 1, 1, 0, 1}, ""), },
 new Weapon[]{new Weapon(WeaponType.Cannon, 19, new float[]{0.5f, 2, 2, 0, 0}, ""), new Weapon(WeaponType.HeavyGun, 16, new float[]{0.5f, 1, 1, 0, 1.5f}, ""), },
@@ -297,7 +297,7 @@ new Weapon[]{new Weapon(WeaponType.None, 0, new float[]{0, 0, 0, 0, 0}, ""), new
 70, 80, 70, 70, 90, 90};
         public static MovementType[] AllMobilities = {
 MovementType.Foot, MovementType.Foot, MovementType.WheelsTraverse, MovementType.Foot,
-MovementType.Treads, MovementType.Treads, MovementType.Treads, MovementType.Wheels,
+MovementType.Treads, MovementType.Treads, MovementType.Treads, MovementType.WheelsTraverse,
 MovementType.Treads, MovementType.Treads, MovementType.Treads, MovementType.TreadsAmphi,
 MovementType.Flight, MovementType.Flight, MovementType.Flight, MovementType.FlightFlyby,
 MovementType.Wheels, MovementType.Treads, MovementType.TreadsAmphi, MovementType.Wheels,
@@ -417,8 +417,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             y = u.y;
             worldX = 20 + x * 64 + y * 64;
             worldY = 6 + x * 32 - y * 32;
-            targetingAbove = new List<DirectedPosition>();
-            targetingBelow = new List<DirectedPosition>();
+            targeting = new List<DirectedPosition>();
             visual = VisualAction.Normal;
         }
         public Unit(int unit, int color, int x, int y)
@@ -541,6 +540,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
     }
     public class Logic
     {
+        public static StringBuilder log = new StringBuilder();
         public Mode CurrentMode;
         public LocalMap FieldMap;
         public Unit[,] UnitGrid;
@@ -750,13 +750,17 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         }
                         if (weapon.minRange > 1)
                         {
+                            //d[i, j] = wall;
+                            //closed[new Position(i, j)] = wall;
                             int avoidance = weapon.minRange -1;
-                            for (int a = avoidance; a > 0; a-- )
+                            for (int a = 1; a < avoidance; a++)
+                            {
                                 foreach (Position p in Position.Nearby(i, j, width, height, a))
                                 {
-                                    d[p.x, p.y] += (d[p.x, p.y] == wall) ? 0 : 100;
-                                    closed[p] = d[p.x, p.y];
+                                    //d[p.x, p.y] = (d[p.x, p.y] == wall) ? wall : 2 * (avoidance - a);
+                                    //closed[p] = d[p.x, p.y];
                                 }
+                            }
                         }
                     }
                     else if (d[i, j] >= wall)
@@ -829,12 +833,17 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             }*/
             return d;
         }
-
+        public static void writeShowLog(string text)
+        {
+            log.Append (text + "\n");
+            Console.WriteLine(text);
+        }
         List<Position> bestMoves = new List<Position>();
+        Position best = null;
         float[,] ViableMoves(Unit self, int currentWeapon, int[,] grid, Unit[,] placing)
         {
-            Gdx.app.log("CommandersUnite", "Unit is at: " + self.x + ", " + self.y);
-            Gdx.app.log("CommandersUnite", "Moves are: ");
+            writeShowLog("\n" + "* * " + self.name + " * *");
+            writeShowLog("Unit is at: " + self.x + ", " + self.y);
             gradient = SmartDijkstra(self, currentWeapon, grid, placing, ((self.color == 0) ? new int[] { 1, 2, 3, 4, 5, 6, 7 } : new int[] { 0 }));
             /*for (int i = 0; i < 25; i++)
             {
@@ -854,7 +863,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             int goal = 0;
             float unexplored = 1111;
 
-            List<Position> best = new List<Position> { new Position(self.x, self.y) };
+            bestMoves = new List<Position> { new Position(self.x, self.y) };
             Dictionary<Position, float>
                 open = new Dictionary<Position, float> { { new Position(self.x + 1, self.y + 1), goal } },
                 fringe = new Dictionary<Position, float>(),
@@ -1023,7 +1032,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             }
             else
             {
-                while (open.Count > 0 && furthest <= self.speed)
+                while (open.Count > 0 && furthest < self.speed)
                 {
                     foreach (var idx_dijk in open)
                     {
@@ -1044,11 +1053,12 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                                 radiate[mov.x, mov.y] = idx_dijk.Value + 1;
                                 if (gradient[mov.x, mov.y] < lowest)
                                 {
-                                    best.Clear();
-                                    best.Add(new Position { x = mov.x - 1, y = mov.y - 1 });
+                                    bestMoves.Clear();
+                                    bestMoves.Add(new Position { x = mov.x - 1, y = mov.y - 1 });
                                     lowest = gradient[mov.x, mov.y];
-                                    furthest = idx_dijk.Value + 1;
                                 }
+                                //furthest = Math.Max(idx_dijk.Value + 1, furthest);
+
                                 //else if (d[mov.x, mov.y] == lowest)
                                 //{
                                 //    best.Add(new Position { x = mov.x - 1, y = mov.y - 1 });
@@ -1065,6 +1075,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                             {
                                 radiate[mov.x, mov.y] = idx_dijk.Value + 1;
                                 fringe[mov] = (idx_dijk.Value + 1);
+                                //furthest = Math.Max(idx_dijk.Value + 1, furthest);
                             }
                     }
                     foreach (var kv in open)
@@ -1077,6 +1088,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         open[kv.Key] = (kv.Value);
                     }
                     fringe.Clear();
+                    furthest++;
                 }
             }
             for (int i = 0; i < width; i++)
@@ -1087,7 +1099,6 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         radiate[i, j] = wall;
                 }
             }
-            bestMoves = best;
 
             return radiate;
         }
@@ -1426,25 +1437,25 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             Direction currentFacing = active.facing;
             Position newpos = new Position(currentX, currentY);
             float[,] rad = new float[width + 2, height + 2], rad0 = new float[width + 2, height + 2], rad1 = new float[width + 2, height + 2];
-            Position best, best0 = null, best1 = null;
+            Position best0 = null, best1 = null;
             List<Position> bests0 = new List<Position>(), bests1 = new List<Position>();
             float choice = 1111;
-            if (active.weaponry[0].kind != WeaponType.None)
-            {
-                rad0 = ViableMoves(active, 0, grid, placing);
-                bests0 = bestMoves;
-                best0 = bests0.RandomElement();
-                choice = rad0[best0.x + 1, best0.y + 1];
-            }
             if (active.weaponry[1].kind != WeaponType.None)
             {
                 rad1 = ViableMoves(active, 1, grid, placing);
                 bests1 = bestMoves;
                 best1 = bests1.RandomElement();
-                choice = (choice == 2222) ? 0 : (best0 != null && rad1[best1.x + 1, best1.y + 1] > rad0[best0.x + 1, best0.y + 1]) ? 0 : 1;
+                choice = rad1[best1.x + 1, best1.y + 1];
+            }
+            if (active.weaponry[0].kind != WeaponType.None)
+            {
+                rad0 = ViableMoves(active, 0, grid, placing);
+                bests0 = bestMoves;
+                best0 = bests0.RandomElement();
+                choice = (choice == 2222) ? 1 : (best1 != null && rad1[best1.x + 1, best1.y + 1] > rad0[best0.x + 1, best0.y + 1]) ? 1 : 0;
             }
             else
-                choice = (active.weaponry[0].kind == WeaponType.None) ? -1 : 0;
+                choice = (active.weaponry[1].kind == WeaponType.None) ? -1 : 1;
             switch ((int)choice)
             {
                 case -1: bestMoves = new List<Position> { new Position { x = active.x, y = active.y } }; currentlyFiring = -1; break;
@@ -1452,20 +1463,27 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                 case 1: bestMoves = bests1; rad = rad1; currentlyFiring = 1; break;
             }
             best = bestMoves.RandomElement();
+            if (currentlyFiring > -1)
+            {
+                target = DirectedPosition.WithinRange(best.x, best.y, 0, 0, width, height,
+                                active.weaponry[currentlyFiring].minRange, active.weaponry[currentlyFiring].maxRange).Where(pos => UnitGrid[pos.x, pos.y] != null && active.isOpposed(UnitGrid[pos.x, pos.y])).RandomElement();
+            }
+            else target = null;
             /*if (best.x == active.x && best.y == active.y)// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
             {
                 return new List<DirectedPosition> { }; //new DirectedPosition {x=active.x, y=active.y, dir= active.facing }
             }*/
-            Gdx.app.log("CommandersUnite", "Best is: " + best.x + ", " + best.y);
-            Gdx.app.log("CommandersUnite", "Distance is: " + (rad[best.x+1, best.y+1]));
+            writeShowLog("Choice is: " + choice);
+            writeShowLog("Best is: " + best.x + ", " + best.y);
+            writeShowLog("Distance is: " + (rad[best.x + 1, best.y + 1]));
             /*
             foreach (Position p in bestMoves)
             {
-                Gdx.app.log("CommandersUnite", "    " + p.x + ", " + p.y + " with an occupant of " + ((placing[p.x, p.y] != null) ? placing[p.x, p.y].name : "EMPTY"));
+                writeShowLog("    " + p.x + ", " + p.y + " with an occupant of " + ((placing[p.x, p.y] != null) ? placing[p.x, p.y].name : "EMPTY"));
             }*/
             DirectedPosition oldpos = new DirectedPosition(best.x, best.y);
             path.Add(new DirectedPosition(best.x, best.y));
-            for (int f = 0; f <= active.speed; f++)
+            for (int f = 0; f < active.speed; f++)
             {
                 Dictionary<Position, float> near = new Dictionary<Position, float>() { { oldpos, rad[oldpos.x + 1, oldpos.y + 1] } };
                 foreach (Position pos in oldpos.Adjacent(width, height))
@@ -1657,9 +1675,9 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
                         if (r.Next(25) <= 2)
                         {
-                            //if(Unit.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.Wheels))
-                            //    UnitGrid[i, j] = new Unit(Unit.UnitLookup["Artillery"], Colors[section], section, i, j);
-                            //else
+                           // if(Unit.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.WheelsTraverse))
+                           //     UnitGrid[i, j] = new Unit(Unit.UnitLookup["Artillery_T"], Colors[section], section, i, j);
+                           // else
                                 UnitGrid[i, j] = new Unit(currentUnit, Colors[section], section, i, j);
                         }
 
@@ -1710,6 +1728,9 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
         private Thread thr = null;
         public void dispose()
         {
+#if DEBUG
+            File.WriteAllText("log.txt", log.ToString());
+#endif
             if (thr != null)
                 thr.Abort();
         }
@@ -1750,7 +1771,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         {
                             for (int j = 0; j < height; j++)
                             {
-                                FieldMap.Highlight[i, j] = (d[i + 1, j + 1] > 0 && d[i + 1, j + 1] <= ActiveUnit.speed) ? HighlightType.Bright : HighlightType.Plain;
+                                FieldMap.Highlight[i, j] = (d[i + 1, j + 1] > 0 && d[i + 1, j + 1] < ActiveUnit.speed) ? HighlightType.Bright : HighlightType.Plain;
                             }
                         }
                         FieldMap.Highlight[ActiveUnit.x, ActiveUnit.y] = HighlightType.Spectrum;
@@ -1760,12 +1781,15 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                     ActiveUnit.x = FuturePosition.x;
                     ActiveUnit.y = FuturePosition.y;
                     if (BestPath.Count <= 0 || TaskSteps > ActiveUnit.speed + 1)
-                    {
-                        if (false == (ActiveUnit.weaponry[0].kind == WeaponType.None && ActiveUnit.weaponry[1].kind == WeaponType.None) &&
+                    { //false == (ActiveUnit.weaponry[0].kind == WeaponType.None && ActiveUnit.weaponry[1].kind == WeaponType.None)
+                        /*
+                         
                             (Position.WithinRange(ActiveUnit.x, ActiveUnit.y,
                         ActiveUnit.weaponry[currentlyFiring].minRange, ActiveUnit.weaponry[currentlyFiring].minRange, width, height,
                         ActiveUnit.weaponry[currentlyFiring].maxRange, ActiveUnit.weaponry[currentlyFiring].maxRange).Any(
-                        pos => UnitGrid[pos.x, pos.y] != null && ActiveUnit.isOpposed(UnitGrid[pos.x, pos.y]))))
+                        pos => UnitGrid[pos.x, pos.y] != null && ActiveUnit.isOpposed(UnitGrid[pos.x, pos.y])))
+                         */
+                        if (currentlyFiring > -1 && target != null && UnitGrid[target.x, target.y] != null && ActiveUnit.isOpposed(UnitGrid[target.x, target.y]))
                         {
                             ActiveUnit.worldX = 20 + ActiveUnit.x * 64 + ActiveUnit.y * 64;
                             ActiveUnit.worldY = 6 + ActiveUnit.x * 32 - ActiveUnit.y * 32;
@@ -1806,10 +1830,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                 case Mode.Attacking:
                     if (TaskSteps <= 1)
                     {
-                        target = DirectedPosition.WithinRange(ActiveUnit.x, ActiveUnit.y, 0, 0, width, height,
-                            ActiveUnit.weaponry[currentlyFiring].minRange, ActiveUnit.weaponry[currentlyFiring].maxRange).Where(pos => UnitGrid[pos.x, pos.y] != null && ActiveUnit.isOpposed(UnitGrid[pos.x, pos.y])).RandomElement();
-
-                        if (target.x - ActiveUnit.x < target.y - ActiveUnit.y && (target.x - ActiveUnit.x) * -1 <= target.y - ActiveUnit.y)
+                        if (target.x - ActiveUnit.x <= target.y - ActiveUnit.y && (target.x - ActiveUnit.x) * -1 <= target.y - ActiveUnit.y)
                         {
                             ActiveUnit.facing = Direction.SE;
                             ActiveUnit.facingNumber = 0;
@@ -1819,7 +1840,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                                 UnitGrid[target.x, target.y].facingNumber = 2;
                             }
                         }
-                        else if ((target.x - ActiveUnit.x) * -1 <= target.y - ActiveUnit.y && target.x - ActiveUnit.x > target.y - ActiveUnit.y)
+                        else if ((target.x - ActiveUnit.x) * -1 <= target.y - ActiveUnit.y && target.x - ActiveUnit.x >= target.y - ActiveUnit.y)
                         {
                             ActiveUnit.facing = Direction.NE;
                             ActiveUnit.facingNumber = 3;
@@ -1829,7 +1850,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                                 UnitGrid[target.x, target.y].facingNumber = 1;
                             }
                         }
-                        else if (target.x - ActiveUnit.x > target.y - ActiveUnit.y && (target.x - ActiveUnit.x) * -1 >= target.y - ActiveUnit.y)
+                        else if (target.x - ActiveUnit.x >= target.y - ActiveUnit.y && (target.x - ActiveUnit.x) * -1 >= target.y - ActiveUnit.y)
                         {
                             ActiveUnit.facing = Direction.NW;
                             ActiveUnit.facingNumber = 2;
@@ -1839,7 +1860,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                                 UnitGrid[target.x, target.y].facingNumber = 0;
                             }
                         }
-                        else if ((target.x - ActiveUnit.x) * -1 >= target.y - ActiveUnit.y && target.x - ActiveUnit.x < target.y - ActiveUnit.y)
+                        else if ((target.x - ActiveUnit.x) * -1 >= target.y - ActiveUnit.y && target.x - ActiveUnit.x <= target.y - ActiveUnit.y)
                         {
                             ActiveUnit.facing = Direction.SW;
                             ActiveUnit.facingNumber = 1;
@@ -1906,16 +1927,9 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         int w = ((row < width) ? width - 1 - row + col : col); //height + (width - 1 - row) + 
                         int h = (row < width) ? col : row - width + col;
                              */
-                            if (target.x + target.y <= ActiveUnit.x - ActiveUnit.y)
-                            {
-                                ActiveUnit.targetingAbove = new List<DirectedPosition> { new DirectedPosition(target.x, target.y, target.dir) };
-                                ActiveUnit.targetingBelow = new List<DirectedPosition> { };
-                            }
-                            else
-                            {
-                                ActiveUnit.targetingAbove = new List<DirectedPosition> { };
-                                ActiveUnit.targetingBelow = new List<DirectedPosition> { new DirectedPosition(target.x, target.y, target.dir) };
-                            }
+                            
+                                ActiveUnit.targeting = new List<DirectedPosition> { new DirectedPosition(target.x, target.y, target.dir) };
+                            
                         }
                         if (!hitSuccess && UnitGrid[target.x, target.y].speed > 0)
                         {

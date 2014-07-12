@@ -316,15 +316,10 @@ namespace CU
                                 }
                                 break;
                         }
-                    }
-                    if (brain.ActiveUnit.x == w && brain.ActiveUnit.y == h)
-                    {
-                        faction.r = (brain.ActiveUnit.color+1) / 32.0F;
-                        batch.setColor(faction);
-                        //[brain.ReverseColors[brain.ActiveUnit.color]]
-                        foreach(DirectedPosition dp in brain.ActiveUnit.targetingAbove)
+
+                        foreach (DirectedPosition dp in brain.ActiveUnit.targeting)
                         {
-                            if (brain.currentlyFiring > -1)
+                            if (brain.currentlyFiring > -1 && dp.x == w && dp.y == h)
                             {
 
                                 int tx = 20 - 80 + dp.x * 64 + dp.y * 64;
@@ -333,6 +328,13 @@ namespace CU
                                 batch.draw(currentFrame, tx + currentFrame.offsetX, ty + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[dp.x, dp.y]] * 3);
                             }
                         }
+                    }
+                    if (brain.ActiveUnit.x == w && brain.ActiveUnit.y == h)
+                    {
+                        faction.r = (brain.ActiveUnit.color+1) / 32.0F;
+                        batch.setColor(faction);
+                        //[brain.ReverseColors[brain.ActiveUnit.color]]
+                        
                         switch (brain.ActiveUnit.visual)
                         {
                             case VisualAction.Normal:
@@ -355,17 +357,6 @@ namespace CU
                                     batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX) + currentFrame.offsetX, (int)(brain.ActiveUnit.worldY) + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                                 }
                                 break;
-                        }
-                        foreach (DirectedPosition dp in brain.ActiveUnit.targetingBelow)
-                        {
-                            if (brain.currentlyFiring > -1)
-                            {
-
-                                int tx = 20 - 80 + dp.x * 64 + dp.y * 64;
-                                int ty = 6 - 40 + dp.x * 32 - dp.y * 32;
-                                currentFrame = (TextureAtlas.AtlasRegion)animations[brain.ActiveUnit.unitIndex][Logic.ConvertDirection(dp.dir)][4 + brain.currentlyFiring].getKeyFrame(receiveTime, false);
-                                batch.draw(currentFrame, tx + currentFrame.offsetX, ty + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[dp.x, dp.y]] * 3);
-                            }
                         }
                     }
                 }
