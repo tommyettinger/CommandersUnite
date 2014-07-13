@@ -81,6 +81,31 @@ namespace CU
             }
             return arr;
         }
+        public static Dictionary<K, V> Clone<K, V>(this Dictionary<K, V> dict)
+            where K : ICloneable
+            where V : ICloneable
+        {
+            if (dict.Count == 0)
+                return new Dictionary<K,V>();
+            Dictionary<K, V> ret = new Dictionary<K, V>(dict.Count);
+            foreach (KeyValuePair<K, V> kv in dict)
+            {
+                ret.Add((K)(kv.Key.Clone()), (V)(kv.Value.Clone()));
+            }
+            return ret;
+        }
+        public static List<T> Clone<T>(this List<T> list)
+            where T : ICloneable
+        {
+            if (list.Count == 0)
+                return new List<T>();
+            List<T> ret = new List<T>(list.Count);
+            foreach (T elem in list)
+            {
+                ret.Add((T)(elem.Clone()));
+            }
+            return ret;
+        }
     }
     public class JUComparator<T> : java.util.Comparator
     {

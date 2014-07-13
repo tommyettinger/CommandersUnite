@@ -93,6 +93,92 @@ namespace CU
             }
             return l;
         }
+        public static DirectedPosition TurnToFace(Position targetToFace, Position turner)
+        {
+            DirectedPosition dp = null;
+            int startx = targetToFace.x, starty = targetToFace.y, endx = turner.x, endy = turner.y;
+                    if (endx - startx <= endy - starty && (endx - startx) * -1 <= endy - starty)
+                    {
+                        dp=(new DirectedPosition(endx, endy, Direction.NW));
+                    }
+                    else if ((endx - startx) * -1 <= endy - starty && endx - startx >= endy - starty)
+                    {
+                        dp=(new DirectedPosition(endx, endy, Direction.SW));
+                    }
+                    else if (endx - startx >= endy - starty && (endx - startx) * -1 >= endy - starty)
+                    {
+                        dp=(new DirectedPosition(endx, endy, Direction.SE));
+                    }
+                    else if ((endx - startx) * -1 >= endy - starty && endx - startx <= endy - starty)
+                    {
+                        dp=(new DirectedPosition(endx, endy, Direction.NE));
+                    }
+                    else
+                        dp=(new DirectedPosition(endx, endy));
+             
+            return dp;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as DirectedPosition);
+        }
+
+        public bool Equals(DirectedPosition p)
+        {
+            // If parameter is null, return false. 
+            if (Object.ReferenceEquals(p, null))
+            {
+                return false;
+            }
+
+            // Optimization for a common success case. 
+            if (Object.ReferenceEquals(this, p))
+            {
+                return true;
+            }
+
+            // If run-time types are not exactly the same, return false. 
+            if (this.GetType() != p.GetType())
+                return false;
+
+            // Return true if the fields match. 
+            // Note that the base class is not invoked because it is 
+            // System.Object, which defines Equals as reference equality. 
+            return (x == p.x) && (y == p.y) && (dir == p.dir);
+        }
+
+        public override int GetHashCode()
+        {
+            return x * 0x00100000 + y * 0x100 + Logic.ConvertDirection(dir);
+        }
+
+        public static bool operator ==(DirectedPosition lhs, DirectedPosition rhs)
+        {
+            // Check for null on left side. 
+            if (Object.ReferenceEquals(lhs, null))
+            {
+                if (Object.ReferenceEquals(rhs, null))
+                {
+                    // null == null = true. 
+                    return true;
+                }
+
+                // Only the left side is null. 
+                return false;
+            }
+            // Equals handles case of null on right side. 
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(DirectedPosition lhs, DirectedPosition rhs)
+        {
+            return !(lhs == rhs);
+        }
+        public new Object Clone()
+        {
+            return new DirectedPosition(x, y, dir);
+        }
     }
     public enum UnitType
     {
@@ -732,22 +818,27 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             };
                     break;
             }
-
-
+            movesToTargets.Clear();
             for (int i = 1; i < width - 1; i++)
             {
                 for (int j = 1; j < height - 1; j++)
                 {
                     if (targetColors.Any(c => placing[i - 1, j - 1] != null && c == placing[i - 1, j - 1].color))
                     {
-                        foreach (Position p in Position.WithinRange(i, j, 1, 1, width - 1, height - 1, weapon.minRange, weapon.maxRange))
+                        if (weapon.multipliers[Unit.UnitTypeAsNumber(placing[i - 1, j - 1].kind)] > 0)
                         {
-                            if (ability[grid[p.x - 1, p.y - 1]] == 1 && placing[p.x - 1, p.y - 1] == null)
+                            Position tgt = new Position(i - 1, j - 1);
+                            foreach (Position p in Position.WithinRange(i, j, 1, 1, width - 1, height - 1, weapon.minRange, weapon.maxRange))
                             {
-                                d[p.x, p.y] = goal;
-                                open[p] = goal;
+                                if (ability[grid[p.x - 1, p.y - 1]] == 1 && placing[p.x - 1, p.y - 1] == null)
+                                {
+                                    d[p.x, p.y] = goal;
+                                    open[p] = goal;
+                                    movesToTargets[new Position(p.x - 1, p.y - 1)] = tgt;
+                                }
                             }
                         }
+                        /*
                         if (weapon.minRange > 1)
                         {
                             //d[i, j] = wall;
@@ -761,7 +852,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                                     //closed[p] = d[p.x, p.y];
                                 }
                             }
-                        }
+                        }*/
                     }
                     else if (d[i, j] >= wall)
                     {
@@ -835,10 +926,13 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
         }
         public static void writeShowLog(string text)
         {
+#if DEBUG
             log.Append (text + "\n");
             Console.WriteLine(text);
+#endif
         }
         List<Position> bestMoves = new List<Position>();
+        Dictionary<Position, Position> movesToTargets = new Dictionary<Position, Position>();
         Position best = null;
         float[,] ViableMoves(Unit self, int currentWeapon, int[,] grid, Unit[,] placing)
         {
@@ -894,7 +988,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             {
                 for (int j = 0; j < height; j++)
                 {
-                    if (radiate[i, j] >= wall)
+                    if (radiate[i, j] >= wall)// || gradient[i,j] >= wall)
                     {
                         closed[new Position(i, j)] = wall;
                     }
@@ -1057,17 +1151,15 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                                     bestMoves.Add(new Position { x = mov.x - 1, y = mov.y - 1 });
                                     lowest = gradient[mov.x, mov.y];
                                 }
-                                //furthest = Math.Max(idx_dijk.Value + 1, furthest);
-
-                                //else if (d[mov.x, mov.y] == lowest)
-                                //{
-                                //    best.Add(new Position { x = mov.x - 1, y = mov.y - 1 });
-                                //}
+                                else if (gradient[mov.x, mov.y] == lowest)
+                                {
+                                    bestMoves.Add(new Position { x = mov.x - 1, y = mov.y - 1 });
+                                }
                             }
                             else if (
                             ability[grid[mov.x - 1, mov.y - 1]] == 1 &&
                               (placing[mov.x - 1, mov.y - 1] != null &&
-                                (Math.Abs(self.x - (mov.x - 1)) + Math.Abs(self.y - (mov.y - 1)) < self.speed &&
+                                (//Math.Abs(self.x - (mov.x - 1)) + Math.Abs(self.y - (mov.y - 1)) < self.speed &&
                                   (pass[placing[mov.x - 1, mov.y - 1].mobility] ||
                                     (placing[mov.x - 1, mov.y - 1].color == self.color &&
                                      placing[mov.x - 1, mov.y - 1].mobility != MovementType.Immobile)
@@ -1091,14 +1183,14 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                     furthest++;
                 }
             }
-            for (int i = 0; i < width; i++)
+            /*for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < height; j++)
                 {
                     if (gradient[i, j] <= goal)
                         radiate[i, j] = wall;
                 }
-            }
+            }*/
 
             return radiate;
         }
@@ -1409,7 +1501,12 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             for (int i = 1; i < width - 1; i++)
             {
                 for (int j = 1; j < height - 1; j++)
-                    d[i, j] = unexplored;
+                {
+                    if (placing[i - i, j - 1] == null)
+                        d[i, j] = unexplored;
+                    else
+                        d[i, j] = wall;
+                }
             }
 
             for (int i = 0; i < width; i++)
@@ -1439,34 +1536,96 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             float[,] rad = new float[width + 2, height + 2], rad0 = new float[width + 2, height + 2], rad1 = new float[width + 2, height + 2];
             Position best0 = null, best1 = null;
             List<Position> bests0 = new List<Position>(), bests1 = new List<Position>();
-            float choice = 1111;
+            Dictionary<Position, Position> mtt0 = new Dictionary<Position, Position>(), mtt1 = new Dictionary<Position, Position>();
+            float choice = -1, eff0 = 0, eff1 = 0;
             if (active.weaponry[1].kind != WeaponType.None)
             {
                 rad1 = ViableMoves(active, 1, grid, placing);
-                bests1 = bestMoves;
-                best1 = bests1.RandomElement();
-                choice = rad1[best1.x + 1, best1.y + 1];
+                bests1 = bestMoves.Clone();
+                mtt1 = movesToTargets.Clone();
+                var bd = bests1.OrderByDescending(p => (movesToTargets.ContainsKey(p))
+                    ? active.weaponry[1].multipliers[Unit.UnitTypeAsNumber(placing[movesToTargets[p].x, movesToTargets[p].y].kind)]
+                    : 0.005F * rad1[p.x + 1, p.y + 1]);
+                best1 = bd.TakeWhile(p => (movesToTargets.ContainsKey(p))
+                    ? active.weaponry[1].multipliers[Unit.UnitTypeAsNumber(placing[movesToTargets[p].x, movesToTargets[p].y].kind)] ==
+                      active.weaponry[1].multipliers[Unit.UnitTypeAsNumber(placing[movesToTargets[bd.First()].x, movesToTargets[bd.First()].y].kind)]
+                    : 0.005F * rad1[p.x + 1, p.y + 1] == 0.005F * rad1[bd.First().x + 1, bd.First().y + 1]
+                    ).RandomElement();
+                //best1 = bests1.RandomElement();
+                eff1 = (mtt1.ContainsKey(best1))
+                    ? active.weaponry[1].multipliers[Unit.UnitTypeAsNumber(placing[mtt1[best1].x, mtt1[best1].y].kind)]
+                    : 0;
+                choice = 1;//rad1[best1.x + 1, best1.y + 1];
+
             }
             if (active.weaponry[0].kind != WeaponType.None)
             {
                 rad0 = ViableMoves(active, 0, grid, placing);
-                bests0 = bestMoves;
-                best0 = bests0.RandomElement();
-                choice = (choice == 2222) ? 1 : (best1 != null && rad1[best1.x + 1, best1.y + 1] > rad0[best0.x + 1, best0.y + 1]) ? 1 : 0;
+                bests0 = bestMoves.Clone();
+                mtt0 = movesToTargets.Clone();
+                var bd = bests0.OrderByDescending(p => (movesToTargets.ContainsKey(p))
+                    ? active.weaponry[0].multipliers[Unit.UnitTypeAsNumber(placing[movesToTargets[p].x, movesToTargets[p].y].kind)]
+                    : 0.005F * rad0[p.x + 1, p.y + 1]);
+                best0 = bd.TakeWhile(p => (movesToTargets.ContainsKey(p))
+                    ? active.weaponry[0].multipliers[Unit.UnitTypeAsNumber(placing[movesToTargets[p].x, movesToTargets[p].y].kind)] ==
+                      active.weaponry[0].multipliers[Unit.UnitTypeAsNumber(placing[movesToTargets[bd.First()].x, movesToTargets[bd.First()].y].kind)]
+                    : 0.005F * rad0[p.x + 1, p.y + 1] == 0.005F * rad0[bd.First().x + 1, bd.First().y + 1]
+                    ).RandomElement();
+                eff0 = (mtt0.ContainsKey(best0))
+                ? active.weaponry[0].multipliers[Unit.UnitTypeAsNumber(placing[mtt0[best0].x, mtt0[best0].y].kind)]
+                : 0;
+                //choice = (choice == 2222) ? 1 : (best1 != null && rad1[best1.x + 1, best1.y + 1] > rad0[best0.x + 1, best0.y + 1]) ? 1 : 0;
+                if (eff1 > eff0)
+                {
+                    choice = 1;
+                }
+                else if (eff0 > eff1)
+                {
+                    choice = 0;
+                }
+                else if (active.weaponry[1].damage > active.weaponry[0].damage)
+                {
+                    choice = 1;
+                }
+                else if (active.weaponry[0].damage > active.weaponry[1].damage)
+                {
+                    choice = 0;
+                }
+                else
+                {
+                    choice = (best1 != null && rad1[best1.x + 1, best1.y + 1] > rad0[best0.x + 1, best0.y + 1]) ? 1 : 0;
+                }
             }
             else
+            {
                 choice = (active.weaponry[1].kind == WeaponType.None) ? -1 : 1;
+            }
             switch ((int)choice)
             {
-                case -1: bestMoves = new List<Position> { new Position { x = active.x, y = active.y } }; currentlyFiring = -1; break;
-                case 0: bestMoves = bests0; rad = rad0; currentlyFiring = 0; break;
-                case 1: bestMoves = bests1; rad = rad1; currentlyFiring = 1; break;
+                case -1: bestMoves = new List<Position> { new Position(active.x, active.y) };
+                    best = new Position(active.x, active.y);
+                    movesToTargets = new Dictionary<Position, Position>();
+                    currentlyFiring = -1;
+                    //gradient.Fill(2222);
+                    break;
+                case 0: bestMoves = bests0.Clone();
+                    rad = rad0;
+                    best = new Position(best0.x, best0.y);
+                    movesToTargets = mtt0.Clone();
+                    currentlyFiring = 0; 
+                    break;
+                case 1: bestMoves = bests1.Clone();
+                    rad = rad1;
+                    best = new Position(best1.x, best1.y);
+                    movesToTargets = mtt1.Clone();
+                    currentlyFiring = 1;
+                    break;
             }
-            best = bestMoves.RandomElement();
-            if (currentlyFiring > -1)
+            if (currentlyFiring > -1 && movesToTargets.ContainsKey(best))
             {
-                target = DirectedPosition.WithinRange(best.x, best.y, 0, 0, width, height,
-                                active.weaponry[currentlyFiring].minRange, active.weaponry[currentlyFiring].maxRange).Where(pos => UnitGrid[pos.x, pos.y] != null && active.isOpposed(UnitGrid[pos.x, pos.y])).RandomElement();
+                target = new DirectedPosition(movesToTargets[best].x, movesToTargets[best].y);
+                target = DirectedPosition.TurnToFace(best, movesToTargets[best]);
+//                                active.weaponry[currentlyFiring].minRange, active.weaponry[currentlyFiring].maxRange).Where(pos => UnitGrid[pos.x, pos.y] != null && active.isOpposed(UnitGrid[pos.x, pos.y])).RandomElement();
             }
             else target = null;
             /*if (best.x == active.x && best.y == active.y)// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
@@ -1483,39 +1642,64 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             }*/
             DirectedPosition oldpos = new DirectedPosition(best.x, best.y);
             path.Add(new DirectedPosition(best.x, best.y));
-            for (int f = 0; f < active.speed; f++)
+            if (best.x == active.x && best.y == active.y)
             {
-                Dictionary<Position, float> near = new Dictionary<Position, float>() { { oldpos, rad[oldpos.x + 1, oldpos.y + 1] } };
-                foreach (Position pos in oldpos.Adjacent(width, height))
-                    near[pos] = rad[pos.x + 1, pos.y + 1];
-                var ordered = near.OrderBy(kv => kv.Value);
-                newpos = ordered.TakeWhile(kv => kv.Value == ordered.First().Value).RandomElement().Key;
-                if (near.All(e => e.Value == near[newpos]))
-                    return new List<DirectedPosition>();
 
-                int newX = newpos.x, newY = newpos.y;
-                if (!(newX == currentX && newY == currentY))
+            }
+            else
+            {
+                for (int f = 0; f < active.speed; f++)
                 {
-                    currentX = newX;
-                    currentY = newY;
-                    //                    d_inv = dijkstraInner(active, grid, placing, d_inv);
+                    Dictionary<Position, float> near = new Dictionary<Position, float>() { { oldpos, rad[oldpos.x + 1, oldpos.y + 1] } }; // { { oldpos, rad[oldpos.x + 1, oldpos.y + 1] } }
+                    foreach (Position pos in oldpos.Adjacent(width, height))
+                        near[pos] = rad[pos.x + 1, pos.y + 1];
+                    var ordered = near.OrderBy(kv => kv.Value);
+                    newpos = ordered.TakeWhile(kv => kv.Value == ordered.First().Value).RandomElement().Key;
+                    if (near.All(e => e.Value == near[newpos]))
+                        return new List<DirectedPosition>();
+#if DEBUG
+                    StringBuilder sb = new StringBuilder();
+                    for (int jj = height; jj >= 1; jj--)
+                    {
+                        for (int ii = 1; ii < width + 1; ii++)
+                        {
+                            sb.AppendFormat("{0,5}", rad[ii, jj]);
+                        }
+                        sb.AppendLine();
+                    }
+                    writeShowLog(sb.ToString());
+#endif
+
+                    int newX = newpos.x, newY = newpos.y;
+                    if (!(newX == currentX && newY == currentY))
+                    {
+                        currentX = newX;
+                        currentY = newY;
+                        //                    d_inv = dijkstraInner(active, grid, placing, d_inv);
+                    }
+                    DirectedPosition dp = new DirectedPosition(currentX, currentY, currentFacing);
+                    if (dp.x == active.x && dp.y == active.y)//bestMoves.Any(b => b.x == dp.x && b.y == dp.y))// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
+                    {
+                        //oldpos = new DirectedPosition(currentX, currentY, currentFacing);
+                        writeShowLog("Found target.");
+                        path.Add(dp);
+                        f = active.speed + 10;
+                    }
+                    else
+                    {
+                        writeShowLog("Continuing pathfind, f is " + f + ", position is " + dp.x + ", " + dp.y);
+                        if (path.Last().x == dp.x && path.Last().y == dp.y)
+                        {
+                            writeShowLog("Tried to reach unreachable target!!!");
+                        }
+                        path.Add(dp);
+                    }
+                    oldpos = new DirectedPosition(currentX, currentY, currentFacing);
                 }
-                DirectedPosition dp = new DirectedPosition(currentX, currentY, currentFacing);
-                if (rad[dp.x + 1, dp.y + 1] == 0)//bestMoves.Any(b => b.x == dp.x && b.y == dp.y))// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
-                {
-                    //oldpos = new DirectedPosition(currentX, currentY, currentFacing);
-                    path.Add(dp);
-                    f = active.speed + 10;
-                }
-                else
-                {
-                    path.Add(dp);
-                }
-                oldpos = new DirectedPosition(currentX, currentY, currentFacing);
             }
             path.Reverse();
             path[0].dir = active.facing;
-            DirectedPosition old2 = path.First();
+            DirectedPosition old2 = new DirectedPosition(path.First().x, path.First().y);
             for (int i = 1; i < path.Count; i++)
             {
                 currentX = old2.x;
@@ -1549,7 +1733,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                 currentY = path.Last().y;
                 currentFacing = path.Last().dir;
             }*/
-            DirectedPosition dpos = path.First();
+/*            DirectedPosition dpos = path.First();
             for (int i = 1; i < path.Count; i++)
             {
                 if (path[i].x == dpos.x && path[i].y == dpos.y)
@@ -1561,7 +1745,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                 {
                     dpos = path[i];
                 }
-            }
+            }*/
             return path;
         }
 
@@ -1673,11 +1857,11 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                             continue;
                         int currentUnit = Unit.TerrainToUnits[FieldMap.Land[i, j]].RandomElement();
                         //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
-                        if (r.Next(25) <= 2)
+                        if (r.Next(25) <= 3)
                         {
-                           // if(Unit.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.WheelsTraverse))
-                           //     UnitGrid[i, j] = new Unit(Unit.UnitLookup["Artillery_T"], Colors[section], section, i, j);
-                           // else
+                            //if(Unit.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.WheelsTraverse))
+                            //    UnitGrid[i, j] = new Unit(Unit.UnitLookup["Artillery_T"], Colors[section], section, i, j);
+                            //else
                                 UnitGrid[i, j] = new Unit(currentUnit, Colors[section], section, i, j);
                         }
 
@@ -1771,7 +1955,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         {
                             for (int j = 0; j < height; j++)
                             {
-                                FieldMap.Highlight[i, j] = (d[i + 1, j + 1] > 0 && d[i + 1, j + 1] < ActiveUnit.speed) ? HighlightType.Bright : HighlightType.Plain;
+                                FieldMap.Highlight[i, j] = (d[i + 1, j + 1] > 0 && d[i + 1, j + 1] <= ActiveUnit.speed) ? HighlightType.Bright : HighlightType.Plain;
                             }
                         }
                         FieldMap.Highlight[ActiveUnit.x, ActiveUnit.y] = HighlightType.Spectrum;
