@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
@@ -633,10 +632,11 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
         public Unit ActiveUnit;
         public int[] Colors;
         public int[] ReverseColors;
-        public int ActingFaction { get; set; }
-        public int TaskSteps { get; set; }
+        public int ActingFaction;
+        public int TaskSteps;
         public int width;
         public int height;
+        public List<Speech> speaking;
         int[] targetX;
         int[] targetY;
         public Logic(int MapWidth, int MapHeight)
@@ -646,7 +646,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             CurrentMode = Mode.Selecting;
             FieldMap = new LocalMap(MapWidth, MapHeight);
             UnitGrid = new Unit[FieldMap.Width, FieldMap.Height];
-
+            speaking = new List<Speech>();
             targetX = new int[] { MapWidth / 4, MapWidth / 2, MapWidth / 4, MapWidth / 2, };
             targetY = new int[] { MapHeight / 2, MapHeight / 4, MapHeight / 2, MapHeight / 4 };
         }
@@ -1909,6 +1909,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
         public DirectedPosition FuturePosition, target;
         public int currentlyFiring = -1;
         private bool killSuccess = false, hitSuccess = false;
+        private int previousHP;
         private Thread thr = null;
         public void dispose()
         {
@@ -1955,7 +1956,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         {
                             for (int j = 0; j < height; j++)
                             {
-                                FieldMap.Highlight[i, j] = (d[i + 1, j + 1] > 0 && d[i + 1, j + 1] <= ActiveUnit.speed) ? HighlightType.Bright : HighlightType.Plain;
+                                FieldMap.Highlight[i, j] = (d[i + 1, j + 1] > 0 && d[i + 1, j + 1] <= ActiveUnit.speed) ? HighlightType.Bright : HighlightType.Dim;
                             }
                         }
                         FieldMap.Highlight[ActiveUnit.x, ActiveUnit.y] = HighlightType.Spectrum;
@@ -2075,7 +2076,11 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         if (currentlyFiring > -1)
                         {
                             hitSuccess = UnitGrid[target.x, target.y].attemptDodge(ActiveUnit.weaponry[currentlyFiring]);
-                            if (hitSuccess) killSuccess = UnitGrid[target.x, target.y].takeDamage(ActiveUnit.weaponry[currentlyFiring]);
+                            if (hitSuccess)
+                            {
+                                previousHP = UnitGrid[target.x, target.y].currentHealth;
+                                killSuccess = UnitGrid[target.x, target.y].takeDamage(ActiveUnit.weaponry[currentlyFiring]);
+                            }
                         }
                         else
                         {
@@ -2096,6 +2101,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         Unit temp = UnitGrid.RandomFactionUnit(Colors[ActingFaction]);
                         ActiveUnit = new Unit(temp);
                         UnitGrid[temp.x, temp.y] = null;
+                        speaking.Clear();
 
                         CurrentMode = Mode.Selecting;
                         TaskSteps = 0;
@@ -2142,10 +2148,18 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
 
                         }
                     }
-                    else if (killSuccess && TaskSteps == 2 + 1 * (Math.Abs(target.x - ActiveUnit.x) + Math.Abs(target.y - ActiveUnit.y)) && currentlyFiring > -1)
+                    else if (TaskSteps == 2 + 1 * (Math.Abs(target.x - ActiveUnit.x) + Math.Abs(target.y - ActiveUnit.y)) && currentlyFiring > -1)
                     {
-                        GameGDX.explodeTime = 0;
-                        UnitGrid[target.x, target.y].visual = VisualAction.Exploding;
+                        if (killSuccess)
+                        {
+                            GameGDX.explodeTime = 0;
+                            UnitGrid[target.x, target.y].visual = VisualAction.Exploding;
+                            speaking.Add(new Speech { x = target.x, y = target.y, large = true, text = "DEAD" });
+                        }
+                        else if(hitSuccess)
+                        {
+                            speaking.Add(new Speech { x = target.x, y = target.y, large = true, text = (previousHP - UnitGrid[target.x, target.y].currentHealth) + "" });
+                        }
 
                     }
                     break;

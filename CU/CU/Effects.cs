@@ -69,6 +69,49 @@ void main() {
             runner();
         }
     }
+    public class Speech
+    {
+        private bool initializedX = false, initializedY = false;
+        private int _x, _y;
+        public int x
+        {
+            get
+            {
+                return _x;
+            }
+            set
+            {
+                _x = value;
+                initializedX = true;
+                if (initializedX && initializedY)
+                {
+                    worldX = 64 + x * 64 + y * 64;
+                    worldY = 146 + x * 32 - y * 32;
+                }
+            }
+        }
+        public int y
+        {
+            get
+            {
+                return _y;
+            }
+            set
+            {
+                _y = value;
+                initializedY = true;
+                if (initializedX && initializedY)
+                {
+                    worldX = 64 + x * 64 + y * 64;
+                    worldY = 146 + x * 32 - y * 32;
+                }
+            }
+        }
+        public float worldX;
+        public float worldY;
+        public string text;
+        public bool large;
+    }
     public class Effects
     {
         private static Vector3 oldpos = GameGDX.camera.position, newpos, midpos = oldpos;
@@ -82,7 +125,6 @@ void main() {
                 GameGDX.camera.update(); });
             Timer.instance().scheduleTask(n, 0, stepPortion * GameGDX.updateStep / 16F, 15);
             Timer.instance().start();
-            
         }
         public static void CenterCamera(Position pos, float stepPortion)
         {

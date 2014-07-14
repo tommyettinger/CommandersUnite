@@ -6,6 +6,11 @@ using CU;
 
 namespace CU
 {
+    public struct Tuple<K, V>
+    {
+        public K Item1;
+        public V Item2;
+    }
     public static class Tools
     {
         private static Random r = new Random();

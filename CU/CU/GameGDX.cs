@@ -24,6 +24,7 @@ namespace CU
         TextureRegion[,] terrains;
         TextureAtlas.AtlasRegion[][][][] units;
         Animation[][][] animations;
+        public BitmapFont font, largeFont;
         public static float stateTime, attackTime, explodeTime, receiveTime;
         TextureAtlas.AtlasRegion currentFrame;
         public static float updateStep = 0.33F;
@@ -42,6 +43,9 @@ namespace CU
             
             palette = new Texture(Gdx.files.local("Assets/PaletteDark.png"), Pixmap.Format.RGBA8888, false);
             palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+            font = new BitmapFont(Gdx.files.@internal("Assets/Monology.fnt"));
+            largeFont = new BitmapFont(Gdx.files.@internal("Assets/MonologyLarge.fnt"));
 
             terrains = new TextureRegion[11, 2];
             for (int i = 0; i < 11; i++)
@@ -263,7 +267,7 @@ namespace CU
                             break;
                         case HighlightType.Dim:
                             boldness = 0;
-                            highlighter = 10;
+                            highlighter = 19;
                             break;
                         case HighlightType.Plain:
                             boldness = 0;
@@ -361,26 +365,15 @@ namespace CU
                     }
                 }
             }
-
+            foreach(Speech sp in brain.speaking)
+            {
+                batch.setColor(Color.BLACK);
+                (sp.large ? largeFont : font).setColor((attackTime % 100 < 50) ? Color.BLACK : Color.RED);
+                (sp.large ? largeFont : font).draw(batch, sp.text, sp.worldX - (sp.text.Length* (sp.large ? 8 : 4)), sp.worldY);
+            }
             //            worldX = 20 + x * 64 + y * 64;
             //            worldY = 8 + x * 32 - y * 32;
 
-            for (int h = 0; h < height; h++)
-            {
-                for (int w = width - 1; w >= 0; w--)
-                {
-                    //if (brain.UnitGrid[w, h] != null)
-                    //{
-                    //    currentFrame = animations[brain.ReverseColors[brain.UnitGrid[w, h].color]][brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber].getKeyFrame(stateTime, true);
-                    //    batch.draw(currentFrame, brain.UnitGrid[w, h].worldX, brain.UnitGrid[w, h].worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
-                    //}
-                    //if (w == brain.ActiveUnit.x && h == brain.ActiveUnit.y)
-                    //{
-                    //    currentFrame = animations[brain.ReverseColors[brain.ActiveUnit.color]][brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber].getKeyFrame(fastTime, true);
-                    //    batch.draw(currentFrame, brain.ActiveUnit.worldX, brain.ActiveUnit.worldY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
-                    //}
-                }
-            }
             batch.end();
 
             //shader.end();
@@ -467,12 +460,13 @@ void main()
             cfg.foregroundFPS = 45;
             cfg.fullscreen = false;
 
-
+            
 
             //            cfg.addIcon("Assets/CU32.png", Files.FileType.Local);
             //cfg.addIcon("Assets/CU16.png", Files.FileType.Local);
             //cfg.addIcon("Assets/CU128.png", Files.FileType.Local);
             LwjglApplication app = new LwjglApplication(new GameGDX(), cfg);
+            
             /*
             string[] iconPaths = { "Assets/CU32.png", "Assets/CU16.png", "Assets/CU128.png" };
             int[] sizes = { 32, 16, 128 };

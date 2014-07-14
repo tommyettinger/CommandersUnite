@@ -20,8 +20,9 @@ namespace CU
 
         public static int[] Depths = new int[]
             {
-                2, 3, 1, 4, 6, 8, 4, 2, 2, 1,
-                7,7,7,7,7,7,7,7
+                3, 3, 3, 3, 7, 
+                7, 5, 3, 5, 1,
+                5,5,5,5,5,5,5,5
             };
         private static Random r = new Random();
 
