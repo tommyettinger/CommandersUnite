@@ -148,6 +148,34 @@ namespace CU
             else
                 return _lambdaComparer((T)x, (T)y);
         }
+        public java.util.Comparator thenComparing(java.util.Comparator uh)
+        {
+            return this;
+        }
+        public java.util.Comparator thenComparing(java.util.function.Function fn, java.util.Comparator uh)
+        {
+            return this;
+        }
+        public java.util.Comparator thenComparing(java.util.function.Function fn)
+        {
+            return this;
+        }
+        public java.util.Comparator thenComparingInt(java.util.function.ToIntFunction fn)
+        {
+            return this;
+        }
+        public java.util.Comparator thenComparingLong(java.util.function.ToLongFunction fn)
+        {
+            return this;
+        }
+        public java.util.Comparator thenComparingDouble(java.util.function.ToDoubleFunction fn)
+        {
+            return this;
+        }
+        public java.util.Comparator reversed()
+        {
+            return this;
+        }
         public bool equals(object o)
         {
             return base.Equals(o);

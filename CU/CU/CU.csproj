@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CU</RootNamespace>
     <AssemblyName>CommandersUnite</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
@@ -55,91 +55,94 @@
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="gdx-cli, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\gdx-cli.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.AWT.WinForms">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.AWT.WinForms.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Beans">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Beans.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Charsets">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Charsets.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Corba">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Corba.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Core, Version=7.4.5196.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.84.0.0, Culture=neutral, PublicKeyToken=1b03e6acf1164f73">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Core.dll</HintPath>
+      <HintPath>libs\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.Jdbc">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Jdbc.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Management">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Management.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Media">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Media.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Misc">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Misc.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Naming">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Naming.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Remoting">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Remoting.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Security, Version=7.4.5196.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+    <Reference Include="IKVM.AWT.WinForms, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Security.dll</HintPath>
+      <HintPath>libs\IKVM.AWT.WinForms.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.SwingAWT, Version=7.4.5196.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.Core, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.SwingAWT.dll</HintPath>
+      <HintPath>libs\IKVM.OpenJDK.Core.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.Text">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Text.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Tools">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Tools.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Util, Version=7.4.5196.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.Media, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.Util.dll</HintPath>
+      <HintPath>libs\IKVM.OpenJDK.Media.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.XML.API">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.XML.API.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.XML.Bind">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.XML.Bind.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.XML.Crypto">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.XML.Crypto.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.XML.Parse">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.XML.Parse.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.XML.Transform">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.XML.Transform.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.XML.WebServices">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.XML.WebServices.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.XML.XPath">
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.OpenJDK.XML.XPath.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.Runtime, Version=7.4.5196.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.Security, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.Runtime.dll</HintPath>
+      <HintPath>libs\IKVM.OpenJDK.Security.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.Runtime.JNI, Version=7.4.5196.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.SwingAWT, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\IKVM.7.4.5196.0\lib\IKVM.Runtime.JNI.dll</HintPath>
+      <HintPath>libs\IKVM.OpenJDK.SwingAWT.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Text, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\IKVM.OpenJDK.Text.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Tools, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\IKVM.OpenJDK.Tools.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Util, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\IKVM.OpenJDK.Util.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Reflection, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\IKVM.Reflection.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Runtime, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\IKVM.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Runtime.JNI, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\IKVM.Runtime.JNI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -213,16 +216,32 @@
     <None Include="Assets\pack.atlas">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libs\libgdx.dylib">
+    <None Include="libgdx.dylib" />
+    <None Include="libgdx.so" />
+    <None Include="libgdx64.dylib" />
+    <None Include="libgdx64.so" />
+    <None Include="linux-x86\libjawt.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="linux-x64\libjawt.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\liblwjgl.jnilib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libs\libgdx.so">
+    <None Include="libs\liblwjgl.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libs\libgdx64.dylib">
+    <None Include="libs\liblwjgl64.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libs\libgdx64.so">
+    <None Include="libs\libopenal.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\libopenal64.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\openal.dylib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
@@ -237,17 +256,50 @@
     <Content Include="cube_soft.png" />
     <Content Include="flat_soft.png" />
     <Content Include="Assets\PaletteDarkMod.png" />
+    <Content Include="gdx.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="gdx64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ikvm-native-win32-x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ikvm-native-win32-x86.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="libs\gdx-cli.dll" />
-    <Content Include="libs\gdx.dll">
+    <Content Include="ikvm-native.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="libs\gdx64.dll">
+    <Content Include="JVM.DLL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\gdx-cli-x86.dll" />
+    <Content Include="libs\gdx-cli.dll" />
+    <Content Include="libs\ICSharpCode.SharpZipLib.dll" />
+    <Content Include="libs\ikvm-native-win32-x64.dll" />
+    <Content Include="libs\ikvm-native-win32-x86.dll" />
+    <Content Include="libs\IKVM.AWT.WinForms.dll" />
+    <Content Include="libs\IKVM.OpenJDK.Core.dll" />
+    <Content Include="libs\IKVM.OpenJDK.Media.dll" />
+    <Content Include="libs\IKVM.OpenJDK.Security.dll" />
+    <Content Include="libs\IKVM.OpenJDK.SwingAWT.dll" />
+    <Content Include="libs\IKVM.OpenJDK.Text.dll" />
+    <Content Include="libs\IKVM.OpenJDK.Tools.dll" />
+    <Content Include="libs\IKVM.OpenJDK.Util.dll" />
+    <Content Include="libs\IKVM.Reflection.dll" />
+    <Content Include="libs\IKVM.Runtime.dll" />
+    <Content Include="libs\IKVM.Runtime.JNI.dll" />
+    <Content Include="libs\lwjgl.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\lwjgl64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\OpenAL32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\OpenAL64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="spin_soft.png" />

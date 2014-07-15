@@ -452,6 +452,44 @@ void main()
     {
         public static void Main(string[] args)
         { //"Commanders Unite", 800, 800
+            com.badlogic.gdx.utils.GdxNativesLoader.disableNativesLoading = true;
+            com.badlogic.gdx.utils.SharedLibraryLoader loader = new com.badlogic.gdx.utils.SharedLibraryLoader();
+            java.io.File nativesDir = null;
+            try
+            {
+                nativesDir = new java.io.File("libs");
+                //if (com.badlogic.gdx.utils.SharedLibraryLoader.isWindows)
+                //{
+                //    nativesDir = loader.extractFile(com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? "lwjgl64.dll" : "lwjgl.dll", null).getParentFile();
+                //    if (!LwjglApplicationConfiguration.disableAudio)
+                //        loader.extractFile(com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? "OpenAL64.dll" : "OpenAL32.dll", nativesDir.getName());
+                //}
+                //else if (com.badlogic.gdx.utils.SharedLibraryLoader.isMac)
+                //{
+                //    java.io.File extractedFile = loader.extractFile("liblwjgl.jnilib", null);
+                //    nativesDir = extractedFile.getParentFile();
+                //    new com.badlogic.gdx.files.FileHandle(extractedFile).copyTo(new com.badlogic.gdx.files.FileHandle(new java.io.File(nativesDir, "liblwjgl.dylib")));
+                //    if (!LwjglApplicationConfiguration.disableAudio) loader.extractFile("openal.dylib", nativesDir.getName());
+                //}
+                //else if (com.badlogic.gdx.utils.SharedLibraryLoader.isLinux)
+                //{
+                //    nativesDir = loader.extractFile(com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? "liblwjgl64.so" : "liblwjgl.so", null).getParentFile();
+                //    if (!LwjglApplicationConfiguration.disableAudio)
+                //        loader.extractFile(com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? "libopenal64.so" : "libopenal.so", nativesDir.getName());
+                //}
+            }
+            catch (Exception ex)
+            {
+                throw new com.badlogic.gdx.utils.GdxRuntimeException("Unable to find LWJGL natives.", ex);
+            }
+            java.lang.System.setProperty("org.lwjgl.librarypath", nativesDir.getAbsolutePath());
+            if (com.badlogic.gdx.utils.SharedLibraryLoader.isLinux)
+            {
+                java.lang.System.setProperty("java.library.path", java.lang.System.getProperty("java.library.path") + (com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? ":linux-x64" : ":linux-x86"));
+//                java.lang.System.load(com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? "linux-x64/libjawt.so" : "linux-x86/libjawt.so");
+            }
+            loader.load("gdx");
+
             LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
             cfg.title = "Commanders Unite";
             cfg.width = 1280;
@@ -459,6 +497,7 @@ void main()
             cfg.backgroundFPS = 45;
             cfg.foregroundFPS = 45;
             cfg.fullscreen = false;
+            
 
             
 

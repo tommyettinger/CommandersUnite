@@ -1914,7 +1914,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
         public void dispose()
         {
 #if DEBUG
-            File.WriteAllText("log.txt", log.ToString());
+            //File.WriteAllText("log.txt", log.ToString());
 #endif
             if (thr != null)
                 thr.Abort();
