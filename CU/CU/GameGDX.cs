@@ -29,10 +29,9 @@ using System.Text;
 using com.badlogic.gdx;
 using com.badlogic.gdx.graphics;
 using com.badlogic.gdx.graphics.g2d;
-using com.badlogic.gdx.backends.lwjgl;
+using com.badlogic.gdx.backends.jglfw;
 using com.badlogic.gdx.graphics.glutils;
 using com.badlogic.gdx.math;
-using lwjglgl = org.lwjgl.opengl;
 using Nibb = java.nio.ByteBuffer;
 namespace CU
 {
@@ -490,7 +489,7 @@ void main()
             com.badlogic.gdx.utils.GdxNativesLoader.disableNativesLoading = true;
             com.badlogic.gdx.utils.SharedLibraryLoader loader = new com.badlogic.gdx.utils.SharedLibraryLoader();
             java.io.File nativesDir = null;
-            try
+            /*try
             {
                 nativesDir = new java.io.File("./");
                 //if (com.badlogic.gdx.utils.SharedLibraryLoader.isWindows)
@@ -519,7 +518,7 @@ void main()
             }
             java.lang.System.setProperty("org.lwjgl.librarypath", nativesDir.getAbsolutePath());
             Console.WriteLine(java.lang.System.getProperty("org.lwjgl.librarypath"));
-            Console.WriteLine(java.lang.System.getProperty("java.library.path"));
+            Console.WriteLine(java.lang.System.getProperty("java.library.path"));*/
             //Console.ReadKey();
             /*if (com.badlogic.gdx.utils.SharedLibraryLoader.isLinux)
             {
@@ -528,7 +527,7 @@ void main()
             }*/
             loader.load("gdx");
 
-            LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+            JglfwApplicationConfiguration cfg = new JglfwApplicationConfiguration();
             cfg.title = "Commanders Unite";
             cfg.width = 1280;
             cfg.height = 720;
@@ -542,7 +541,7 @@ void main()
             //            cfg.addIcon("Assets/CU32.png", Files.FileType.Local);
             //cfg.addIcon("Assets/CU16.png", Files.FileType.Local);
             //cfg.addIcon("Assets/CU128.png", Files.FileType.Local);
-            LwjglApplication app = new LwjglApplication(new GameGDX(), cfg);
+            JglfwApplication app = new JglfwApplication (new GameGDX(), cfg);
             
             /*
             string[] iconPaths = { "Assets/CU32.png", "Assets/CU16.png", "Assets/CU128.png" };
