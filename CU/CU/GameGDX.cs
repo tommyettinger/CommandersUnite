@@ -29,13 +29,14 @@ using System.Text;
 using com.badlogic.gdx;
 using com.badlogic.gdx.graphics;
 using com.badlogic.gdx.graphics.g2d;
-using com.badlogic.gdx.backends.jglfw;
+using com.badlogic.gdx.backends.lwjgl;
 using com.badlogic.gdx.graphics.glutils;
 using com.badlogic.gdx.math;
 using Nibb = java.nio.ByteBuffer;
+
 namespace CU
 {
-    class GameGDX : ApplicationListener
+    class GameGDX : Game
     {
         public static OrthographicCamera camera;
         SpriteBatch batch;
@@ -53,17 +54,17 @@ namespace CU
         public static float updateStep = 0.33F;
         public ShaderProgram shader;
         private static Random r = new Random();
-        public void create()
+        public override void create()
         {
             pieces = new Texture[] {new Texture(Gdx.files.local("Assets/pack.png"), Pixmap.Format.RGBA8888, false),
                 new Texture(Gdx.files.local("Assets/pack2.png"), Pixmap.Format.RGBA8888, false)};
-            
+
             brain = new Logic(25, 25);
             width = brain.FieldMap.Width;
             height = brain.FieldMap.Height;
             brain.PlaceUnits();
             atlas = new TextureAtlas(new CustomAtlasData(Gdx.files.local("Assets/pack.atlas"), Gdx.files.local("Assets"), false));
-            
+
             palette = new Texture(Gdx.files.local("Assets/PaletteDark.png"), Pixmap.Format.RGBA8888, false);
             palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
@@ -190,7 +191,7 @@ namespace CU
                                 break;
                             case 1: animations[Unit.UnitLookup[name]][dir][j] = new Animation(0.11F,
                                     units[Unit.UnitLookup[name]][dir][j]);
-//                                units[Unit.UnitLookup[name]][i][j].Concat(new TextureRegion[] {units[Unit.UnitLookup[name]][i][j][7],  }).ToArray());
+                                //                                units[Unit.UnitLookup[name]][i][j].Concat(new TextureRegion[] {units[Unit.UnitLookup[name]][i][j][7],  }).ToArray());
                                 break;
                             case 2: if (Unit.WeaponDisplays[Unit.UnitLookup[name]][0] > -1)
                                 {
@@ -232,10 +233,11 @@ namespace CU
             attackTime = 0;
             explodeTime = 0;
             receiveTime = 0;
+            Gdx.input.setInputProcessor(new InputProc());
             Timer.instance().scheduleTask(new NilTask(brain.ProcessStep), 0F, updateStep);
         }
 
-        public void render()
+        public override void render()
         {
             Timer.instance().start();
             Gdx.gl.glClearColor(0.45F, 0.7F, 1f, 1);
@@ -312,15 +314,15 @@ namespace CU
 
             for (int row = 0; row < width + height; row++)
             {
-                for (int col = 0; col <= ((row < width) ? row : (width + height -1) - row); col++)
+                for (int col = 0; col <= ((row < width) ? row : (width + height - 1) - row); col++)
                 {
                     int w = ((row < width) ? width - 1 - row + col : col); //height + (width - 1 - row) + 
                     int h = (row < width) ? col : row - width + col;
                     if (brain.UnitGrid[w, h] != null)
                     {
-                        faction.r = (brain.UnitGrid[w, h].color+1) / 32.0F;
+                        faction.r = (brain.UnitGrid[w, h].color + 1) / 32.0F;
                         batch.setColor(faction);
-                        switch(brain.UnitGrid[w, h].visual)
+                        switch (brain.UnitGrid[w, h].visual)
                         {
                             case VisualAction.Normal:
                                 currentFrame = (TextureAtlas.AtlasRegion)animations[brain.UnitGrid[w, h].unitIndex][brain.UnitGrid[w, h].facingNumber][0].getKeyFrame(stateTime, true);
@@ -358,10 +360,10 @@ namespace CU
                     }
                     if (brain.ActiveUnit.x == w && brain.ActiveUnit.y == h)
                     {
-                        faction.r = (brain.ActiveUnit.color+1) / 32.0F;
+                        faction.r = (brain.ActiveUnit.color + 1) / 32.0F;
                         batch.setColor(faction);
                         //[brain.ReverseColors[brain.ActiveUnit.color]]
-                        
+
                         switch (brain.ActiveUnit.visual)
                         {
                             case VisualAction.Normal:
@@ -375,7 +377,7 @@ namespace CU
                             case VisualAction.Firing:
                                 if (brain.currentlyFiring > -1)
                                 {
-                                    currentFrame = (TextureAtlas.AtlasRegion)animations[brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber][2+brain.currentlyFiring].getKeyFrame(attackTime, false);
+                                    currentFrame = (TextureAtlas.AtlasRegion)animations[brain.ActiveUnit.unitIndex][brain.ActiveUnit.facingNumber][2 + brain.currentlyFiring].getKeyFrame(attackTime, false);
                                     batch.draw(currentFrame, (int)(brain.ActiveUnit.worldX - 80) + currentFrame.offsetX, (int)(brain.ActiveUnit.worldY - 40) + currentFrame.offsetY + LocalMap.Depths[brain.FieldMap.Land[w, h]] * 3);
                                 }
                                 else
@@ -388,11 +390,11 @@ namespace CU
                     }
                 }
             }
-            foreach(Speech sp in brain.speaking)
+            foreach (Speech sp in brain.speaking)
             {
                 batch.setColor(Color.BLACK);
                 (sp.large ? largeFont : font).setColor((attackTime % 100 < 50) ? Color.BLACK : Color.RED);
-                (sp.large ? largeFont : font).draw(batch, sp.text, sp.worldX - (sp.text.Length* (sp.large ? 8 : 4)), sp.worldY);
+                (sp.large ? largeFont : font).draw(batch, sp.text, sp.worldX - (sp.text.Length * (sp.large ? 8 : 4)), sp.worldY);
             }
             //            worldX = 20 + x * 64 + y * 64;
             //            worldY = 8 + x * 32 - y * 32;
@@ -401,41 +403,42 @@ namespace CU
 
             //shader.end();
         }
-        public void resume()
+        public override void resume()
         {
             Timer.instance().start();
         }
-        public void pause()
+        public override void pause()
         {
         }
-        public void dispose()
+        public override void dispose()
         {
             try
             {
                 brain.dispose();
-                Timer.instance().kill();
+                Timer.instance().stop();
             }
-            catch (Exception e) { 
+            catch (Exception e)
+            {
 #if DEBUG
-                Console.WriteLine(e.StackTrace); 
+                Console.WriteLine(e.StackTrace);
 #endif
             }
             batch.dispose();
             atlas.dispose();
         }
-        public void resize(int wide, int high)
+        public override void resize(int wide, int high)
         {
             camera.setToOrtho(false, wide, high);
             camera.update();
         }
         public void win()
         {
-            Timer.instance().kill();
+            Timer.instance().stop();
             Console.WriteLine("Y O U   W I N !!!");
         }
         public void lose()
         {
-            Timer.instance().kill();
+            Timer.instance().stop();
             Console.WriteLine("YOU LOSE...");
         }
 
@@ -479,6 +482,68 @@ void main()
         }
     }
 
+    class InputProc : InputProcessor
+    {
+        public bool paused;
+        public InputProc()
+        {
+            paused = false;
+        }
+        public bool keyDown(int keycode)
+        {
+            if (keycode == Input.Keys.SPACE)
+            {
+                if (paused == false)
+                {
+                    Timer.instance().pause();
+                    paused = true;
+                }
+                else
+                {
+                    Timer.instance().resume();
+                    paused = false;
+                }
+            }
+            return false;
+        }
+
+        public bool keyUp(int keycode)
+        {
+            return false;
+        }
+
+        public bool keyTyped(char character)
+        {
+            return false;
+        }
+
+        public bool touchDown(int x, int y, int pointer, int button)
+        {
+            return false;
+        }
+
+        public bool touchUp(int x, int y, int pointer, int button)
+        {
+            return false;
+        }
+
+        public bool touchDragged(int x, int y, int pointer)
+        {
+            return false;
+        }
+
+        public bool mouseMoved(int x, int y)
+        {
+            return false;
+        }
+
+        public bool scrolled(int amount)
+        {
+            return false;
+        }
+
+    }
+
     class Launcher
     {
         public static void Main(string[] args)
@@ -496,7 +561,7 @@ void main()
             }
             com.badlogic.gdx.utils.GdxNativesLoader.disableNativesLoading = true;
             com.badlogic.gdx.utils.SharedLibraryLoader loader = new com.badlogic.gdx.utils.SharedLibraryLoader();
-            java.io.File nativesDir = null;
+           // java.io.File nativesDir = null;
             /*try
             {
                 nativesDir = new java.io.File("./");
@@ -535,22 +600,22 @@ void main()
             }*/
             loader.load("gdx");
 
-            JglfwApplicationConfiguration cfg = new JglfwApplicationConfiguration();
+            LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
             cfg.title = "Commanders Unite";
             cfg.width = 1280;
             cfg.height = 720;
             cfg.backgroundFPS = 45;
             cfg.foregroundFPS = 45;
             cfg.fullscreen = false;
-            
 
-            
+
+
 
             //            cfg.addIcon("Assets/CU32.png", Files.FileType.Local);
             //cfg.addIcon("Assets/CU16.png", Files.FileType.Local);
             //cfg.addIcon("Assets/CU128.png", Files.FileType.Local);
-            JglfwApplication app = new JglfwApplication (new GameGDX(), cfg);
-            
+            LwjglApplication app = new LwjglApplication(new GameGDX(), cfg);
+
             /*
             string[] iconPaths = { "Assets/CU32.png", "Assets/CU16.png", "Assets/CU128.png" };
             int[] sizes = { 32, 16, 128 };
