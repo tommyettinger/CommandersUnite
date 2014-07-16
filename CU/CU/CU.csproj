@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{0068F703-2130-4E49-AE24-E481B15C9C03}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CU</RootNamespace>
     <AssemblyName>CommandersUnite</AssemblyName>
@@ -216,10 +216,18 @@
     <None Include="Assets\pack.atlas">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libgdx.dylib" />
-    <None Include="libgdx.so" />
-    <None Include="libgdx64.dylib" />
-    <None Include="libgdx64.so" />
+    <None Include="libgdx.dylib">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libgdx.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libgdx64.dylib">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libgdx64.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="linux-x86\libjawt.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -274,6 +282,7 @@
     <Content Include="JVM.DLL">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="libs\gdx-cli-x64.dll" />
     <Content Include="libs\gdx-cli-x86.dll" />
     <Content Include="libs\gdx-cli.dll" />
     <Content Include="libs\ICSharpCode.SharpZipLib.dll" />

@@ -1,4 +1,27 @@
-﻿using System;
+﻿/* This file is licensed under
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2014 Thomas Ettinger
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -483,11 +506,13 @@ void main()
                 throw new com.badlogic.gdx.utils.GdxRuntimeException("Unable to find LWJGL natives.", ex);
             }
             java.lang.System.setProperty("org.lwjgl.librarypath", nativesDir.getAbsolutePath());
-            if (com.badlogic.gdx.utils.SharedLibraryLoader.isLinux)
+            Console.WriteLine(java.lang.System.getProperty("org.lwjgl.librarypath"));
+            //Console.ReadKey();
+            /*if (com.badlogic.gdx.utils.SharedLibraryLoader.isLinux)
             {
                 java.lang.System.setProperty("java.library.path", java.lang.System.getProperty("java.library.path") + (com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? ":linux-x64" : ":linux-x86"));
 //                java.lang.System.load(com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? "linux-x64/libjawt.so" : "linux-x86/libjawt.so");
-            }
+            }*/
             loader.load("gdx");
 
             LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
