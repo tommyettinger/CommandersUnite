@@ -410,8 +410,16 @@ namespace CU
         }
         public void dispose()
         {
-            brain.dispose();
-            Timer.instance().kill();
+            try
+            {
+                brain.dispose();
+                Timer.instance().kill();
+            }
+            catch (Exception e) { 
+#if DEBUG
+                Console.WriteLine(e.StackTrace); 
+#endif
+            }
             batch.dispose();
             atlas.dispose();
         }

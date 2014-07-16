@@ -950,8 +950,8 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
         public static void writeShowLog(string text)
         {
 #if DEBUG
-            log.Append (text + "\n");
-            Console.WriteLine(text);
+            //log.Append (text + "\n");
+            //Console.WriteLine(text);
 #endif
         }
         List<Position> bestMoves = new List<Position>();
