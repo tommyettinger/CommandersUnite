@@ -216,9 +216,6 @@
     <None Include="Assets\pack.atlas">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libgdx.a">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="libgdx.dylib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
