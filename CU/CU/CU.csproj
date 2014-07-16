@@ -216,6 +216,9 @@
     <None Include="Assets\pack.atlas">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="libgdx.a">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="libgdx.dylib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -228,28 +231,34 @@
     <None Include="libgdx64.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="libikvm-native32.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libikvm-native64.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="linux-x86\libjawt.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="linux-x64\libjawt.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="libs\liblwjgl.jnilib">
+    <None Include="liblwjgl.jnilib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libs\liblwjgl.so">
+    <None Include="liblwjgl.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libs\liblwjgl64.so">
+    <None Include="liblwjgl64.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libs\libopenal.so">
+    <None Include="libopenal.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libs\libopenal64.so">
+    <None Include="libopenal64.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libs\openal.dylib">
+    <None Include="openal.dylib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
@@ -299,16 +308,16 @@
     <Content Include="libs\IKVM.Reflection.dll" />
     <Content Include="libs\IKVM.Runtime.dll" />
     <Content Include="libs\IKVM.Runtime.JNI.dll" />
-    <Content Include="libs\lwjgl.dll">
+    <Content Include="lwjgl.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="libs\lwjgl64.dll">
+    <Content Include="lwjgl64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="libs\OpenAL32.dll">
+    <Content Include="OpenAL32.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="libs\OpenAL64.dll">
+    <Content Include="OpenAL64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="spin_soft.png" />

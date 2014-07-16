@@ -22,6 +22,7 @@
  * THE SOFTWARE.
  */
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -475,12 +476,23 @@ void main()
     {
         public static void Main(string[] args)
         { //"Commanders Unite", 800, 800
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                if (Environment.Is64BitProcess && File.Exists("libikvm-native.so") == false)
+                {
+                    File.Copy("libikvm-native64.so", "libikvm-native.so");
+                }
+                else if (File.Exists("libikvm-native.so") == false)
+                {
+                    File.Copy("libikvm-native32.so", "libikvm-native.so");
+                }
+            }
             com.badlogic.gdx.utils.GdxNativesLoader.disableNativesLoading = true;
             com.badlogic.gdx.utils.SharedLibraryLoader loader = new com.badlogic.gdx.utils.SharedLibraryLoader();
             java.io.File nativesDir = null;
             try
             {
-                nativesDir = new java.io.File("libs");
+                nativesDir = new java.io.File("./");
                 //if (com.badlogic.gdx.utils.SharedLibraryLoader.isWindows)
                 //{
                 //    nativesDir = loader.extractFile(com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? "lwjgl64.dll" : "lwjgl.dll", null).getParentFile();
@@ -507,6 +519,7 @@ void main()
             }
             java.lang.System.setProperty("org.lwjgl.librarypath", nativesDir.getAbsolutePath());
             Console.WriteLine(java.lang.System.getProperty("org.lwjgl.librarypath"));
+            Console.WriteLine(java.lang.System.getProperty("java.library.path"));
             //Console.ReadKey();
             /*if (com.badlogic.gdx.utils.SharedLibraryLoader.isLinux)
             {
