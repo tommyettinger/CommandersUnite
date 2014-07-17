@@ -36,6 +36,10 @@ using Nibb = java.nio.ByteBuffer;
 
 namespace CU
 {
+    enum GameState
+    {
+        Paused, NPC_Play, PC_Play, PC_Select
+    }
     class GameGDX : Game
     {
         public static OrthographicCamera camera;
@@ -54,6 +58,9 @@ namespace CU
         public static float updateStep = 0.33F;
         public ShaderProgram shader;
         private static Random r = new Random();
+        InputProc inp;
+        public static GameState state = GameState.PC_Play;
+        public static GameState previousState = GameState.PC_Play;
         public override void create()
         {
             pieces = new Texture[] {new Texture(Gdx.files.local("Assets/pack.png"), Pixmap.Format.RGBA8888, false),
@@ -233,7 +240,8 @@ namespace CU
             attackTime = 0;
             explodeTime = 0;
             receiveTime = 0;
-            Gdx.input.setInputProcessor(new InputProc());
+            inp = new InputProc();
+            Gdx.input.setInputProcessor(inp);
             Timer.instance().scheduleTask(new NilTask(brain.ProcessStep), 0F, updateStep);
         }
 
@@ -244,10 +252,19 @@ namespace CU
             Gdx.gl.glClear(GL20.__Fields.GL_COLOR_BUFFER_BIT);
 
             camera.update();
-            stateTime += Gdx.graphics.getDeltaTime();
-            attackTime += Gdx.graphics.getDeltaTime();
-            explodeTime += Gdx.graphics.getDeltaTime();
-            receiveTime += Gdx.graphics.getDeltaTime();
+            if(state == GameState.Paused)
+            {}
+            else if (state == GameState.NPC_Play || state == GameState.PC_Play)
+            {
+                stateTime += Gdx.graphics.getDeltaTime();
+                attackTime += Gdx.graphics.getDeltaTime();
+                explodeTime += Gdx.graphics.getDeltaTime();
+                receiveTime += Gdx.graphics.getDeltaTime();
+            }
+            else if (state == GameState.PC_Select)
+            {
+                stateTime += Gdx.graphics.getDeltaTime();
+            }
             //            fastTime += Gdx.graphics.getDeltaTime() * 1.5F;
 
             batch.setProjectionMatrix(camera.combined);
@@ -390,10 +407,16 @@ namespace CU
                     }
                 }
             }
+            if (state == GameState.Paused)
+            {
+                batch.setColor(Color.BLACK);
+                largeFont.setColor(Color.BLACK); //(sp.large ? largeFont : font).
+                largeFont.draw(batch, "PAUSED", camera.position.x + 0, camera.position.y + 50);
+            }
             foreach (Speech sp in brain.speaking)
             {
                 batch.setColor(Color.BLACK);
-                (sp.large ? largeFont : font).setColor((attackTime % 100 < 50) ? Color.BLACK : Color.RED);
+                largeFont.setColor(Color.BLACK); //(sp.large ? largeFont : font).
                 (sp.large ? largeFont : font).draw(batch, sp.text, sp.worldX - (sp.text.Length * (sp.large ? 8 : 4)), sp.worldY);
             }
             //            worldX = 20 + x * 64 + y * 64;
@@ -405,10 +428,30 @@ namespace CU
         }
         public override void resume()
         {
-            Timer.instance().start();
+//            Timer.instance().start();
+            resumeGame();
+        }
+        public static void resumeGame()
+        {
+            if (state == GameState.Paused)
+            {
+                Timer.instance().resume();
+                GameGDX.state = previousState;
+            }
         }
         public override void pause()
         {
+            pauseGame();
+        }
+        public static void pauseGame()
+        {
+
+            if (state != GameState.Paused)
+            {
+                Timer.instance().pause();
+                previousState = GameGDX.state;
+                GameGDX.state = GameState.Paused;
+            }
         }
         public override void dispose()
         {
@@ -484,24 +527,21 @@ void main()
 
     class InputProc : InputProcessor
     {
-        public bool paused;
         public InputProc()
         {
-            paused = false;
         }
         public bool keyDown(int keycode)
         {
             if (keycode == Input.Keys.SPACE)
             {
-                if (paused == false)
+
+                if (GameGDX.state != GameState.Paused)
                 {
-                    Timer.instance().pause();
-                    paused = true;
+                    GameGDX.pauseGame();
                 }
                 else
                 {
-                    Timer.instance().resume();
-                    paused = false;
+                    GameGDX.resumeGame();
                 }
             }
             return false;
