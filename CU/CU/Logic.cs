@@ -1944,12 +1944,27 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
         }
         public void ProcessStep()
         {
+            if (GameGDX.state == GameState.PC_Select)
+            {
+
+                Effects.CenterCamera(ActiveUnit.x, ActiveUnit.y, 0.5F);
+                float[,] d = dijkstra(ActiveUnit, FieldMap.Land, UnitGrid, ActiveUnit.x, ActiveUnit.y);
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        FieldMap.Highlight[i, j] = (d[i + 1, j + 1] > 0 && d[i + 1, j + 1] <= ActiveUnit.speed) ? HighlightType.Bright : HighlightType.Dim;
+                    }
+                }
+                FieldMap.Highlight[ActiveUnit.x, ActiveUnit.y] = HighlightType.Spectrum;
+                return;
+            }
             TaskSteps++;
             switch (CurrentMode)
             {
                 case Mode.Selecting:
 
-                    if (TaskSteps > 5 && thr != null && thr.ThreadState == ThreadState.Stopped)
+                    if (TaskSteps > 4 && thr != null && thr.ThreadState == ThreadState.Stopped)
                     {
                         FuturePosition = new DirectedPosition(ActiveUnit.x, ActiveUnit.y, ActiveUnit.facing);
                         for (int i = 0; i < width; i++)

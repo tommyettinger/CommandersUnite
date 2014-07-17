@@ -46,7 +46,7 @@ namespace CU
         SpriteBatch batch;
         TextureAtlas atlas;
         int width, height;
-        Logic brain;
+        public static Logic brain;
         Texture palette;
         Texture[] pieces;
         TextureRegion[,] terrains;
@@ -59,8 +59,9 @@ namespace CU
         public ShaderProgram shader;
         private static Random r = new Random();
         InputProc inp;
-        public static GameState state = GameState.PC_Play;
-        public static GameState previousState = GameState.PC_Play;
+        public static Position cursor = null;
+        public static GameState state = GameState.PC_Select;
+        public static GameState previousState = GameState.PC_Select;
         public override void create()
         {
             pieces = new Texture[] {new Texture(Gdx.files.local("Assets/pack.png"), Pixmap.Format.RGBA8888, false),
@@ -240,6 +241,7 @@ namespace CU
             attackTime = 0;
             explodeTime = 0;
             receiveTime = 0;
+            cursor = new Position(brain.ActiveUnit.x, brain.ActiveUnit.y);
             inp = new InputProc();
             Gdx.input.setInputProcessor(inp);
             Timer.instance().scheduleTask(new NilTask(brain.ProcessStep), 0F, updateStep);
@@ -252,8 +254,8 @@ namespace CU
             Gdx.gl.glClear(GL20.__Fields.GL_COLOR_BUFFER_BIT);
 
             camera.update();
-            if(state == GameState.Paused)
-            {}
+            if (state == GameState.Paused)
+            { }
             else if (state == GameState.NPC_Play || state == GameState.PC_Play)
             {
                 stateTime += Gdx.graphics.getDeltaTime();
@@ -305,11 +307,11 @@ namespace CU
                     {
                         case HighlightType.Bright:
                             boldness = 1;
-                            highlighter += brain.ActiveUnit.color + 1; //3 + ((brain.gradient[w + 1, h + 1]) % 6);
+                            highlighter += 0;//(((int)((stateTime) % 2)) == 0) ? brain.ActiveUnit.color + 1 : 0; //3 + ((brain.gradient[w + 1, h + 1]) % 6);
                             break;
                         case HighlightType.Dim:
                             boldness = 0;
-                            highlighter = 19;
+                            highlighter = 19;//(((int)((stateTime) % 2)) == 0) ? 19 : 10;
                             break;
                         case HighlightType.Plain:
                             boldness = 0;
@@ -322,7 +324,11 @@ namespace CU
                         default:
                             break;
                     }
-
+                    if (state == GameState.PC_Select && brain.FieldMap.Highlight[w, h] != HighlightType.Dim && cursor.x == w && cursor.y == h)
+                    {
+                        boldness = 1;
+                        highlighter = 13 + ((int)((stateTime * 9) % 6));
+                    }
                     faction.r = highlighter / 32.0F;
                     batch.setColor(faction);
                     batch.draw(terrains[brain.FieldMap.Land[w, h], boldness], w * 64 + h * 64, w * 32 - h * 32);
@@ -413,7 +419,7 @@ namespace CU
                 largeFont.setColor(Color.BLACK); //(sp.large ? largeFont : font).
                 font.setColor(Color.BLACK); //(sp.large ? largeFont : font).
                 largeFont.draw(batch, "PAUSED", camera.position.x + 12, camera.position.y + 50);
-                font.draw(batch, "Press Space to continue", camera.position.x - 23*2, camera.position.y + 0);
+                font.draw(batch, "Press Space to continue", camera.position.x - 23 * 2, camera.position.y + 0);
             }
             foreach (Speech sp in brain.speaking)
             {
@@ -430,7 +436,7 @@ namespace CU
         }
         public override void resume()
         {
-//            Timer.instance().start();
+            //            Timer.instance().start();
             resumeGame();
         }
         public static void resumeGame()
@@ -462,7 +468,7 @@ namespace CU
                 brain.dispose();
                 Timer.instance().stop();
                 Timer.instance().dispose();
-                
+
             }
             catch (Exception e)
             {
@@ -578,6 +584,36 @@ void main()
 
         public bool mouseMoved(int x, int y)
         {
+            if (GameGDX.state == GameState.PC_Select)
+            {
+                Vector3 v3 = GameGDX.camera.unproject(new Vector3(x, y, 0));
+
+                float worldX = v3.x;
+                float worldY = v3.y;
+                
+                //Console.WriteLine("screenX: " + screenX + ", screenY: " + screenY);
+                worldY -= 32;
+                //screenX /= 64;
+                //screenY /= 32;
+
+                int gridX = (int)((worldX / 128 + worldY / 64));
+                int gridY = (int)((worldX / 128 - worldY / 64));
+
+                GameGDX.cursor.x = gridX;
+                GameGDX.cursor.y = gridY;
+                /*if(GameGDX.brain.FieldMap.ValidatePosition(GameGDX.cursor))
+                {
+                    screenY = (int)v3.y;
+                    screenY -= 32 + (LocalMap.Depths[GameGDX.brain.FieldMap.Land[worldX, worldY]] *3);
+                    //Console.WriteLine("X: " + worldX + ", Y: " + worldY + ", Depth" + LocalMap.Depths[GameGDX.brain.FieldMap.Land[worldX, worldY]]);
+                    screenY /= 32;
+
+                    worldX = ((screenX + screenY) / 2);
+                    worldY = ((screenX - screenY) / 2);
+                    GameGDX.cursor.x = worldX;
+                    GameGDX.cursor.y = worldY;
+                }*/
+            }
             return false;
         }
 
@@ -594,7 +630,7 @@ void main()
         { //"Commanders Unite", 800, 800
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                if (Environment.Is64BitProcess && File.Exists("libikvm-native.so") == false)
+                if (IntPtr.Size == 8 && File.Exists("libikvm-native.so") == false)
                 {
                     File.Copy("libikvm-native64.so", "libikvm-native.so");
                 }
@@ -605,7 +641,7 @@ void main()
             }
             com.badlogic.gdx.utils.GdxNativesLoader.disableNativesLoading = true;
             com.badlogic.gdx.utils.SharedLibraryLoader loader = new com.badlogic.gdx.utils.SharedLibraryLoader();
-           // java.io.File nativesDir = null;
+            // java.io.File nativesDir = null;
             /*try
             {
                 nativesDir = new java.io.File("./");
