@@ -96,6 +96,13 @@ namespace CU
 
             //}
         }
+        /** Disposes the timer and its resources. */
+        public void dispose()
+        {
+            //lock (inst) {
+            thread.dispose();
+            //}
+        }
         /** Pauses the timer, will this work??? */
         public void pause()
         {

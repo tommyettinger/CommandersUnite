@@ -411,7 +411,9 @@ namespace CU
             {
                 batch.setColor(Color.BLACK);
                 largeFont.setColor(Color.BLACK); //(sp.large ? largeFont : font).
-                largeFont.draw(batch, "PAUSED", camera.position.x + 0, camera.position.y + 50);
+                font.setColor(Color.BLACK); //(sp.large ? largeFont : font).
+                largeFont.draw(batch, "PAUSED", camera.position.x + 12, camera.position.y + 50);
+                font.draw(batch, "Press Space to continue", camera.position.x - 23*2, camera.position.y + 0);
             }
             foreach (Speech sp in brain.speaking)
             {
@@ -459,6 +461,8 @@ namespace CU
             {
                 brain.dispose();
                 Timer.instance().stop();
+                Timer.instance().dispose();
+                
             }
             catch (Exception e)
             {

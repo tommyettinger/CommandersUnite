@@ -1170,7 +1170,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                                 radiate[mov.x, mov.y] = idx_dijk.Value + 1;
                                 if (gradient[mov.x, mov.y] < lowest)
                                 {
-                                    bestMoves.Clear();
+                                    //bestMoves.Clear();
                                     bestMoves.Add(new Position { x = mov.x - 1, y = mov.y - 1 });
                                     lowest = gradient[mov.x, mov.y];
                                 }
