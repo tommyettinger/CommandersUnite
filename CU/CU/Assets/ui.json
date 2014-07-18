@@ -1,0 +1,60 @@
+{
+  com.badlogic.gdx.graphics.g2d.BitmapFont: {
+   normaltext: { file: MonologyUI.fnt },
+   titletext: { file: MonologyLargeUI.fnt },
+  },
+  com.badlogic.gdx.graphics.Color: {
+  
+   dark   : { hex: "AA7F86" },
+   pale   : { hex: "FEFEFE" },
+   red    : { hex: "ED9793" },
+   orange : { hex: "FFBB87" },
+   yellow : { hex: "FFFAB6" },
+   green  : { hex: "94DE93" },
+   blue   : { hex: "8E9FF0" },
+   purple : { hex: "DEA2EE" },
+   white: { hex: "FFFFFF" },
+   black: { hex: "000000" }
+  },
+  com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
+   default: { font: normaltext, fontColor: white },
+   normal-text: { font: normaltext, fontColor: white },
+   title-text: { font: titletext, fontColor: red }
+  },
+  com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
+   default: { up: button, down: button-down, checked: button-down, disabled: button-disabled },
+   transparent: { }
+  },
+  com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
+   default: { up: button, down: button-down, checked: button-down, disabled: button-disabled, font: normaltext, fontColor: white }
+  },
+  com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
+    button0: { name: button, color: dark   },
+    button1: { name: button, color: pale   },
+    button2: { name: button, color: red    },
+    button3: { name: button, color: orange },
+    button4: { name: button, color: yellow },
+    button5: { name: button, color: green  },
+    button6: { name: button, color: blue   },
+    button7: { name: button, color: purple },
+    
+    button-down0: { name: button-down, color: dark   },
+    button-down1: { name: button-down, color: pale   },
+    button-down2: { name: button-down, color: red    },
+    button-down3: { name: button-down, color: orange },
+    button-down4: { name: button-down, color: yellow },
+    button-down5: { name: button-down, color: green  },
+    button-down6: { name: button-down, color: blue   },
+    button-down7: { name: button-down, color: purple },
+    
+    button-disabled0: { name: button-disabled, color: dark   },
+    button-disabled1: { name: button-disabled, color: pale   },
+    button-disabled2: { name: button-disabled, color: red    },
+    button-disabled3: { name: button-disabled, color: orange },
+    button-disabled4: { name: button-disabled, color: yellow },
+    button-disabled5: { name: button-disabled, color: green  },
+    button-disabled6: { name: button-disabled, color: blue   },
+    button-disabled7: { name: button-disabled, color: purple }
+  }
+
+}

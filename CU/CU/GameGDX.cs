@@ -32,17 +32,21 @@ using com.badlogic.gdx.graphics.g2d;
 using com.badlogic.gdx.backends.lwjgl;
 using com.badlogic.gdx.graphics.glutils;
 using com.badlogic.gdx.math;
+using com.badlogic.gdx.scenes.scene2d;
+using com.badlogic.gdx.scenes.scene2d.ui;
 using Nibb = java.nio.ByteBuffer;
+using com.badlogic.gdx.scenes.scene2d.utils;
+using com.badlogic.gdx.utils.viewport;
 
 namespace CU
 {
     enum GameState
     {
-        Paused, NPC_Play, PC_Play, PC_Select
+        Paused, NPC_Play, PC_Select_Move, PC_Play_Move, PC_Select_UI, PC_Select_Action, PC_Play_Action
     }
     class GameGDX : Game
     {
-        public static OrthographicCamera camera;
+        public OrthographicCamera camera;
         SpriteBatch batch;
         TextureAtlas atlas;
         int width, height;
@@ -58,10 +62,11 @@ namespace CU
         public static float updateStep = 0.33F;
         public ShaderProgram shader;
         private static Random r = new Random();
+        InputMultiplexer multi;
         InputProc inp;
         public static Position cursor = null;
-        public static GameState state = GameState.PC_Select;
-        public static GameState previousState = GameState.PC_Select;
+        public static GameState state = GameState.PC_Select_Move;
+        public static GameState previousState = GameState.PC_Select_Move;
         public override void create()
         {
             pieces = new Texture[] {new Texture(Gdx.files.local("Assets/pack.png"), Pixmap.Format.RGBA8888, false),
@@ -76,8 +81,8 @@ namespace CU
             palette = new Texture(Gdx.files.local("Assets/PaletteDark.png"), Pixmap.Format.RGBA8888, false);
             palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-            font = new BitmapFont(Gdx.files.@internal("Assets/Monology.fnt"));
-            largeFont = new BitmapFont(Gdx.files.@internal("Assets/MonologyLarge.fnt"));
+            font = new BitmapFont(Gdx.files.local("Assets/Monology.fnt"));
+            largeFont = new BitmapFont(Gdx.files.local("Assets/MonologyLarge.fnt"));
 
             terrains = new TextureRegion[11, 2];
             for (int i = 0; i < 11; i++)
@@ -243,10 +248,15 @@ namespace CU
             receiveTime = 0;
             cursor = new Position(brain.ActiveUnit.x, brain.ActiveUnit.y);
             inp = new InputProc();
-            Gdx.input.setInputProcessor(inp);
+            UI.skin = new Skin(Gdx.files.local("Assets/ui.json"), new TextureAtlas(Gdx.files.local("Assets/ui.atlas")));
+
+            UI.stage = new Stage(new StretchViewport(1280, 720));
+            multi = new InputMultiplexer(UI.stage, inp);
+            Gdx.input.setInputProcessor(multi);
+
+
             Timer.instance().scheduleTask(new NilTask(brain.ProcessStep), 0F, updateStep);
         }
-
         public override void render()
         {
             Timer.instance().start();
@@ -256,19 +266,18 @@ namespace CU
             camera.update();
             if (state == GameState.Paused)
             { }
-            else if (state == GameState.NPC_Play || state == GameState.PC_Play)
+            else if (state == GameState.NPC_Play || state == GameState.PC_Play_Move || state == GameState.PC_Play_Action)
             {
                 stateTime += Gdx.graphics.getDeltaTime();
                 attackTime += Gdx.graphics.getDeltaTime();
                 explodeTime += Gdx.graphics.getDeltaTime();
                 receiveTime += Gdx.graphics.getDeltaTime();
+                UI.stage.act(Gdx.graphics.getDeltaTime());
             }
-            else if (state == GameState.PC_Select)
+            else if (state == GameState.PC_Select_Move || state == GameState.PC_Select_UI || state == GameState.PC_Select_Action)
             {
                 stateTime += Gdx.graphics.getDeltaTime();
             }
-            //            fastTime += Gdx.graphics.getDeltaTime() * 1.5F;
-
             batch.setProjectionMatrix(camera.combined);
 
             //shader.begin();
@@ -324,7 +333,7 @@ namespace CU
                         default:
                             break;
                     }
-                    if (state == GameState.PC_Select && brain.FieldMap.Highlight[w, h] != HighlightType.Dim && cursor.x == w && cursor.y == h)
+                    if (state == GameState.PC_Select_Move && brain.FieldMap.Highlight[w, h] != HighlightType.Dim && cursor.x == w && cursor.y == h)
                     {
                         boldness = 1;
                         highlighter = 13 + ((int)((stateTime * 9) % 6));
@@ -415,7 +424,7 @@ namespace CU
             }
             if (state == GameState.Paused)
             {
-                batch.setColor(Color.BLACK);
+                batch.setColor(new Color(20 / 32f, 0, 0, 1));
                 largeFont.setColor(Color.BLACK); //(sp.large ? largeFont : font).
                 font.setColor(Color.BLACK); //(sp.large ? largeFont : font).
                 largeFont.draw(batch, "PAUSED", camera.position.x + 12, camera.position.y + 50);
@@ -432,6 +441,7 @@ namespace CU
 
             batch.end();
 
+            UI.draw();
             //shader.end();
         }
         public override void resume()
@@ -481,9 +491,13 @@ namespace CU
         }
         public override void resize(int wide, int high)
         {
+            Effects.CenterCamera(new Position(brain.ActiveUnit.x, brain.ActiveUnit.y), 1);
+            UI.stage.getViewport().update(wide, high, true);
             camera.setToOrtho(false, wide, high);
             camera.update();
         }
+
+
         public void win()
         {
             Timer.instance().stop();
@@ -569,6 +583,39 @@ void main()
 
         public bool touchDown(int x, int y, int pointer, int button)
         {
+            if (GameGDX.state == GameState.PC_Select_Move || GameGDX.state == GameState.PC_Select_Action)
+            {
+                Vector3 v3 = Launcher.game.camera.unproject(new Vector3(x, y, 0));
+
+                float worldX = v3.x;
+                float worldY = v3.y;
+
+                //Console.WriteLine("screenX: " + screenX + ", screenY: " + screenY);
+                worldY -= 32;
+                //screenX /= 64;
+                //screenY /= 32;
+
+                int gridX = (int)((worldX / 128 + worldY / 64));
+                int gridY = (int)((worldX / 128 - worldY / 64));
+
+                GameGDX.cursor.x = gridX;
+                GameGDX.cursor.y = gridY;
+                if (GameGDX.brain.UnitGrid[GameGDX.cursor.x, GameGDX.cursor.y] == null && GameGDX.state == GameState.PC_Select_Move)
+                {
+                    GameGDX.state = GameState.PC_Play_Move;
+                }
+                else if (GameGDX.brain.ActiveUnit.x == GameGDX.cursor.x && GameGDX.brain.ActiveUnit.y == GameGDX.cursor.y && GameGDX.state == GameState.PC_Select_Action)
+                {
+                    GameGDX.brain.advanceTurn();
+                    GameGDX.state = GameState.NPC_Play;
+                }
+                else if (GameGDX.brain.UnitGrid[GameGDX.cursor.x, GameGDX.cursor.y] != null
+                    && GameGDX.brain.FieldMap.Highlight[GameGDX.cursor.x, GameGDX.cursor.y] == HighlightType.Bright 
+                    && GameGDX.state == GameState.PC_Select_Action)
+                {
+                    GameGDX.state = GameState.PC_Play_Action;
+                }
+            }
             return false;
         }
 
@@ -584,13 +631,13 @@ void main()
 
         public bool mouseMoved(int x, int y)
         {
-            if (GameGDX.state == GameState.PC_Select)
+            if (GameGDX.state == GameState.PC_Select_Move)
             {
-                Vector3 v3 = GameGDX.camera.unproject(new Vector3(x, y, 0));
+                Vector3 v3 = Launcher.game.camera.unproject(new Vector3(x, y, 0));
 
                 float worldX = v3.x;
                 float worldY = v3.y;
-                
+
                 //Console.WriteLine("screenX: " + screenX + ", screenY: " + screenY);
                 worldY -= 32;
                 //screenX /= 64;
@@ -601,18 +648,6 @@ void main()
 
                 GameGDX.cursor.x = gridX;
                 GameGDX.cursor.y = gridY;
-                /*if(GameGDX.brain.FieldMap.ValidatePosition(GameGDX.cursor))
-                {
-                    screenY = (int)v3.y;
-                    screenY -= 32 + (LocalMap.Depths[GameGDX.brain.FieldMap.Land[worldX, worldY]] *3);
-                    //Console.WriteLine("X: " + worldX + ", Y: " + worldY + ", Depth" + LocalMap.Depths[GameGDX.brain.FieldMap.Land[worldX, worldY]]);
-                    screenY /= 32;
-
-                    worldX = ((screenX + screenY) / 2);
-                    worldY = ((screenX - screenY) / 2);
-                    GameGDX.cursor.x = worldX;
-                    GameGDX.cursor.y = worldY;
-                }*/
             }
             return false;
         }
@@ -623,9 +658,9 @@ void main()
         }
 
     }
-
     class Launcher
     {
+        public static GameGDX game;
         public static void Main(string[] args)
         { //"Commanders Unite", 800, 800
             if (Environment.OSVersion.Platform == PlatformID.Unix)
@@ -689,12 +724,12 @@ void main()
             cfg.fullscreen = false;
 
 
-
-
             //            cfg.addIcon("Assets/CU32.png", Files.FileType.Local);
             //cfg.addIcon("Assets/CU16.png", Files.FileType.Local);
             //cfg.addIcon("Assets/CU128.png", Files.FileType.Local);
-            LwjglApplication app = new LwjglApplication(new GameGDX(), cfg);
+
+            game = new GameGDX();
+            LwjglApplication app = new LwjglApplication(game, cfg);
 
             /*
             string[] iconPaths = { "Assets/CU32.png", "Assets/CU16.png", "Assets/CU128.png" };

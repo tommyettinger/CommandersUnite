@@ -79,11 +79,11 @@ void main() {
         //public static ShaderProgram Bright = AlterChannels(1.35f, 1.35f, 1.35f);
         //public static ShaderProgram[] Spectrum = { AlterChannels(1.4f, 0.8f, 0.8f), AlterChannels(1.4f, 1.4f, 0.7f), AlterChannels(0.8f, 1.4f, 0.8f), AlterChannels(0.85f, 0.85f, 1.4f)};
     }*/
-    public delegate void Nilly ();
+    public delegate void NilFn ();
     public class NilTask : Timer.Task
     {
-        Nilly runner;
-        public NilTask(Nilly runner)
+        NilFn runner;
+        public NilTask(NilFn runner)
         {
             this.runner = runner;
         }
@@ -137,15 +137,16 @@ void main() {
     }
     public class Effects
     {
-        private static Vector3 oldpos = GameGDX.camera.position, newpos, midpos = oldpos;
+        private static Vector3 oldpos = Launcher.game.camera.position, newpos, midpos = oldpos;
         public static void CenterCamera(float gridX, float gridY, float stepPortion)
         {
-            oldpos = new Vector3(GameGDX.camera.position);
+            oldpos = new Vector3(Launcher.game.camera.position);
             newpos = new Vector3(64 * (gridX + gridY), 32 * (gridX - gridY) + 32, 0);
             NilTask n = new NilTask(() => {
                 midpos = midpos.add((int)((newpos.x - oldpos.x) / 16F), (int)((newpos.y - oldpos.y) / 16F), 0);
-                GameGDX.camera.position.set(midpos);
-                GameGDX.camera.update(); });
+                Launcher.game.camera.position.set(midpos);
+                Launcher.game.camera.update();
+            });
             Timer.instance().scheduleTask(n, 0, stepPortion * GameGDX.updateStep / 16F, 15);
             Timer.instance().start();
         }
