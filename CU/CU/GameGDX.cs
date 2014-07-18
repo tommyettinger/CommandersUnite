@@ -433,8 +433,8 @@ namespace CU
             foreach (Speech sp in brain.speaking)
             {
                 batch.setColor(Color.BLACK);
-                largeFont.setColor(Color.BLACK); //(sp.large ? largeFont : font).
-                (sp.large ? largeFont : font).draw(batch, sp.text, sp.worldX - (sp.text.Length * (sp.large ? 8 : 4)), sp.worldY);
+                (sp.large ? largeFont : font).setColor(Color.BLACK);
+                (sp.large ? largeFont : font).draw(batch, sp.text, sp.worldX - (sp.text.Length * (sp.large ? 8 : 4)), (sp.large) ? sp.worldY : sp.worldY - 32);
             }
             //            worldX = 20 + x * 64 + y * 64;
             //            worldY = 8 + x * 32 - y * 32;
@@ -613,6 +613,7 @@ void main()
                     && GameGDX.brain.FieldMap.Highlight[GameGDX.cursor.x, GameGDX.cursor.y] == HighlightType.Bright 
                     && GameGDX.state == GameState.PC_Select_Action)
                 {
+                    GameGDX.brain.speaking.Clear();
                     GameGDX.state = GameState.PC_Play_Action;
                 }
             }

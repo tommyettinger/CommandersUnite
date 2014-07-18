@@ -16,18 +16,7 @@
    white: { hex: "FFFFFF" },
    black: { hex: "000000" }
   },
-  com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
-   default: { font: normaltext, fontColor: white },
-   normal-text: { font: normaltext, fontColor: white },
-   title-text: { font: titletext, fontColor: red }
-  },
-  com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
-   default: { up: button, down: button-down, checked: button-down, disabled: button-disabled },
-   transparent: { }
-  },
-  com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
-   default: { up: button, down: button-down, checked: button-down, disabled: button-disabled, font: normaltext, fontColor: white }
-  },
+  
   com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
     button0: { name: button, color: dark   },
     button1: { name: button, color: pale   },
@@ -55,6 +44,35 @@
     button-disabled5: { name: button-disabled, color: green  },
     button-disabled6: { name: button-disabled, color: blue   },
     button-disabled7: { name: button-disabled, color: purple }
+  },
+  com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
+   default: { font: normaltext, fontColor: white },
+   normal-text: { font: normaltext, fontColor: white },
+   title-text: { font: titletext, fontColor: red }
+  },
+  com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
+   default: { up: button, down: button-down, checked: button-down, disabled: button-disabled },
+   color0: { up: button0, down: button-down0, checked: button-down0, disabled: button-disabled0 },
+   color1: { up: button1, down: button-down1, checked: button-down1, disabled: button-disabled1 },
+   color2: { up: button2, down: button-down2, checked: button-down2, disabled: button-disabled2 },
+   color3: { up: button3, down: button-down3, checked: button-down3, disabled: button-disabled3 },
+   color4: { up: button4, down: button-down4, checked: button-down4, disabled: button-disabled4 },
+   color5: { up: button5, down: button-down5, checked: button-down5, disabled: button-disabled5 },
+   color6: { up: button6, down: button-down6, checked: button-down6, disabled: button-disabled6 },
+   color7: { up: button7, down: button-down7, checked: button-down7, disabled: button-disabled7 },
+   transparent: { }
+  },
+  com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
+   default: { up: button, down: button-down, checked: button-down, disabled: button-disabled, font: normaltext, fontColor: white },
+   color0: { up: button0, down: button-down0, checked: button-down0, disabled: button-disabled0, font: normaltext, fontColor: white },
+   color1: { up: button1, down: button-down1, checked: button-down1, disabled: button-disabled1, font: normaltext, fontColor: white },
+   color2: { up: button2, down: button-down2, checked: button-down2, disabled: button-disabled2, font: normaltext, fontColor: white },
+   color3: { up: button3, down: button-down3, checked: button-down3, disabled: button-disabled3, font: normaltext, fontColor: white },
+   color4: { up: button4, down: button-down4, checked: button-down4, disabled: button-disabled4, font: normaltext, fontColor: white },
+   color5: { up: button5, down: button-down5, checked: button-down5, disabled: button-disabled5, font: normaltext, fontColor: white },
+   color6: { up: button6, down: button-down6, checked: button-down6, disabled: button-disabled6, font: normaltext, fontColor: white },
+   color7: { up: button7, down: button-down7, checked: button-down7, disabled: button-disabled7, font: normaltext, fontColor: white },
+   transparent: { }
   }
 
 }

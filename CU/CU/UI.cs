@@ -14,17 +14,17 @@ namespace CU
         public static Stage stage;
 
 
-        public static ScrollPane makeMenu(List<MenuEntry> entries)
+        public static ScrollPane makeMenu(List<MenuEntry> entries, int color)
         {
             VerticalGroup vg = new VerticalGroup();
             ScrollPane sp = new ScrollPane(vg);
             foreach (MenuEntry ent in entries)
             {
-                TextButton btn = new TextButton(ent.text, skin);
+                TextButton btn = new TextButton(ent.text, skin, "color" + color);
                 btn.addListener(new Changer(() => { btn.setDisabled(true); sp.setVisible(false); ent.action(); }));
                 vg.addActor(btn);
             }
-            TextButton end = new TextButton("End", skin);
+            TextButton end = new TextButton("End", skin, "color" + color);
             end.addListener(new Changer(() => { sp.setVisible(false); GameGDX.brain.advanceTurn(); sp.remove(); }));
             vg.addActor(end);
             return sp;
@@ -72,6 +72,7 @@ namespace CU
         public override void changed(ChangeEvent evt, Actor actor)
         {
             n();
+            evt.stop();
         }
     }
 }

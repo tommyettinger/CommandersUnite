@@ -1937,9 +1937,9 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
             bool[] taken = { false, false, false, false, false, false, false };
             for (int i = 1; i < 4; i++)
             {
-                int col = r.Next(7);
+                int col = (i == 1) ? r.Next(1,7) : r.Next(7);
                 while (taken[col])
-                    col = r.Next(7);
+                    col = (i == 1) ? r.Next(1, 7) : r.Next(7);
                 Colors[i] = allcolors[col];
                 ReverseColors[Colors[i]] = i;
                 taken[col] = true;
@@ -2023,8 +2023,8 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
                         if (r.Next(25) <= 3)
                         {
-                            //if(Unit.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.WheelsTraverse))
-                            //    UnitGrid[i, j] = new Unit(Unit.UnitLookup["Artillery_T"], Colors[section], section, i, j);
+                            //if(Unit.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.TreadsAmphi))
+                            //    UnitGrid[i, j] = new Unit(Unit.UnitLookup["Tank_T"], Colors[section], section, i, j);
                             //else
                                 UnitGrid[i, j] = new Unit(currentUnit, Colors[section], section, i, j);
                         }
@@ -2095,9 +2095,10 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         && w.multipliers[Unit.UnitTypeAsNumber(UnitGrid[i, j].kind)] > 0)
                     {
                         Speech s = new Speech { large = false, x = i, y = j,
-                            text = (100 - UnitGrid[i, j].dodge * 10) + "% hit, " +
-                            (int)((w.multipliers[Unit.UnitTypeAsNumber(UnitGrid[i, j].kind)] - 0.1f * UnitGrid[i, j].armor) * w.damage) + " damage"
+                            text = (100 - UnitGrid[i, j].dodge * 10) + "% / " +
+                            (int)((w.multipliers[Unit.UnitTypeAsNumber(UnitGrid[i, j].kind)] - 0.1f * UnitGrid[i, j].armor) * w.damage) + ""
                         };
+                        speaking.Add(s);
                         FieldMap.Highlight[i, j] = HighlightType.Bright;
                     }
                     else
@@ -2167,7 +2168,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                         GameGDX.stateTime = 0;
                         CurrentMode = Mode.Moving;
                     }
-                    else if (TaskSteps <= 1 && (thr == null || thr.ThreadState == ThreadState.Stopped) && GameGDX.state != GameState.PC_Play_Move)
+                    else if (TaskSteps <= 1 && (thr == null || thr.ThreadState == ThreadState.Stopped) && GameGDX.state == GameState.NPC_Play)
                     {
                         thr = new Thread(() =>
                         {
@@ -2248,7 +2249,7 @@ UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Armored,UnitType.Arm
                                     GameGDX.state = GameState.PC_Select_Action;
                                 }));
 
-                            UI.postActor(UI.makeMenu(entries));//, ActiveUnit.worldX, ActiveUnit.worldY);
+                            UI.postActor(UI.makeMenu(entries, ActiveUnit.color));//, ActiveUnit.worldX, ActiveUnit.worldY);
                             TaskSteps = 0;
                             CurrentMode = Mode.Selecting;
                             break;
