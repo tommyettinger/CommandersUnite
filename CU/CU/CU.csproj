@@ -94,7 +94,7 @@
   <ItemGroup>
     <Reference Include="gdx-cli, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>libs\gdx-cli.dll</HintPath>
+      <HintPath>.\gdx-cli.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.84.0.0, Culture=neutral, PublicKeyToken=1b03e6acf1164f73">
       <SpecificVersion>False</SpecificVersion>
@@ -239,6 +239,9 @@
     <Content Include="Assets\ui.atlas">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="gdx-cli.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="libgdx.dylib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -256,6 +259,9 @@
     </None>
     <None Include="libikvm-native64.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libjawt.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="libjglfw.dylib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -300,7 +306,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="black_outline_soft.png" />
-    <Content Include="CU.ico" />
+    <Content Include="CU.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="cube_gray_soft.png" />
     <Content Include="cube_soft.png" />
     <Content Include="flat_soft.png" />
@@ -328,7 +336,7 @@
     </Content>
     <Content Include="libs\gdx-cli-x64.dll" />
     <Content Include="libs\gdx-cli-x86.dll" />
-    <Content Include="libs\gdx-cli.dll" />
+    <Content Include="gdx-cli.dll" />
     <Content Include="libs\ICSharpCode.SharpZipLib.dll" />
     <Content Include="libs\ikvm-native-win32-x64.dll" />
     <Content Include="libs\ikvm-native-win32-x86.dll" />
