@@ -107,6 +107,8 @@ namespace CU
         public void pause()
         {
             //lock (inst) {
+            if (thread == null)
+                return;
             thread.pause();
             //}
         }
@@ -114,6 +116,8 @@ namespace CU
         public void resume()
         {
             //lock (inst) {
+            if (thread == null)
+                return;
             thread.resume();
             //}
         }

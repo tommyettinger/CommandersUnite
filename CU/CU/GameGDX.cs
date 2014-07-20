@@ -664,9 +664,11 @@ void main()
         public static GameGDX game;
         public static void Main(string[] args)
         { //"Commanders Unite", 800, 800
+            IKVM.Internal.Tracer.EnableTraceForDebug();
+            IKVM.Internal.Tracer.EnableTraceConsoleListener();
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                if (IntPtr.Size == 8 && File.Exists("libikvm-native.so") == false)
+                if (Environment.Is64BitOperatingSystem && File.Exists("libikvm-native.so") == false)
                 {
                     File.Copy("libikvm-native64.so", "libikvm-native.so");
                 }
@@ -680,21 +682,25 @@ void main()
             java.io.File nativesDir = null;
             try
             {
-                nativesDir = new java.io.File("./");
+                nativesDir = new java.io.File("");
                 
             }
             catch (Exception ex)
             {
                 throw new com.badlogic.gdx.utils.GdxRuntimeException("Unable to find LWJGL natives.", ex);
             }
-            java.lang.System.setProperty("org.lwjgl.librarypath", nativesDir.getAbsolutePath());
+            java.lang.System.setProperty("org.lwjgl.librarypath", Environment.CurrentDirectory);// nativesDir.getAbsolutePath());
             Console.WriteLine("org.lwjgl.librarypath is: " + java.lang.System.getProperty("org.lwjgl.librarypath"));
             /*Console.WriteLine(java.lang.System.getProperty("java.library.path"));*/
             //Console.ReadKey();
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                //Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", )
-                java.lang.System.setProperty("java.library.path", ((IntPtr.Size == 8) ? ".:linux-x64:" : ".:linux-x86:") + java.lang.System.getProperty("java.library.path"));
+                Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", Environment.CurrentDirectory,
+                    EnvironmentVariableTarget.Process);
+                Console.WriteLine("LD_LIBRARY_PATH is: " + Environment.GetEnvironmentVariable("LD_LIBRARY_PATH"));
+                java.lang.System.setProperty("java.library.path", ((Environment.Is64BitOperatingSystem) ? ".:./linux-x64:" : ".:./linux-x86:") + java.lang.System.getProperty("java.library.path"));
+                Console.WriteLine("java.library.path is: " + java.lang.System.getProperty("java.library.path"));
+
 //                java.lang.System.load(com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? "linux-x64/libjawt.so" : "linux-x86/libjawt.so");
             }
             loader.load("gdx");
