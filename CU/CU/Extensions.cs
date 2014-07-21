@@ -171,6 +171,7 @@ namespace CU
             else
                 return _lambdaComparer((T)x, (T)y);
         }
+        /*
         public java.util.Comparator thenComparing(java.util.Comparator uh)
         {
             return this;
@@ -198,7 +199,7 @@ namespace CU
         public java.util.Comparator reversed()
         {
             return this;
-        }
+        }*/
         public bool equals(object o)
         {
             return base.Equals(o);

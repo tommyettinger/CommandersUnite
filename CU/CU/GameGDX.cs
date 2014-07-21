@@ -666,7 +666,7 @@ void main()
         { //"Commanders Unite", 800, 800
             IKVM.Internal.Tracer.EnableTraceForDebug();
             IKVM.Internal.Tracer.EnableTraceConsoleListener();
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            /*if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 if (Environment.Is64BitOperatingSystem && File.Exists("libikvm-native.so") == false)
                 {
@@ -676,7 +676,7 @@ void main()
                 {
                     File.Copy("libikvm-native32.so", "libikvm-native.so");
                 }
-            }
+            }*/
             com.badlogic.gdx.utils.GdxNativesLoader.disableNativesLoading = true;
             com.badlogic.gdx.utils.SharedLibraryLoader loader = new com.badlogic.gdx.utils.SharedLibraryLoader();
             java.io.File nativesDir = null;
@@ -695,8 +695,8 @@ void main()
             //Console.ReadKey();
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", Environment.CurrentDirectory,
-                    EnvironmentVariableTarget.Process);
+                //Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", Environment.CurrentDirectory,
+                //    EnvironmentVariableTarget.Process);
                 Console.WriteLine("LD_LIBRARY_PATH is: " + Environment.GetEnvironmentVariable("LD_LIBRARY_PATH"));
                 java.lang.System.setProperty("java.library.path", ((Environment.Is64BitOperatingSystem) ? ".:./linux-x64:" : ".:./linux-x86:") + java.lang.System.getProperty("java.library.path"));
                 Console.WriteLine("java.library.path is: " + java.lang.System.getProperty("java.library.path"));

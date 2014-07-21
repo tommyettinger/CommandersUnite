@@ -100,55 +100,47 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.AWT.WinForms, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.AWT.WinForms, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.AWT.WinForms.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.Beans, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>libs\IKVM.OpenJDK.Beans.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Charsets, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>libs\IKVM.OpenJDK.Charsets.dll</HintPath>
-    </Reference>
-    <Reference Include="IKVM.OpenJDK.Core, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.Core, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.OpenJDK.Core.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.Media, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.Media, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.OpenJDK.Media.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.Security, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.Security, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.OpenJDK.Security.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.SwingAWT, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.SwingAWT, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.OpenJDK.SwingAWT.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.Text, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.Text, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.OpenJDK.Text.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.Tools, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.Tools, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.OpenJDK.Tools.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.OpenJDK.Util, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.OpenJDK.Util, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.OpenJDK.Util.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.Reflection, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.Reflection, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.Reflection.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.Runtime, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.Runtime, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="IKVM.Runtime.JNI, Version=8.0.5305.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IKVM.Runtime.JNI, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\IKVM.Runtime.JNI.dll</HintPath>
     </Reference>
@@ -254,12 +246,13 @@
     <None Include="libgdx64.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="libikvm-native32.so">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="libikvm-native64.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="libikvm-native32.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="libikvm-native64_.so" />
     <None Include="libjawt.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -341,19 +334,8 @@
     <Content Include="libs\ikvm-native-win32-x64.dll" />
     <Content Include="libs\ikvm-native-win32-x86.dll" />
     <Content Include="libs\IKVM.AWT.WinForms.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Beans.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Charsets.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Cldrdata.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Corba.dll" />
     <Content Include="libs\IKVM.OpenJDK.Core.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Jdbc.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Localedata.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Management.dll" />
     <Content Include="libs\IKVM.OpenJDK.Media.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Misc.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Naming.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Nashorn.dll" />
-    <Content Include="libs\IKVM.OpenJDK.Remoting.dll" />
     <Content Include="libs\IKVM.OpenJDK.Security.dll" />
     <Content Include="libs\IKVM.OpenJDK.SwingAWT.dll" />
     <Content Include="libs\IKVM.OpenJDK.Text.dll" />
