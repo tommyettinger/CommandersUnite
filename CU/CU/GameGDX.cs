@@ -666,6 +666,7 @@ void main()
         { //"Commanders Unite", 800, 800
             IKVM.Internal.Tracer.EnableTraceForDebug();
             IKVM.Internal.Tracer.EnableTraceConsoleListener();
+            ikvm.runtime.Startup.setProperties(new Dictionary<string, string> { { "java.library.path", "."} });
             /*if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 if (Environment.Is64BitOperatingSystem && File.Exists("libikvm-native.so") == false)
@@ -698,7 +699,7 @@ void main()
                 //Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", Environment.CurrentDirectory,
                 //    EnvironmentVariableTarget.Process);
                 Console.WriteLine("LD_LIBRARY_PATH is: " + Environment.GetEnvironmentVariable("LD_LIBRARY_PATH"));
-                java.lang.System.setProperty("java.library.path", ((Environment.Is64BitOperatingSystem) ? ".:./linux-x64:" : ".:./linux-x86:") + java.lang.System.getProperty("java.library.path"));
+                //java.lang.System.setProperty("java.library.path", ((Environment.Is64BitOperatingSystem) ? ".:./linux-x64:" : ".:./linux-x86:") + java.lang.System.getProperty("java.library.path"));
                 Console.WriteLine("java.library.path is: " + java.lang.System.getProperty("java.library.path"));
 
 //                java.lang.System.load(com.badlogic.gdx.utils.SharedLibraryLoader.is64Bit ? "linux-x64/libjawt.so" : "linux-x86/libjawt.so");

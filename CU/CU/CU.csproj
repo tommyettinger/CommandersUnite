@@ -265,6 +265,10 @@
     <None Include="libjglfw64.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="libjinput-linux.so" />
+    <None Include="libjinput-linux64.so" />
+    <None Include="libjinput-osx.dylib" />
+    <None Include="liblwjgl.dylib" />
     <None Include="linux-x86\libjawt.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -306,6 +310,10 @@
     <Content Include="cube_soft.png" />
     <Content Include="flat_soft.png" />
     <Content Include="Assets\PaletteDarkMod.png" />
+    <Content Include="jinput-dx8.dll" />
+    <Content Include="jinput-dx8_64.dll" />
+    <Content Include="jinput-raw.dll" />
+    <Content Include="jinput-raw_64.dll" />
     <Content Include="libs\gdx-jglfw.dll" />
     <Content Include="gdx.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
