@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.StringBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
-
+import static ch.lambdaj.Lambda.*;
 public class Logic
 {
     public static StringBuilder log = new StringBuilder();
@@ -204,7 +204,7 @@ public class Logic
     {
         for (int j = 1; j < height - 1; j++)
         {
-            if (targetColors.stream().anyMatch(c -> placing[i - 1][j - 1] != null && c == placing[i - 1][j - 1].color))
+            if (targetColors.(c -> placing[i - 1][j - 1] != null && c == placing[i - 1][j - 1].color))
             {
                 if (weapon.multipliers[Unit.UnitTypeAsNumber(placing[i - 1][j - 1].kind)] > 0) {
                     Position tgt = new Position(i - 1, j - 1);
