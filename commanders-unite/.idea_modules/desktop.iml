@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="scala" name="Scala">
+      <configuration>
+        <option name="compilerLibraryLevel" value="Project" />
+        <option name="compilerLibraryName" value="SBT: scala:2.11.1" />
+        <option name="compilerOptions" value="-unchecked -deprecation" />
+        <option name="deprecationWarnings" value="true" />
+        <option name="fsc" value="true" />
+        <option name="languageLevel" value="Scala 2.11" />
+        <option name="uncheckedWarnings" value="true" />
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../desktop/target/scala-2.11/classes" />
+    <output-test url="file://$MODULE_DIR$/../desktop/target/scala-2.11/test-classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../desktop">
+      <sourceFolder url="file://$MODULE_DIR$/../desktop/src/main/scala" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../desktop/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../desktop/src/main/resources" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../android/assets" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../desktop/src/test/scala" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../desktop/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../desktop/src/test/resources" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/../desktop/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.1" level="project" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx:1.2.0" level="project" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx-backend-lwjgl:1.2.0" level="project" />
+    <orderEntry type="library" name="SBT: org.lwjgl.lwjgl:lwjgl:2.9.1" level="project" />
+    <orderEntry type="library" name="SBT: org.lwjgl.lwjgl:lwjgl-platform:2.9.1" level="project" />
+    <orderEntry type="library" name="SBT: net.java.jinput:jinput:2.0.5" level="project" />
+    <orderEntry type="library" name="SBT: net.java.jutils:jutils:1.0.0" level="project" />
+    <orderEntry type="library" name="SBT: net.java.jinput:jinput-platform:2.0.5" level="project" />
+    <orderEntry type="library" name="SBT: org.lwjgl.lwjgl:lwjgl_util:2.9.1" level="project" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.jlayer:jlayer:1.0.1-gdx" level="project" />
+    <orderEntry type="library" name="SBT: org.jcraft:jorbis:0.0.17" level="project" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx-platform:1.2.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="SBT: net.sf.proguard:proguard-base:4.11:provided" level="project" />
+    <orderEntry type="module" module-name="core" exported="" />
+  </component>
+</module>
+

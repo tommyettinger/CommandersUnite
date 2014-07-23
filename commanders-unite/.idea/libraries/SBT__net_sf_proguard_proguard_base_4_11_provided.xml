@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="SBT: net.sf.proguard:proguard-base:4.11:provided">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/net.sf.proguard/proguard-base/jars/proguard-base-4.11.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/net.sf.proguard/proguard-base/srcs/proguard-base-4.11-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

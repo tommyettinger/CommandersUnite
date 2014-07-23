@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SBT: com.badlogicgames.gdx:gdx-platform:1.2.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.badlogicgames.gdx/gdx-platform/jars/gdx-platform-1.2.0-natives-desktop.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

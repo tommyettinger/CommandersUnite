@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="scala" name="Scala">
+      <configuration>
+        <option name="compilerLibraryLevel" value="Project" />
+        <option name="compilerLibraryName" value="SBT: scala:2.11.1" />
+        <option name="compilerOptions" value="-unchecked -deprecation" />
+        <option name="deprecationWarnings" value="true" />
+        <option name="fsc" value="true" />
+        <option name="languageLevel" value="Scala 2.11" />
+        <option name="uncheckedWarnings" value="true" />
+      </configuration>
+    </facet>
+    <facet type="android" name="Android">
+      <configuration>
+        <option name="GEN_FOLDER_RELATIVE_PATH_APT" value="/../android/gen" />
+        <option name="GEN_FOLDER_RELATIVE_PATH_AIDL" value="/../android/gen" />
+        <option name="MANIFEST_FILE_RELATIVE_PATH" value="/../android/AndroidManifest.xml" />
+        <option name="RES_FOLDER_RELATIVE_PATH" value="/../android/res" />
+        <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/../android/assets" />
+        <option name="LIBS_FOLDER_RELATIVE_PATH" value="/../android/libs" />
+        <option name="PROGUARD_LOGS_FOLDER_RELATIVE_PATH" value="/../android/proguard_logs" />
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../android/bin/classes" />
+    <output-test url="file://$MODULE_DIR$/../android/target/scala-2.11/test-classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../android">
+      <sourceFolder url="file://$MODULE_DIR$/../android/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../android/res" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../android/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../android/tests/resources" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../android/gen" isTestSource="false" generated="true" />
+      <excludeFolder url="file://$MODULE_DIR$/../android/target" />
+    </content>
+    <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.1" level="project" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx:1.2.0" level="project" />
+    <orderEntry type="library" name="SBT: com.badlogicgames.gdx:gdx-backend-android:1.2.0" level="project" />
+    <orderEntry type="library" name="classes" level="project" />
+    <orderEntry type="module" module-name="core" exported="" />
+  </component>
+</module>
+
