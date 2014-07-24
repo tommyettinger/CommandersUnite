@@ -9,10 +9,10 @@ import commanders.unite.PieceType.PieceType
 import commanders.unite.VisualAction.VisualAction
 import commanders.unite.WeaponType.WeaponType
 
-import collection.mutable._
+import scala.collection.mutable._
 import scala.collection.mutable
 import scala.util.Random
-
+import commanders.unite.Extensions._
 /*
 LINQ conversion table
 
@@ -348,11 +348,11 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       }
     }
   }
-    class Piece(unitIndex:Int,
-               color:Int,
+    class Piece(val unitIndex:Int,
+               val color:Int,
                var facingNumber:Int,
-               x:Int,
-               y:Int,
+               var x:Int,
+               var y:Int,
 
                var name:String = Piece.CurrentPieces(unitIndex),
                var facing:Direction = Direction.SE,
@@ -406,6 +406,9 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
     }
   }
   object Logic {
+    type IntMat   = Array[Array[Int]]
+    type FloatMat = Array[Array[Float]]
+    type PieceMat = Array[Array[Piece]]
     def log = new StringBuilder()
     def CurrentMode = Mode.Selecting
     def width = 24
@@ -445,295 +448,167 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         case _ => return 0
       }
     }
-    float[, ] DijkstraAttackPositions(Weapon weapon, MovementType mobility, int selfColor, int[] targetColors, int[, ] grid, Piece[, ] placing, float[, ] d)
+
+
+    var bestMoves = new ArrayBuffer[Position]
+    var movesToTargets = new HashMap[Position, Position]
+    var best:Position = null
+    var gradient = Array.ofDim[Float](width+2, height+2)
+
+    def movementAbility(mobility:MovementType):Array[Int] =
     {
-      int width = d.GetLength(0);
-      int height = d.GetLength(1);
-      int wall = 2222;
-      int goal = 0;
-
-      Dictionary < Position, float > open = new Dictionary < Position, float >(),
-      fringe = new Dictionary < Position, float >(),
-      closed = new Dictionary < Position, float >();
-
-      int[] ability =
-        new int[] {
-          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-        };
       //plains forest desert jungle hills mountains ruins tundra road river basement
-      Dictionary < MovementType, bool > pass = new Dictionary < MovementType, bool > {
-      {
-        MovementType.Foot, true
-      },
-      {
-        MovementType.Treads, true
-      },
-      {
-        MovementType.Wheels, true
-      },
-      {
-        MovementType.TreadsAmphi, true
-      },
-      {
-        MovementType.WheelsTraverse, true
-      },
-      {
-        MovementType.Flight, true
-      },
-      {
-        MovementType.FlightFlyby, true
-      },
-      {
-        MovementType.Immobile, false
-      },
-    };
-      switch(mobility) {
-        case MovementType.Foot:
-        ability =
-          new int[] {
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-          };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, true
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, true
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.Treads:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.Wheels:
-          ability =
-        new int[] {
-          1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.TreadsAmphi:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.WheelsTraverse:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.Flight:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, true
-          },
-          {
-            MovementType.Treads, true
-          },
-          {
-            MovementType.Wheels, true
-          },
-          {
-            MovementType.TreadsAmphi, true
-          },
-          {
-            MovementType.WheelsTraverse, true
-          },
-          {
-            MovementType.Flight, false
-          },
-          {
-            MovementType.FlightFlyby, false
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.FlightFlyby:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, true
-          },
-          {
-            MovementType.Treads, true
-          },
-          {
-            MovementType.Wheels, true
-          },
-          {
-            MovementType.TreadsAmphi, true
-          },
-          {
-            MovementType.WheelsTraverse, true
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
+      mobility match {
+        case MovementType.Foot =>
+          Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+        case MovementType.Treads =>
+          Array(1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0)
+
+        case MovementType.Wheels =>
+          Array(1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0)
+
+        case MovementType.TreadsAmphi =>
+          Array(1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0)
+
+        case MovementType.WheelsTraverse =>
+          Array(1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0)
+
+        case MovementType.Flight =>
+          Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+        case MovementType.FlightFlyby =>
+          Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+        case _ =>
+          Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
       }
-      movesToTargets.Clear();
-      for (int i = 1;
-      i < width - 1;
-      i ++)
+    }
+
+    def movementPass(mobility:MovementType):HashMap[MovementType, Boolean] =
+    {
+      mobility match {
+        case MovementType.Foot =>
+          HashMap[MovementType, Boolean](
+            MovementType.Foot -> false,
+            MovementType.Treads -> true,
+            MovementType.Wheels -> false,
+            MovementType.TreadsAmphi -> true,
+            MovementType.WheelsTraverse -> false,
+            MovementType.Flight -> true,
+            MovementType.FlightFlyby -> true,
+            MovementType.Immobile -> false
+          )
+        case MovementType.Treads =>
+          HashMap[MovementType, Boolean](
+            MovementType.Foot -> false,
+            MovementType.Treads -> false,
+            MovementType.Wheels -> false,
+            MovementType.TreadsAmphi -> false,
+            MovementType.WheelsTraverse -> false,
+            MovementType.Flight -> true,
+            MovementType.FlightFlyby -> true,
+            MovementType.Immobile -> false
+          )
+        case MovementType.Wheels =>
+          HashMap[MovementType, Boolean](
+            MovementType.Foot -> false,
+            MovementType.Treads -> false,
+            MovementType.Wheels -> false,
+            MovementType.TreadsAmphi -> false,
+            MovementType.WheelsTraverse -> false,
+            MovementType.Flight -> true,
+            MovementType.FlightFlyby -> true,
+            MovementType.Immobile -> false
+          )
+        case MovementType.TreadsAmphi =>
+          HashMap[MovementType, Boolean](
+            MovementType.Foot -> false,
+            MovementType.Treads -> false,
+            MovementType.Wheels -> false,
+            MovementType.TreadsAmphi -> false,
+            MovementType.WheelsTraverse -> false,
+            MovementType.Flight -> true,
+            MovementType.FlightFlyby -> true,
+            MovementType.Immobile -> false
+          )
+        case MovementType.WheelsTraverse =>
+          HashMap[MovementType, Boolean](
+            MovementType.Foot -> false,
+            MovementType.Treads -> false,
+            MovementType.Wheels -> false,
+            MovementType.TreadsAmphi -> false,
+            MovementType.WheelsTraverse -> false,
+            MovementType.Flight -> true,
+            MovementType.FlightFlyby -> true,
+            MovementType.Immobile -> false
+          )
+        case MovementType.Flight =>
+          HashMap[MovementType, Boolean](
+            MovementType.Foot -> true,
+            MovementType.Treads -> true,
+            MovementType.Wheels -> true,
+            MovementType.TreadsAmphi -> true,
+            MovementType.WheelsTraverse -> true,
+            MovementType.Flight -> false,
+            MovementType.FlightFlyby -> false,
+            MovementType.Immobile -> false
+          )
+        case MovementType.FlightFlyby =>
+          HashMap[MovementType, Boolean](
+            MovementType.Foot -> true,
+            MovementType.Treads -> true,
+            MovementType.Wheels -> true,
+            MovementType.TreadsAmphi -> true,
+            MovementType.WheelsTraverse -> true,
+            MovementType.Flight -> true,
+            MovementType.FlightFlyby -> true,
+            MovementType.Immobile -> false
+          )
+        case _ =>
+      HashMap[MovementType, Boolean](
+      MovementType.Foot -> false,
+      MovementType.Treads -> false,
+      MovementType.Wheels -> false,
+      MovementType.TreadsAmphi -> false,
+      MovementType.WheelsTraverse -> false,
+      MovementType.Flight -> false,
+      MovementType.FlightFlyby -> false,
+      MovementType.Immobile -> false
+      )
+      }
+
+    }
+
+    def DijkstraAttackPositions(weapon:Weapon, mobility:MovementType, selfColor:Int, targetColors:List[Int], grid:IntMat, placing:PieceMat, d:FloatMat) : FloatMat =
+    {
+      val width = d.length
+      val height = d(0).length
+      val wall:Float = 2222
+      val goal:Float = 0
+
+      val open = new HashMap[Position, Float]()
+      val fringe = new HashMap[Position, Float]()
+      val closed = new HashMap[Position, Float]()
+
+      val ability = movementAbility(mobility)
+      val pass = movementPass(mobility)
+      movesToTargets.clear()
+      for (i <- 1 to width - 1)
       {
-        for (int j = 1;
-        j < height - 1;
-        j ++)
+        for (j <- 1 to height - 1)
         {
-          if (targetColors.Any(c => placing[i - 1, j - 1] != null && c == placing[i - 1, j - 1].color) )
+          if (targetColors.exists(c => placing(i - 1)(j - 1) != null && c == placing(i - 1)(j - 1).color) )
           {
-            if (weapon.multipliers[Piece.PieceTypeAsNumber(placing[i - 1, j - 1].kind)] > 0)
+            if (weapon.multipliers(Piece.PieceTypeAsNumber(placing(i - 1)(j - 1).kind)) > 0)
             {
-              Position tgt = new Position(i - 1, j - 1);
-              foreach(Position p in Position.WithinRange(i, j, 1, 1, width - 1, height - 1, weapon.minRange, weapon.maxRange))
+              val tgt = Position(i - 1, j - 1)
+              for(p <- Position.WithinRange(i, j, 1, 1, width - 1, height - 1, weapon.minRange, weapon.maxRange))
               {
-                if (ability[grid[p.x - 1, p.y - 1]] == 1 && placing[p.x - 1, p.y - 1] == null)
+                if (ability(grid(p.x - 1)(p.y - 1)) == 1 && placing(p.x - 1)(p.y - 1) == null)
                 {
-                  d[p.x, p.y] = goal;
-                  open[p] = goal;
-                  movesToTargets[ new Position(p.x - 1, p.y - 1)] = tgt;
+                  d(p.x)(p.y) = goal
+                  open(p) = goal
+                  movesToTargets(Position(p.x - 1, p.y - 1)) = tgt
                 }
               }
             }
@@ -753,53 +628,52 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                 }
             }*/
           }
-          else if (d[i, j] >= wall) {
-          closed[ new Position(i, j)] = wall;
-        }
+          else if (d(i)(j) >= wall) {
+            closed(Position(i, j)) = wall
+          }
         }
       }
 
 
-      while (open.Count > 0) {
-        foreach( var idx_dijk in open)
+      while (open.size > 0) {
+        for(idx_dijk <- open)
         {
-          List < Position > moves = idx_dijk.Key.Adjacent(width, height);
-          foreach(Position mov in moves)
-          if (open.ContainsKey(mov) ||
-            closed.ContainsKey(mov) ||
-            d[mov.x, mov.y] >= wall ||
-            d[mov.x, mov.y] <= idx_dijk.Value + 1) {
-
+          var moves = idx_dijk._1.Adjacent(width, height)
+          for(mov <- moves)
+          if (open.contains(mov) ||
+              closed.contains(mov) ||
+            d(mov.x)(mov.y) >= wall ||
+            d(mov.x)(mov.y) <= idx_dijk._2 + 1) {
           }
           else if (
-            ability[grid[mov.x - 1, mov.y - 1]] == 1
-          && placing[mov.x - 1, mov.y - 1] == null)
+            ability(grid(mov.x - 1)(mov.y - 1)) == 1
+          && placing(mov.x - 1)(mov.y - 1) == null)
           {
-            fringe[mov] = (idx_dijk.Value + 1);
-            d[mov.x, mov.y] = idx_dijk.Value + 1;
+            fringe(mov) = idx_dijk._2 + 1
+            d(mov.x)(mov.y) = idx_dijk._2 + 1
           }
           else if (
-          ability[grid[mov.x - 1, mov.y - 1]] == 1 &&
-          (placing[mov.x - 1, mov.y - 1] != null &&
-          (pass[placing[mov.x - 1, mov.y - 1].mobility] ||
-          (placing[mov.x - 1, mov.y - 1].color == selfColor &&
-          placing[mov.x - 1, mov.y - 1].mobility != MovementType.Immobile)
+          ability(grid(mov.x - 1)(mov.y - 1)) == 1 &&
+            (placing(mov.x - 1)(mov.y - 1) != null &&
+              (pass(placing(mov.x - 1)(mov.y - 1).mobility) ||
+              (placing(mov.x - 1)(mov.y - 1).color == selfColor &&
+               placing(mov.x - 1)(mov.y - 1).mobility != MovementType.Immobile)
           ) ) )
           {
-            fringe[mov] = (idx_dijk.Value + 1);
-            d[mov.x, mov.y] = idx_dijk.Value + 1;
+            fringe(mov) = idx_dijk._2 + 1
+            d(mov.x)(mov.y) = idx_dijk._2 + 1;
           }
         }
-        foreach( var kv in open)
+        for(kv <- open)
         {
-          closed[kv.Key] = (kv.Value);
+          closed(kv._1) = kv._2
         }
-        open.Clear();
-        foreach( var kv in fringe)
+        open.clear()
+        for(kv <- fringe)
         {
-          open[kv.Key] = (kv.Value);
+          open(kv._1) = kv._2
         }
-        fringe.Clear();
+        fringe.clear()
 
       }
       /*
@@ -820,24 +694,11 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       }*/
       return d;
     }
-    public static void writeShowLog (string text) {
-      #if DEBUG
-      //log.Append (text + "\n");
-      //Console.WriteLine(text);
-      #endif
-    }
-    List < Position > bestMoves = new List < Position >();
-    Dictionary < Position, Position > movesToTargets = new Dictionary < Position, Position >();
-    Position best = null;
-    float[, ] ViableMoves(Piece self, int currentWeapon, int[, ] grid, Piece[, ] placing)
+    def ViableMoves(self:Piece, currentWeapon:Int, grid:IntMat, placing:PieceMat) : FloatMat =
     {
-      writeShowLog("\n" + "* * " + self.name + " * *");
-      writeShowLog("Piece is at: " + self.x + ", " + self.y);
-      gradient = SmartDijkstra(self, currentWeapon, grid, placing, ((self.color == 0) ? new int[] {
-        1, 2, 3, 4, 5, 6, 7
-      }: new int[] {
-      0
-    }) );
+      gradient = SmartDijkstra(self, currentWeapon, grid, placing,
+        if (self.color == 0) Array(1, 2, 3, 4, 5, 6, 7) else Array(0)
+      )
       /*for (int i = 0; i < 25; i++)
       {
           StringBuilder lg = new StringBuilder();
@@ -850,388 +711,111 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           }
           Gdx.app.log("CU", lg.ToString());
       }*/
-      int width = gradient.GetLength(0);
-      int height = gradient.GetLength(1);
-      int wall = 2222;
-      int goal = 0;
-      float unexplored = 1111;
+      val width = gradient.length
+      val height = gradient(0).length
+      val wall:Float = 2222
+      val goal:Float = 0
+      val unexplored:Float = 1111
 
-      bestMoves = new List < Position > {
-        new Position(self.x, self.y)
-      };
-      Dictionary < Position, float >
-      open = new Dictionary < Position, float > {
+      bestMoves = ArrayBuffer(Position(self.x, self.y))
+
+      var open = HashMap(Position(self.x + 1, self.y + 1) -> goal)
+      var fringe = new HashMap[Position, Float]
+      var closed = new HashMap[Position, Float]
+
+      var radiate = Array.ofDim[Float](width, height)
+
+      for (i <- 1 to width - 1)
       {
-        new Position(self.x + 1, self.y + 1), goal
-      }
-    },
-      fringe = new Dictionary < Position, float >(),
-      closed = new Dictionary < Position, float >();
-
-
-      float[, ] radiate = new float[width, height];
-
-      for (int i = 1;
-      i < width - 1;
-      i ++)
-      {
-        for (int j = 1;
-        j < height - 1;
-        j ++)
-        radiate[i, j] = unexplored;
+        for (j <- 1 to height - 1) {
+          radiate(i)(j) = unexplored
+        }
       }
 
-      for (int i = 0;
-      i < width;
-      i ++)
+      for (i <- 0 to width)
       {
-        radiate[i, 0] = wall;
-        radiate[i, (height - 1)] = wall;
+        radiate(i)(0) = wall
+        radiate(i)(height - 1) = wall
 
       }
-      for (int j = 1;
-      j < height - 1;
-      j ++)
+      for (j <- 1 to height - 1)
       {
-        radiate[ 0, j] = wall;
-        radiate[(width - 1), j] = wall;
+        radiate(0)(j) = wall
+        radiate(width - 1)(j) = wall
       }
 
-      for (int i = 0;
-      i < width;
-      i ++)
+      for (i <- 0 to width)
       {
-        for (int j = 0;
-        j < height;
-        j ++)
+        for (j <- 0 to height)
         {
-          if (radiate[i, j] >= wall) // || gradient[i,j] >= wall) {
-            closed[ new Position(i, j)] = wall;
+          if (radiate(i)(j) >= wall) {
+            closed(Position(i, j)) = wall
           }
         }
       }
-      radiate[self.x + 1, self.y + 1] = goal;
-      int[] ability =
-        new int[] {
-          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-        };
-      //plains forest desert jungle hills mountains ruins tundra road river basement
-      Dictionary < MovementType, bool > pass = new Dictionary < MovementType, bool > {
+      radiate(self.x + 1)(self.y + 1) = goal;
+      val ability = movementAbility(self.mobility)
+      val pass = movementPass(self.mobility)
+      var furthest:Float = 0;
+      var lowest:Float = 1000;
+      if (gradient(self.x + 1)(self.y + 1) <= goal)
       {
-        MovementType.Foot, true
-      },
-      {
-        MovementType.Treads, true
-      },
-      {
-        MovementType.Wheels, true
-      },
-      {
-        MovementType.TreadsAmphi, true
-      },
-      {
-        MovementType.WheelsTraverse, true
-      },
-      {
-        MovementType.Flight, true
-      },
-      {
-        MovementType.FlightFlyby, true
-      },
-      {
-        MovementType.Immobile, false
-      },
-    };
-      switch(self.mobility) {
-        case MovementType.Foot:
-        ability =
-          new int[] {
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-          };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, true
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, true
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.Treads:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.Wheels:
-          ability =
-        new int[] {
-          1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.TreadsAmphi:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.WheelsTraverse:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.Flight:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, true
-          },
-          {
-            MovementType.Treads, true
-          },
-          {
-            MovementType.Wheels, true
-          },
-          {
-            MovementType.TreadsAmphi, true
-          },
-          {
-            MovementType.WheelsTraverse, true
-          },
-          {
-            MovementType.Flight, false
-          },
-          {
-            MovementType.FlightFlyby, false
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.FlightFlyby:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, true
-          },
-          {
-            MovementType.Treads, true
-          },
-          {
-            MovementType.Wheels, true
-          },
-          {
-            MovementType.TreadsAmphi, true
-          },
-          {
-            MovementType.WheelsTraverse, true
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-      }
-      float furthest = 0;
-      float lowest = 1000;
-      if (gradient[self.x + 1, self.y + 1] <= goal)
-      {
-        radiate.Fill(wall);
-        radiate[self.x + 1, self.y + 1] = goal;
+        radiate = Array.fill[Float](width, height)(wall)
+        radiate(self.x + 1)(self.y + 1) = goal
       }
       else
       {
-        while (open.Count > 0 && furthest < self.speed) {
-          foreach( var idx_dijk in open)
+        while (open.size > 0 && furthest < self.speed) {
+          for(idx_dijk <- open)
           {
-            List < Position > moves = idx_dijk.Key.Adjacent(width, height);
-            foreach(Position mov in moves)
-            if (open.ContainsKey(mov) ||
-              closed.ContainsKey(mov) ||
-              radiate[mov.x, mov.y] >= wall ||
-              radiate[mov.x, mov.y] <= idx_dijk.Value + 1) {
+            var moves = idx_dijk._1.Adjacent(width, height)
+            for(mov <- moves)
+              if (open.contains(mov) ||
+                closed.contains(mov) ||
+                radiate(mov.x)(mov.y) >= wall ||
+                radiate(mov.x)(mov.y) <= idx_dijk._2 + 1) {
+              }
+              else if (
+                     ability(grid(mov.x - 1)(mov.y - 1)) == 1
+                       && placing(mov.x - 1)(mov.y - 1) == null)
+                   {
+                     fringe(mov) = idx_dijk._2 + 1
+                     radiate(mov.x)(mov.y) = idx_dijk._2 + 1
+                     if (gradient(mov.x)(mov.y) < lowest)
+                     {
+                       //bestMoves.Clear();
+                       bestMoves += Position(mov.x - 1,mov.y - 1)
+                       lowest = gradient(mov.x)(mov.y)
+                     }
+                     else if (gradient(mov.x)(mov.y) == lowest) {
+                       bestMoves+= Position(mov.x - 1, mov.y - 1)
+                     }
+                   }
+              else if (
+                     ability(grid(mov.x - 1)(mov.y - 1)) == 1 &&
+                       (placing(mov.x - 1)(mov.y - 1) != null &&
+                         (pass(placing(mov.x - 1)(mov.y - 1).mobility) ||
+                           (placing(mov.x - 1)(mov.y - 1).color == self.color &&
+                             placing(mov.x - 1)(mov.y - 1).mobility != MovementType.Immobile)
+                           ) ) )
+                   {
+                     fringe(mov) = idx_dijk._2 + 1
+                     radiate(mov.x)(mov.y) = idx_dijk._2 + 1;
+                   }
 
-            }
-            else if (
-              ability[grid[mov.x - 1, mov.y - 1]] == 1 &&
-            placing[mov.x - 1, mov.y - 1] == null)
-            {
-              fringe[mov] = (idx_dijk.Value + 1);
-              radiate[mov.x, mov.y] = idx_dijk.Value + 1;
-              if (gradient[mov.x, mov.y] < lowest) {
-                //bestMoves.Clear();
-                bestMoves.Add(new Position {
-                  x = mov.x - 1, y = mov.y - 1
-                });
-                lowest = gradient[mov.x, mov.y];
-              }
-              else if (gradient[mov.x, mov.y] == lowest) {
-                bestMoves.Add(new Position {
-                  x = mov.x - 1, y = mov.y - 1
-                });
-              }
-            }
-            else if (
-            ability[grid[mov.x - 1, mov.y - 1]] == 1 &&
-            (placing[mov.x - 1, mov.y - 1] != null &&
-            (//Math.Abs(self.x - (mov.x - 1)) + Math.Abs(self.y - (mov.y - 1)) < self.speed &&
-              (pass[placing[mov.x - 1, mov.y - 1].mobility] ||
-            (placing[mov.x - 1, mov.y - 1].color == self.color &&
-            placing[mov.x - 1, mov.y - 1].mobility != MovementType.Immobile)
-            ) ) ) )
-            {
-              radiate[mov.x, mov.y] = idx_dijk.Value + 1;
-              fringe[mov] = (idx_dijk.Value + 1);
-              //furthest = Math.Max(idx_dijk.Value + 1, furthest);
-            }
           }
-          foreach( var kv in open)
+
+          for(kv <- open)
           {
-            closed[kv.Key] = (kv.Value);
+            closed(kv._1) = kv._2
           }
-          open.Clear();
-          foreach( var kv in fringe)
+          open.clear()
+          for(kv <- fringe)
           {
-            open[kv.Key] = (kv.Value);
+            open(kv._1) = kv._2
           }
-          fringe.Clear();
-          furthest ++;
+          fringe.clear()
+          furthest = furthest+1
         }
       }
       /*for (int i = 0; i < width; i++)
@@ -1243,538 +827,238 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           }
       }*/
 
-      return radiate;
+      radiate
     }
 
-    float[, ] dijkstraInner(Piece self, int[, ] grid, Piece[, ] placing, float[, ] d)
+    def dijkstraInner(self:Piece, grid:IntMat, placing:PieceMat, d:FloatMat) : FloatMat =
     {
-      int width = d.GetLength(0);
-      int height = d.GetLength(1);
-      int wall = 2222;
-      int goal = 0;
 
-      Dictionary < Position, float > open = new Dictionary < Position, float >(),
-      fringe = new Dictionary < Position, float >(),
-      closed = new Dictionary < Position, float >();
+      val width = d.length
+      val height = d(0).length
+      val wall:Float = 2222
+      val goal:Float = 0
 
-      for (int i = 0;
-      i < width;
-      i ++)
-      {
-        for (int j = 0;
-        j < height;
-        j ++)
-        {
-          if (d[i, j] == goal) {
-            open[ new Position(i, j)] = goal;
+      val open = new HashMap[Position, Float]()
+      val fringe = new HashMap[Position, Float]()
+      val closed = new HashMap[Position, Float]()
+
+      val ability = movementAbility(self.mobility)
+      val pass = movementPass(self.mobility)
+
+      for (i <- 0 to width) {
+        for (j <- 0 to height) {
+          if (d(i)(j) == goal) {
+            open(Position(i, j)) = goal
           }
-          /*else if (d[i, j] == ultimate)
-          {
-              open[new Position(i, j)] = goal;
-          }*/
-          else if (d[i, j] >= wall) {
-            closed[ new Position(i, j)] = wall;
+          else if (d(i)(j) >= wall) {
+            closed(Position(i, j)) = wall
           }
         }
       }
 
-      int[] ability =
-        new int[] {
-          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-        };
-      //plains forest desert jungle hills mountains ruins tundra road river basement
-      Dictionary < MovementType, bool > pass = new Dictionary < MovementType, bool > {
-      {
-        MovementType.Foot, true
-      },
-      {
-        MovementType.Treads, true
-      },
-      {
-        MovementType.Wheels, true
-      },
-      {
-        MovementType.TreadsAmphi, true
-      },
-      {
-        MovementType.WheelsTraverse, true
-      },
-      {
-        MovementType.Flight, true
-      },
-      {
-        MovementType.FlightFlyby, true
-      },
-      {
-        MovementType.Immobile, false
-      },
-    };
-      switch(self.mobility) {
-        case MovementType.Foot:
-        ability =
-          new int[] {
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-          };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, true
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, true
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.Treads:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.Wheels:
-          ability =
-        new int[] {
-          1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.TreadsAmphi:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.WheelsTraverse:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, false
-          },
-          {
-            MovementType.Treads, false
-          },
-          {
-            MovementType.Wheels, false
-          },
-          {
-            MovementType.TreadsAmphi, false
-          },
-          {
-            MovementType.WheelsTraverse, false
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.Flight:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, true
-          },
-          {
-            MovementType.Treads, true
-          },
-          {
-            MovementType.Wheels, true
-          },
-          {
-            MovementType.TreadsAmphi, true
-          },
-          {
-            MovementType.WheelsTraverse, true
-          },
-          {
-            MovementType.Flight, false
-          },
-          {
-            MovementType.FlightFlyby, false
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-        case MovementType.FlightFlyby:
-          ability =
-        new int[] {
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-        };
-        pass = new Dictionary < MovementType, bool > {
-          {
-            MovementType.Foot, true
-          },
-          {
-            MovementType.Treads, true
-          },
-          {
-            MovementType.Wheels, true
-          },
-          {
-            MovementType.TreadsAmphi, true
-          },
-          {
-            MovementType.WheelsTraverse, true
-          },
-          {
-            MovementType.Flight, true
-          },
-          {
-            MovementType.FlightFlyby, true
-          },
-          {
-            MovementType.Immobile, false
-          },
-        };
-        break;
-      }
-      while (open.Count > 0) {
-        foreach( var idx_dijk in open)
+      while (open.size > 0) {
+        for(idx_dijk <- open)
         {
-          List < Position > moves = idx_dijk.Key.Adjacent(width, height);
-          foreach(Position mov in moves)
-          if (open.ContainsKey(mov) ||
-            closed.ContainsKey(mov) ||
-            d[mov.x, mov.y] >= wall ||
-            d[mov.x, mov.y] <= idx_dijk.Value + 1) {
-
-          }
-          else if (
-            ability[grid[mov.x - 1, mov.y - 1]] == 1 &&
-          placing[mov.x - 1, mov.y - 1] == null)
-          {
-            fringe[mov] = (idx_dijk.Value + 1);
-            d[mov.x, mov.y] = idx_dijk.Value + 1;
-          }
-          else if (
-          ability[grid[mov.x - 1, mov.y - 1]] == 1 &&
-          (placing[mov.x - 1, mov.y - 1] != null &&
-          (Math.Abs(self.x - (mov.x - 1)) + Math.Abs(self.y - (mov.y - 1)) < self.speed &&
-            (pass[placing[mov.x - 1, mov.y - 1].mobility] ||
-          (placing[mov.x - 1, mov.y - 1].color == self.color &&
-          placing[mov.x - 1, mov.y - 1].mobility != MovementType.Immobile)
-          ) ) ) )
-          {
-            fringe[mov] = (idx_dijk.Value + 1);
-            d[mov.x, mov.y] = idx_dijk.Value + 1;
-          }
+          var moves = idx_dijk._1.Adjacent(width, height)
+          for(mov <- moves)
+            if (open.contains(mov) ||
+              closed.contains(mov) ||
+              d(mov.x)(mov.y) >= wall ||
+              d(mov.x)(mov.y) <= idx_dijk._2 + 1) {
+            }
+            else if (
+                   ability(grid(mov.x - 1)(mov.y - 1)) == 1
+                     && placing(mov.x - 1)(mov.y - 1) == null)
+                 {
+                   fringe(mov) = idx_dijk._2 + 1
+                   d(mov.x)(mov.y) = idx_dijk._2 + 1
+                 }
+            else if (
+                   ability(grid(mov.x - 1)(mov.y - 1)) == 1 &&
+                     (placing(mov.x - 1)(mov.y - 1) != null &&
+                       (Math.abs(self.x - (mov.x - 1)) + Math.abs(self.y - (mov.y - 1)) < self.speed &&
+                         (pass(placing(mov.x - 1)(mov.y - 1).mobility) ||
+                         (placing(mov.x - 1)(mov.y - 1).color == self.color &&
+                           placing(mov.x - 1)(mov.y - 1).mobility != MovementType.Immobile)
+                         ) ) ) )
+                 {
+                   fringe(mov) = idx_dijk._2 + 1
+                   d(mov.x)(mov.y) = idx_dijk._2 + 1;
+                 }
         }
-        foreach( var kv in open)
+        for(kv <- open)
         {
-          closed[kv.Key] = (kv.Value);
+          closed(kv._1) = kv._2
         }
-        open.Clear();
-        foreach( var kv in fringe)
+        open.clear()
+        for(kv <- fringe)
         {
-          open[kv.Key] = (kv.Value);
+          open(kv._1) = kv._2
         }
-        fringe.Clear();
-
+        fringe.clear()
       }
 
-      for (int i = 1;
-      i < width - 1;
-      i ++)
-      {
-        for (int j = 1;
-        j < height - 1;
-        j ++)
-        {
-          if (d[i, j] == goal && placing[i - 1, j - 1] != null)
-          {
-            d[i, j] = 3333; // ((pass[placing[i - 1, j - 1].mobility]) ? 0 : wall);
 
-          }
-          else if (placing[i - 1, j - 1] != null)
+      for (i <- 1 to width-1) {
+        for (j <- 1 to height-1) {
+          if (d(i)(j) == goal && placing(i - 1)(j - 1) != null)
           {
-            //d[i, j] += 0.5F;
+            d(i)(j) = 3333; // ((pass[placing[i - 1, j - 1].mobility]) ? 0 : wall);
           }
         }
       }
-      return d;
+      d
     }
 
-    float[, ] dijkstra(Piece self, int[, ] grid, Piece[, ] placing, int targetX, int targetY)
+    def dijkstra(self:Piece, grid:IntMat, placing:PieceMat, targetX:Int, targetY:Int) : FloatMat =
     {
 
-      int width = grid.GetLength(0) + 2;
-      int height = grid.GetLength(1) + 2;
-      float unexplored = 1111;
-      float goal = 0;
-      int wall = 2222;
+      val width = grid.length+2
+      val height = grid(0).length + 2
+      val unexplored :Float= 1111
+      val goal:Float = 0
+      val wall:Float = 2222
 
-      float[, ] d = new float[width, height];
+      val d = Array.ofDim[Float](width, height)
 
-      for (int i = 1;
-      i < width - 1;
-      i ++)
+      for (i <- 1 to width - 1)
       {
-        for (int j = 1;
-        j < height - 1;
-        j ++)
-        d[i, j] = unexplored;
+        for (j <- 1 to height - 1) {
+          d(i)(j) = unexplored
+        }
       }
-
-      for (int i = 0;
-      i < width;
-      i ++)
+      for (i <- 0 to width)
       {
-        d[i, 0] = wall;
-        d[i, (height - 1)] = wall;
-
+        d(i)(0) = wall
+        d(i)(height - 1) = wall
       }
-      for (int j = 1;
-      j < height - 1;
-      j ++)
+      for (j <- 1 to height - 1)
       {
-        d[ 0, j] = wall;
-        d[(width - 1), j] = wall;
+        d(0)(j) = wall
+        d(width - 1)(j) = wall
       }
-      d[targetX + 1, targetY + 1] = goal;
+      d(targetX + 1)(targetY + 1) = goal
 
-      d = dijkstraInner(self, grid, placing, d);
-
-      return d;
+      dijkstraInner(self, grid, placing, d)
     }
-    float[, ] dijkstra(Piece self, int[, ] grid, Piece[, ] placing, int[] targetColors)
+    def dijkstra(self:Piece, grid:IntMat, placing:PieceMat, targetColors:Array[Int]) : FloatMat =
     {
+      val width = grid.length+2
+      val height = grid(0).length + 2
+      val unexplored :Float= 1111
+      val goal:Float = 0
+      val wall:Float = 2222
 
-      int width = grid.GetLength(0) + 2;
-      int height = grid.GetLength(1) + 2;
-      float unexplored = 1111;
-      float goal = 0;
-      int wall = 2222;
+      var d = Array.ofDim[Float](width, height)
 
-      float[, ] d = new float[width, height];
-
-      for (int i = 1;
-      i < width - 1;
-      i ++)
+      for (i <- 1 to width - 1)
       {
-        for (int j = 1;
-        j < height - 1;
-        j ++)
-        d[i, j] = unexplored;
+        for (j <- 1 to height - 1) {
+          d(i)(j) = unexplored
+        }
+      }
+      for (i <- 0 to width)
+      {
+        d(i)(0) = wall
+        d(i)(height - 1) = wall
+      }
+      for (j <- 1 to height - 1)
+      {
+        d(0)(j) = wall
+        d(width - 1)(j) = wall
       }
 
-      for (int i = 0;
-      i < width;
-      i ++)
+      for (i <- 1 to width - 1)
       {
-        d[i, 0] = wall;
-        d[i, (height - 1)] = wall;
-
-      }
-      for (int j = 1;
-      j < height - 1;
-      j ++)
-      {
-        d[ 0, j] = wall;
-        d[(width - 1), j] = wall;
-      }
-      for (int i = 1;
-      i < width - 1;
-      i ++)
-      {
-        for (int j = 1;
-        j < height - 1;
-        j ++)
-        {
-          if (targetColors.Any(c => placing[i - 1, j - 1] != null && c == placing[i - 1, j - 1].color) )
+        for (j <- 1 to height - 1) {
+          if (targetColors.exists(c => placing(i - 1)(j - 1) != null && c == placing(i - 1)(j - 1).color) )
           {
             //if (placing[i - 1, j - 1].name == "Castle" || placing[i - 1, j - 1].name == "Estate")
-            d[i, j] = goal;
+            d(i)(j) = goal;
           }
         }
       }
-      d = dijkstraInner(self, grid, placing, d);
 
-      return d;
+      dijkstraInner(self, grid, placing, d)
     }
-    float[, ] SmartDijkstra(Piece self, int currentWeapon, int[, ] grid, Piece[, ] placing, int[] targetColors)
+
+    def findWeapon(piece: Piece, i: Int): Weapon =
+    {
+      if(i == 0)
+        piece.weaponry._1
+      else
+        piece.weaponry._2
+    }
+
+    def SmartDijkstra(self:Piece, currentWeapon : Int, grid:IntMat, placing:PieceMat, targetColors:List[Int]) : FloatMat =
     {
 
-      int width = grid.GetLength(0) + 2;
-      int height = grid.GetLength(1) + 2;
-      float unexplored = 1111;
-      int wall = 2222;
+      val width = grid.length+2
+      val height = grid(0).length + 2
+      val unexplored :Float= 1111
+      val goal:Float = 0
+      val wall:Float = 2222
 
-      float[, ] d = new float[width, height];
+      var d = Array.ofDim[Float](width, height)
 
-      for (int i = 1;
-      i < width - 1;
-      i ++)
+      for (i <- 1 to width - 1)
       {
-        for (int j = 1;
-        j < height - 1;
-        j ++)
-        {
-          if (placing[i - i, j - 1] == null)
-          d[i, j] = unexplored;
-          else
-          d[i, j] = wall;
+        for (j <- 1 to height - 1) {
+          d(i)(j) = unexplored
         }
       }
-
-      for (int i = 0;
-      i < width;
-      i ++)
+      for (i <- 0 to width)
       {
-        d[i, 0] = wall;
-        d[i, (height - 1)] = wall;
+        d(i)(0) = wall
+        d(i)(height - 1) = wall
       }
-      for (int j = 1;
-      j < height - 1;
-      j ++)
+      for (j <- 1 to height - 1)
       {
-        d[ 0, j] = wall;
-        d[(width - 1), j] = wall;
+        d(0)(j) = wall
+        d(width - 1)(j) = wall
       }
       if (currentWeapon > -1)
-        d = DijkstraAttackPositions(self.weaponry[currentWeapon], self.mobility, self.color, targetColors, grid, placing, d);
+        d = DijkstraAttackPositions(findWeapon(self, currentWeapon), self.mobility, self.color, targetColors, grid, placing, d);
 
-      return d;
+      d
     }
-    public float[, ] gradient = new float[ 27, 27];
-    List < DirectedPosition > getDijkstraPath(Piece active, int[, ] grid, Piece[, ] placing)
+    def getDijkstraPath(active :Piece, grid : IntMat, placing : PieceMat) : ArrayBuffer[DirectedPosition] =
     {
-      int width = grid.GetLength(0);
-      int height = grid.GetLength(1);
-      List < DirectedPosition > path = new List < DirectedPosition >();
-      int currentX = active.x, currentY = active.y;
-      Direction currentFacing = active.facing;
-      Position newpos = new Position(currentX, currentY);
-      float[, ] rad = new float[width + 2, height + 2], rad0 = new float[width + 2, height + 2], rad1 = new float[width + 2, height + 2];
-      Position best0 = null, best1 = null;
-      List < Position > bests0 = new List < Position >(), bests1 = new List < Position >();
-      Dictionary < Position, Position > mtt0 = new Dictionary < Position, Position >(), mtt1 = new Dictionary < Position, Position >();
-      float choice = -1, eff0 = 0, eff1 = 0;
-      if (active.weaponry[ 1].kind != WeaponType.None)
+      val width = grid.length
+      val height = grid(0).length
+      var path = new ArrayBuffer[DirectedPosition]
+      var currentX = active.x
+      var currentY = active.y
+      var currentFacing = active.facing
+      var newpos = Position(currentX, currentY)
+      var rad = Array.ofDim[Float](width + 2, height + 2)
+      var rad0 = Array.ofDim[Float](width + 2, height + 2)
+      var rad1 = Array.ofDim[Float](width + 2, height + 2)
+      var best0 :Position = null
+      var best1 :Position = null
+      var bests0 = new ArrayBuffer[Position]
+      var bests1 = new ArrayBuffer[Position]
+      var mtt0 = new HashMap[Position, Position]
+      var mtt1 = new HashMap[Position, Position]
+      var choice = -1
+      var eff0:Float = 0
+      var eff1:Float = 0
+      if (findWeapon(active, 1).kind != WeaponType.Non)
       {
         rad1 = ViableMoves(active, 1, grid, placing);
-        bests1 = bestMoves.Clone();
-        mtt1 = movesToTargets.Clone();
-        var bd = bests1.OrderByDescending(p => (movesToTargets.ContainsKey(p))
-          ? active.weaponry[ 1].multipliers[Piece.PieceTypeAsNumber(placing[movesToTargets[p].x, movesToTargets[p].y].kind)]
-        : 0.005F * rad1[p.x + 1, p.y + 1] );
-        best1 = bd.TakeWhile(p => (movesToTargets.ContainsKey(p))
-          ? active.weaponry[ 1].multipliers[Piece.PieceTypeAsNumber(placing[movesToTargets[p].x, movesToTargets[p].y].kind)] ==
-        active.weaponry[ 1].multipliers[Piece.PieceTypeAsNumber(placing[movesToTargets[bd.First()].x, movesToTargets[bd.First()].y].kind)]
-        : 0.005F * rad1[p.x + 1, p.y + 1] == 0.005F * rad1[bd.First().x + 1, bd.First().y + 1]
-        ).RandomElement();
-        //best1 = bests1.RandomElement();
-        eff1 = (mtt1.ContainsKey(best1))
-        ? active.weaponry[ 1].multipliers[Piece.PieceTypeAsNumber(placing[mtt1[best1].x, mtt1[best1].y].kind)]
-        : 0;
-        choice = 1; //rad1[best1.x + 1, best1.y + 1];
-
+        bests1 = bestMoves.clone()
+        mtt1 = movesToTargets.clone()
+        val bd = bests1.sortBy(p => if(movesToTargets.contains(p))
+          findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind))
+          else 0.005F * rad1(p.x + 1)(p.y + 1) )
+        best1 = bd.takeWhile(p => if(movesToTargets.contains(p))
+                                    findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind)) ==
+                                    findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(bd(0)).x)(movesToTargets(bd(0)).y).kind))
+                                  else 0.005F * rad1(p.x + 1)(p.y + 1) == 0.005F * rad1(bd(0).x + 1)(bd(0).y + 1)).toArray[Position].RandomItem
+        eff1 = if(mtt1.contains(best1))
+          findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(mtt1(best1).x)(mtt1(best1).y).kind))
+          else 0;
+        choice = 1;
       }
       if (active.weaponry[ 0].kind != WeaponType.None)
       {

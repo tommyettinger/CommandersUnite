@@ -9,6 +9,32 @@ import commanders.unite.Direction;
  * Created by Tommy Ettinger on 7/22/2014.
  */
 case class Position(x: Int, y: Int) {
+  def Adjacent(width: Int, height: Int): MutableList[Position] = {
+    var l: MutableList[Position] = new MutableList[Position]();
+    if (x > 0)
+      l += new Position(x - 1, y)
+    if (y > 0)
+      l += new Position(x, y - 1)
+    if (x < width - 1)
+      l += new Position(x + 1, y)
+    if (y < height - 1)
+      l += new Position(x, y + 1)
+    l
+  }
+  def WithinRange(lowerX: Int, lowerY: Int, width: Int, height: Int, min: Int, max: Int): MutableList[Position] = {
+    var l: MutableList[Position] = new MutableList[Position]()
+    for (i <- (if (x - max >= lowerX) x - max else lowerX) to x + max if i < width) {
+      for (j <- (if (y - max >= lowerY) y - max else lowerY) to y + max if j < width) {
+        if (!(Math.abs(i - x) + Math.abs(j - y) < min || Math.abs(i - x) + Math.abs(j - y) > max || (x == i && y == j))) {
+          l += (new Position(i, j));
+        }
+      }
+    }
+    l
+  }
+}
+object Position
+{
   def Adjacent(x: Int, y: Int, width: Int, height: Int): MutableList[Position] = {
     var l: MutableList[Position] = new MutableList[Position]();
     if (x > 0)
@@ -36,6 +62,48 @@ case class Position(x: Int, y: Int) {
 }
 
 case class DirectedPosition(p: Position, dir: Direction) {
+
+  def Adjacent(width: Int, height: Int): MutableList[DirectedPosition] = {
+    var l: MutableList[DirectedPosition] = new MutableList[DirectedPosition]();
+    if (p.x > 0)
+      l += new DirectedPosition(Position(p.x - 1, p.y), Direction.NE)
+    if (p.y > 0)
+      l += new DirectedPosition(Position(p.x, p.y - 1), Direction.SE)
+    if (p.x < width - 1)
+      l += new DirectedPosition(Position(p.x + 1, p.y), Direction.SW)
+    if (p.y < height - 1)
+      l += new DirectedPosition(Position(p.x, p.y + 1), Direction.NW)
+    l
+  }
+
+  def WithinRange(lowerX: Int, lowerY: Int, width: Int, height: Int, min: Int, max: Int): MutableList[DirectedPosition] = {
+    var l: MutableList[DirectedPosition] = new MutableList[DirectedPosition]()
+    for (i <- (if (p.x - max >= lowerX) p.x - max else lowerX) to p.x + max if i < width) {
+      for (j <- (if (p.y - max >= lowerY) p.y - max else lowerY) to p.y + max if j < width) {
+        if (!(Math.abs(i - p.x) + Math.abs(j - p.y) < min || Math.abs(i - p.x) + Math.abs(j - p.y) > max || (p.x == i && p.y == j))) {
+          if (i - p.x <= j - p.y && (i - p.x) * -1 <= j - p.y) {
+            l += (new DirectedPosition(Position(i, j), Direction.NW));
+          }
+          else if ((i - p.x) * -1 <= j - p.y && i - p.x >= j - p.y) {
+            l += (new DirectedPosition(Position(i, j), Direction.SW));
+          }
+          else if (i - p.x >= j - p.y && (i - p.x) * -1 >= j - p.y) {
+            l += (new DirectedPosition(Position(i, j), Direction.SE));
+          }
+          else if ((i - p.x) * -1 >= j - p.y && i - p.x <= j - p.y) {
+            l += (new DirectedPosition(Position(i, j), Direction.NE));
+          }
+          else
+            l += (new DirectedPosition(Position(i, j), Direction.SE));
+        }
+      }
+    }
+    l
+  }
+
+}
+object DirectedPosition
+{
   def Adjacent(x: Int, y: Int, width: Int, height: Int): MutableList[DirectedPosition] = {
     var l: MutableList[DirectedPosition] = new MutableList[DirectedPosition]();
     if (x > 0)
@@ -96,5 +164,4 @@ case class DirectedPosition(p: Position, dir: Direction) {
       dp = (new DirectedPosition(Position(endx, endy), Direction.NW))
     dp
   }
-
 }
