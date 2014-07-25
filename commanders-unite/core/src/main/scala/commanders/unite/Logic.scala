@@ -9,6 +9,7 @@ import commanders.unite.MovementType.MovementType
 import commanders.unite.PieceType.PieceType
 import commanders.unite.VisualAction.VisualAction
 import commanders.unite.WeaponType.WeaponType
+import game.commanders.unite.CommandersUnite
 
 import scala.concurrent._
 import ExecutionContext.Implicits.global
@@ -237,13 +238,13 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       (Weapon(WeaponType.Non, 0, Array(0f, 0f, 0f, 0f, 0f), ""),
         Weapon(WeaponType.Non, 0, Array(0f, 0f, 0f, 0f, 0f), ""))
     )
-    var PieceLookup = new HashMap[String, Int]
-    var TerrainLookup = new HashMap[String, Int]
-    var NameLookup = new HashMap[String, Int]
-    var MobilityToPieces = new HashMap[MovementType, ArrayBuffer[Int]]
-    var MobilityToTerrains = new HashMap[MovementType, ArrayBuffer[Int]]
-    var TerrainToPieces = new Array[ArrayBuffer[Int]](10)
-    var TerrainToMobilities = new HashMap[Int, ArrayBuffer[MovementType]];
+    def PieceLookup = new HashMap[String, Int]
+    def TerrainLookup = new HashMap[String, Int]
+    def NameLookup = new HashMap[String, Int]
+    def MobilityToPieces = new HashMap[MovementType, ArrayBuffer[Int]]
+    def MobilityToTerrains = new HashMap[MovementType, ArrayBuffer[Int]]
+    def TerrainToPieces = new Array[ArrayBuffer[Int]](10)
+    def TerrainToMobilities = new HashMap[Int, ArrayBuffer[MovementType]];
     val AllSpeeds = Array(
       3, 3, 5, 3,
       4, 3, 6, 4,
@@ -419,6 +420,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
     type PieceMat = Array[Array[Piece]]
 
     var state = GameState.PC_Select_Move
+    var previousState = GameState.PC_Select_Move;
     var CurrentMode = Mode.Selecting
     def width = 24
     def height = 24
@@ -1528,7 +1530,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             }
           }
           TaskSteps = 0
-          GameGDX.stateTime = 0
+          CommandersUnite.stateTime = 0
           CurrentMode = Mode.Moving
         }
         else if (TaskSteps <= 1 && (thr == null || thr.isCompleted) && state == GameState.NPC_Play) {
@@ -1551,7 +1553,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
 
         }
         else if (state == GameState.PC_Play_Move) {
-          BestPath = getDijkstraPath(ActivePiece, FieldMap.Land, PieceGrid, GameGDX.cursor.x, GameGDX.cursor.y);
+          BestPath = getDijkstraPath(ActivePiece, FieldMap.Land, PieceGrid, CommandersUnite.cursor.x, CommandersUnite.cursor.y);
           FuturePosition = new DirectedPosition(Position(ActivePiece.x, ActivePiece.y), ActivePiece.facing);
           for (i <- 0 until width)
           {
@@ -1561,11 +1563,11 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             }
           }
           TaskSteps = 0
-          GameGDX.stateTime = 0
+          CommandersUnite.stateTime = 0
           CurrentMode = Mode.Moving
         }
         else if (state == GameState.PC_Play_Action) {
-          target = DirectedPosition.TurnToFace(new Position(ActivePiece.x, ActivePiece.y), new Position(GameGDX.cursor.x, GameGDX.cursor.y))
+          target = DirectedPosition.TurnToFace(new Position(ActivePiece.x, ActivePiece.y), new Position(CommandersUnite.cursor.x, CommandersUnite.cursor.y))
           CurrentMode = Mode.Attacking
           state = GameState.PC_Play_Action
           TaskSteps = 0
@@ -1634,7 +1636,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           ActivePiece.worldY += (FuturePosition.p.x - oldx) * 2 - (FuturePosition.p.y - oldy) * 2
           ActivePiece.worldY += (LocalMap.Depths(FieldMap.Land(FuturePosition.p.x)(FuturePosition.p.y) - LocalMap.Depths(FieldMap.Land(oldx)(oldy))) * 3F) / 16F
          } }
-        Timer.instance().scheduleTask(n, 0, GameGDX.updateStep / 16F, 15);
+        Timer.instance().scheduleTask(n, 0, CommandersUnite.updateStep / 16F, 15);
         Effects.CenterCamera(FuturePosition, 1F);
         BestPath.remove(0)
         case Mode.Attacking =>
@@ -1681,7 +1683,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             }
           }
 
-          GameGDX.attackTime = 0;
+          CommandersUnite.attackTime = 0;
           /*currentlyFiring = -1;
           if (ActivePiece.weaponry[1].kind != WeaponType.None && ActivePiece.weaponry[0].kind != WeaponType.None)
               currentlyFiring = r.Next(2);
@@ -1716,13 +1718,13 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           {
             case 0=>
               if (hitSuccess || Piece.WeaponDisplays(ActivePiece.unitIndex)._1 == 1 || Piece.WeaponDisplays(ActivePiece.unitIndex)._1 == 7) {
-                GameGDX.receiveTime = 0
+                CommandersUnite.receiveTime = 0
                 ActivePiece.targeting = ArrayBuffer[DirectedPosition](new DirectedPosition (target.p, target.dir))
               }
 
             case 1=>
               if (hitSuccess || Piece.WeaponDisplays(ActivePiece.unitIndex)._2 == 1 || Piece.WeaponDisplays(ActivePiece.unitIndex)._2 == 7) {
-                GameGDX.receiveTime = 0
+                CommandersUnite.receiveTime = 0
                 ActivePiece.targeting = ArrayBuffer[DirectedPosition](new DirectedPosition (target.p, target.dir))
               }
           }
@@ -1735,23 +1737,23 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
               PieceGrid(target.p.x)(target.p.y).worldX = PieceGrid(target.p.x)(target.p.y).worldX +(if((PieceGrid(target.p.x)(target.p.y).facingNumber) % 4 >= 2) 2f else -2f);
               PieceGrid(target.p.x)(target.p.y).worldY = PieceGrid(target.p.x)(target.p.y).worldY +(if((PieceGrid(target.p.x)(target.p.y).facingNumber + 1) % 4 >= 2) 1f else -1f);
             }}
-            Timer.instance().scheduleTask(avoid, 0, GameGDX.updateStep / 16F, 10);
+            Timer.instance().scheduleTask(avoid, 0, CommandersUnite.updateStep / 16F, 10);
             val calm = new Timer.Task{ def run() {
               PieceGrid(target.p.x)(target.p.y).worldX = PieceGrid(target.p.x)(target.p.y).worldX -(if((PieceGrid(target.p.x)(target.p.y).facingNumber) % 4 >= 2) 2f else -2f);
               PieceGrid(target.p.x)(target.p.y).worldY = PieceGrid(target.p.x)(target.p.y).worldY -(if((PieceGrid(target.p.x)(target.p.y).facingNumber + 1) % 4 >= 2) 1f else -1f);
             }}
-            Timer.instance().scheduleTask(calm, GameGDX.updateStep, GameGDX.updateStep / 8F, 10);
+            Timer.instance().scheduleTask(calm, CommandersUnite.updateStep, CommandersUnite.updateStep / 8F, 10);
             val reset = new Timer.Task{ def run() {
               PieceGrid(target.p.x)(target.p.y).worldX = 20 + PieceGrid(target.p.x)(target.p.y).x * 64 + PieceGrid(target.p.x)(target.p.y).y * 64
               PieceGrid(target.p.x)(target.p.y).worldY = 6 + PieceGrid(target.p.x)(target.p.y).x * 32 - PieceGrid(target.p.x)(target.p.y).y * 32
             }}
-            Timer.instance().scheduleTask(reset, GameGDX.updateStep * 19 / 8F)
+            Timer.instance().scheduleTask(reset, CommandersUnite.updateStep * 19 / 8F)
 
           }
         }
         else if (TaskSteps == 2 + 1 * (Math.abs(target.p.x - ActivePiece.x) + Math.abs(target.p.y - ActivePiece.y)) && currentlyFiring > -1) {
           if (killSuccess) {
-            GameGDX.explodeTime = 0;
+            CommandersUnite.explodeTime = 0;
             PieceGrid(target.p.x)(target.p.y).visual = VisualAction.Exploding;
             speaking+= Speech(
               x = target.x, y = target.y, large = true, text = "DEAD"
