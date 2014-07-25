@@ -30,7 +30,15 @@ object PieceType extends Enumeration {
 }
 object WeaponType extends Enumeration {
   type WeaponType = Value
-  val LightGun, HeavyGun, Cannon, Missile, Non = Value
+  val LightGun = Value("Light Gun")
+  val HeavyGun = Value("Heavy Gun")
+  val Cannon = Value("Cannon")
+  val Missile = Value("Explosive")
+  val Non = Value
 }
 
+object GameState extends Enumeration {
+  type GameState = Value
+  val Paused, NPC_Play, PC_Select_Move, PC_Play_Move, PC_Select_UI, PC_Select_Action, PC_Play_Action = Value
+}
 }

@@ -3,14 +3,18 @@
  */
 package commanders.unite {
 
+import com.badlogic.gdx.utils.Timer
 import commanders.unite.Direction.Direction
 import commanders.unite.MovementType.MovementType
 import commanders.unite.PieceType.PieceType
 import commanders.unite.VisualAction.VisualAction
 import commanders.unite.WeaponType.WeaponType
 
+import scala.concurrent._
+import ExecutionContext.Implicits.global
+
 import scala.collection.mutable._
-import scala.collection.mutable
+import scala.collection.{SortedMap, mutable}
 import scala.util.Random
 import commanders.unite.Extensions._
 /*
@@ -310,12 +314,12 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       for (v <- MovementType.values) {
         MobilityToPieces(v) = new ArrayBuffer[Int](15)
       }
-      for (t <- 0 to LocalMap.Terrains.length) {
+      for (t <- 0 until LocalMap.Terrains.length) {
         TerrainLookup(LocalMap.Terrains(t)) = t;
         TerrainToMobilities(t) = new ArrayBuffer[MovementType]();
         TerrainToPieces(t) = new ArrayBuffer[Int]();
       }
-      for (i <- 0 to CurrentPieces.length) {
+      for (i <- 0 until CurrentPieces.length) {
         PieceLookup(CurrentPieces(i)) = i;
         NameLookup(PieceNames(i)) = i;
         MobilityToPieces(AllMobilities(i)) += i;
@@ -347,8 +351,12 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         TerrainToPieces(kv._1) = TerrainToPieces(kv._1).distinct
       }
     }
+    def reset(piece : Piece) : Piece =
+    {
+      piece.copy(worldX = 20 + piece.x * 64 + piece.y * 6, worldY = 6 + piece.x * 32 - piece.y * 32)
+    }
   }
-    class Piece(val unitIndex:Int,
+    case class Piece(val unitIndex:Int,
                val color:Int,
                var facingNumber:Int,
                var x:Int,
@@ -409,23 +417,34 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
     type IntMat   = Array[Array[Int]]
     type FloatMat = Array[Array[Float]]
     type PieceMat = Array[Array[Piece]]
-    def log = new StringBuilder()
-    def CurrentMode = Mode.Selecting
+
+    var state = GameState.PC_Select_Move
+    var CurrentMode = Mode.Selecting
     def width = 24
     def height = 24
-    def FieldMap : LocalMap(width, height)
-    def PieceGrid = Array.ofDim[Int](width, height)
-    def ActivePiece:Piece = null
-    def Colors = new Array[Int](4)
-    def ReverseColors = new Array[Int](8)
-    def ActingFaction = 1
-    def TaskSteps = 0
-    def speaking = new ArrayBuffer[Speech](16)
-    def targetX = Array(width/4, width/2, width/4, width/2)
-    def targetY = Array(height / 2, height / 4, height / 2, height / 4)
-    def outward = Array.ofDim[Float](width+2,height+2)
+    var FieldMap : LocalMap(width, height)
+    var PieceGrid = Array.ofDim[Piece](width, height)
+    var ActivePiece:Piece = null
+    var colors = new Array[Int](4)
+    var reverseColors = new Array[Int](8)
+    var ActingFaction = 1
+    var TaskSteps = 0
+    var speaking = new ArrayBuffer[Speech](16)
+    var targetX = Array(width/4, width/2, width/4, width/2)
+    var targetY = Array(height / 2, height / 4, height / 2, height / 4)
+    var outward = Array.ofDim[Float](width+2,height+2)
     def DirectionNames = Array("SE", "SW", "NW", "NE")
 
+    var BestPath = ArrayBuffer[DirectedPosition]()
+    var FuturePosition:DirectedPosition
+    var target:DirectedPosition
+    var currentlyFiring = -1
+    var killSuccess = false
+    var hitSuccess = false;
+    var previousHP : Int
+    var thr : Future[ArrayBuffer[DirectedPosition]]
+    var failCount = 0;
+    
     //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
 
 
@@ -593,9 +612,9 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       val ability = movementAbility(mobility)
       val pass = movementPass(mobility)
       movesToTargets.clear()
-      for (i <- 1 to width - 1)
+      for (i <- 1 until width - 1)
       {
-        for (j <- 1 to height - 1)
+        for (j <- 1 until height - 1)
         {
           if (targetColors.exists(c => placing(i - 1)(j - 1) != null && c == placing(i - 1)(j - 1).color) )
           {
@@ -697,7 +716,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
     def ViableMoves(self:Piece, currentWeapon:Int, grid:IntMat, placing:PieceMat) : FloatMat =
     {
       gradient = SmartDijkstra(self, currentWeapon, grid, placing,
-        if (self.color == 0) Array(1, 2, 3, 4, 5, 6, 7) else Array(0)
+        if (self.color == 0) List(1, 2, 3, 4, 5, 6, 7) else List(0)
       )
       /*for (int i = 0; i < 25; i++)
       {
@@ -725,28 +744,28 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
 
       var radiate = Array.ofDim[Float](width, height)
 
-      for (i <- 1 to width - 1)
+      for (i <- 1 until width - 1)
       {
-        for (j <- 1 to height - 1) {
+        for (j <- 1 until height - 1) {
           radiate(i)(j) = unexplored
         }
       }
 
-      for (i <- 0 to width)
+      for (i <- 0 until width)
       {
         radiate(i)(0) = wall
         radiate(i)(height - 1) = wall
 
       }
-      for (j <- 1 to height - 1)
+      for (j <- 1 until height - 1)
       {
         radiate(0)(j) = wall
         radiate(width - 1)(j) = wall
       }
 
-      for (i <- 0 to width)
+      for (i <- 0 until width)
       {
-        for (j <- 0 to height)
+        for (j <- 0 until height)
         {
           if (radiate(i)(j) >= wall) {
             closed(Position(i, j)) = wall
@@ -845,8 +864,8 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       val ability = movementAbility(self.mobility)
       val pass = movementPass(self.mobility)
 
-      for (i <- 0 to width) {
-        for (j <- 0 to height) {
+      for (i <- 0 until width) {
+        for (j <- 0 until height) {
           if (d(i)(j) == goal) {
             open(Position(i, j)) = goal
           }
@@ -899,8 +918,8 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       }
 
 
-      for (i <- 1 to width-1) {
-        for (j <- 1 to height-1) {
+      for (i <- 1 until width-1) {
+        for (j <- 1 until height-1) {
           if (d(i)(j) == goal && placing(i - 1)(j - 1) != null)
           {
             d(i)(j) = 3333; // ((pass[placing[i - 1, j - 1].mobility]) ? 0 : wall);
@@ -921,18 +940,18 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
 
       val d = Array.ofDim[Float](width, height)
 
-      for (i <- 1 to width - 1)
+      for (i <- 1 until width - 1)
       {
-        for (j <- 1 to height - 1) {
+        for (j <- 1 until height - 1) {
           d(i)(j) = unexplored
         }
       }
-      for (i <- 0 to width)
+      for (i <- 0 until width)
       {
         d(i)(0) = wall
         d(i)(height - 1) = wall
       }
-      for (j <- 1 to height - 1)
+      for (j <- 1 until height - 1)
       {
         d(0)(j) = wall
         d(width - 1)(j) = wall
@@ -951,26 +970,26 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
 
       var d = Array.ofDim[Float](width, height)
 
-      for (i <- 1 to width - 1)
+      for (i <- 1 until width - 1)
       {
-        for (j <- 1 to height - 1) {
+        for (j <- 1 until height - 1) {
           d(i)(j) = unexplored
         }
       }
-      for (i <- 0 to width)
+      for (i <- 0 until width)
       {
         d(i)(0) = wall
         d(i)(height - 1) = wall
       }
-      for (j <- 1 to height - 1)
+      for (j <- 1 until height - 1)
       {
         d(0)(j) = wall
         d(width - 1)(j) = wall
       }
 
-      for (i <- 1 to width - 1)
+      for (i <- 1 until width - 1)
       {
-        for (j <- 1 to height - 1) {
+        for (j <- 1 until height - 1) {
           if (targetColors.exists(c => placing(i - 1)(j - 1) != null && c == placing(i - 1)(j - 1).color) )
           {
             //if (placing[i - 1, j - 1].name == "Castle" || placing[i - 1, j - 1].name == "Estate")
@@ -1001,18 +1020,18 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
 
       var d = Array.ofDim[Float](width, height)
 
-      for (i <- 1 to width - 1)
+      for (i <- 1 until width - 1)
       {
-        for (j <- 1 to height - 1) {
+        for (j <- 1 until height - 1) {
           d(i)(j) = unexplored
         }
       }
-      for (i <- 0 to width)
+      for (i <- 0 until width)
       {
         d(i)(0) = wall
         d(i)(height - 1) = wall
       }
-      for (j <- 1 to height - 1)
+      for (j <- 1 until height - 1)
       {
         d(0)(j) = wall
         d(width - 1)(j) = wall
@@ -1048,184 +1067,141 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         rad1 = ViableMoves(active, 1, grid, placing);
         bests1 = bestMoves.clone()
         mtt1 = movesToTargets.clone()
-        val bd = bests1.sortBy(p => if(movesToTargets.contains(p))
+        val bd1 = bests1.sortBy(p => if(movesToTargets.contains(p))
           findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind))
           else 0.005F * rad1(p.x + 1)(p.y + 1) )
-        best1 = bd.takeWhile(p => if(movesToTargets.contains(p))
-                                    findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind)) ==
-                                    findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(bd(0)).x)(movesToTargets(bd(0)).y).kind))
-                                  else 0.005F * rad1(p.x + 1)(p.y + 1) == 0.005F * rad1(bd(0).x + 1)(bd(0).y + 1)).toArray[Position].RandomItem
+        best1 = bd1.takeWhile(p => if(movesToTargets.contains(p))
+                                    findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind)) ==
+                                    findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(bd1(0)).x)(movesToTargets(bd1(0)).y).kind))
+                                  else 0.005F * rad1(p.x + 1)(p.y + 1) == 0.005F * rad1(bd1(0).x + 1)(bd1(0).y + 1)).toArray[Position].RandomItem
         eff1 = if(mtt1.contains(best1))
-          findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(mtt1(best1).x)(mtt1(best1).y).kind))
-          else 0;
-        choice = 1;
+          findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(mtt1(best1).x)(mtt1(best1).y).kind))
+          else 0
+        choice = 1
       }
-      if (active.weaponry[ 0].kind != WeaponType.None)
+      if (findWeapon(active, 0).kind != WeaponType.Non)
       {
+
         rad0 = ViableMoves(active, 0, grid, placing);
-        bests0 = bestMoves.Clone();
-        mtt0 = movesToTargets.Clone();
-        var bd = bests0.OrderByDescending(p => (movesToTargets.ContainsKey(p))
-          ? active.weaponry[ 0].multipliers[Piece.PieceTypeAsNumber(placing[movesToTargets[p].x, movesToTargets[p].y].kind)]
-        : 0.005F * rad0[p.x + 1, p.y + 1] );
-        best0 = bd.TakeWhile(p => (movesToTargets.ContainsKey(p))
-          ? active.weaponry[ 0].multipliers[Piece.PieceTypeAsNumber(placing[movesToTargets[p].x, movesToTargets[p].y].kind)] ==
-        active.weaponry[ 0].multipliers[Piece.PieceTypeAsNumber(placing[movesToTargets[bd.First()].x, movesToTargets[bd.First()].y].kind)]
-        : 0.005F * rad0[p.x + 1, p.y + 1] == 0.005F * rad0[bd.First().x + 1, bd.First().y + 1]
-        ).RandomElement();
-        eff0 = (mtt0.ContainsKey(best0))
-        ? active.weaponry[ 0].multipliers[Piece.PieceTypeAsNumber(placing[mtt0[best0].x, mtt0[best0].y].kind)]
-        : 0;
+        bests0 = bestMoves.clone()
+        mtt0 = movesToTargets.clone()
+        val bd0 = bests0.sortBy(p => if(movesToTargets.contains(p))
+                                      findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind))
+                                    else 0.005F * rad0(p.x + 1)(p.y + 1) )
+        best0 = bd0.takeWhile(p => if(movesToTargets.contains(p))
+                                    findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind)) ==
+                                      findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(bd0(0)).x)(movesToTargets(bd0(0)).y).kind))
+                                  else 0.005F * rad0(p.x + 1)(p.y + 1) == 0.005F * rad0(bd0(0).x + 1)(bd0(0).y + 1)).toArray[Position].RandomItem
+        eff0 = if(mtt0.contains(best0))
+                 findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(mtt0(best0).x)(mtt0(best0).y).kind))
+               else 0
         //choice = (choice == 2222) ? 1 : (best1 != null && rad1[best1.x + 1, best1.y + 1] > rad0[best0.x + 1, best0.y + 1]) ? 1 : 0;
         if (eff1 > eff0) {
-          choice = 1;
+          choice = 1
         }
         else if (eff0 > eff1) {
-          choice = 0;
+          choice = 0
         }
-        else if (active.weaponry[ 1].damage > active.weaponry[ 0].damage)
+        else if (findWeapon(active, 1).damage > findWeapon(active, 0).damage)
         {
           choice = 1;
         }
-        else if (active.weaponry[ 0].damage > active.weaponry[ 1].damage)
+        else if (findWeapon(active, 0).damage > findWeapon(active, 1).damage)
         {
           choice = 0;
         }
         else
         {
-          choice = (best1 != null && rad1[best1.x + 1, best1.y + 1] > rad0[best0.x + 1, best0.y + 1] ) ? 1: 0;
+          choice = if(best1 != null && rad1(best1.x + 1)(best1.y + 1) > rad0(best0.x + 1)(best0.y + 1) ) 1 else 0
         }
       }
       else
       {
-        choice = (active.weaponry[ 1].kind == WeaponType.None) ? - 1: 1;
+        choice = if(findWeapon(active, 1).kind == WeaponType.Non) -1 else 1
       }
-      switch((int) choice) {
-        case -1: bestMoves = new List < Position > {
-          new Position(active.x, active.y)
-        };
-        best = new Position(active.x, active.y);
-        movesToTargets = new Dictionary < Position, Position >();
+      choice match {
+        case -1=> bestMoves = ArrayBuffer(Position(active.x, active.y))
+        best = Position(active.x, active.y)
+        movesToTargets = new HashMap[Position, Position]
         currentlyFiring = -1;
-        //gradient.Fill(2222);
-        break;
-        case 0: bestMoves = bests0.Clone();
-        rad = rad0;
-        best = new Position(best0.x, best0.y);
-        movesToTargets = mtt0.Clone();
-        currentlyFiring = 0;
-        break;
-        case 1: bestMoves = bests1.Clone();
-        rad = rad1;
-        best = new Position(best1.x, best1.y);
-        movesToTargets = mtt1.Clone();
-        currentlyFiring = 1;
-        break;
+
+        case 0=> bestMoves = bests0.clone()
+        rad = rad0
+        best = Position(best0.x, best0.y)
+        movesToTargets = mtt0.clone()
+        currentlyFiring = 0
+        case 1=> bestMoves = bests1.clone()
+          rad = rad1
+          best = Position(best1.x, best1.y)
+          movesToTargets = mtt1.clone()
+          currentlyFiring = 1
       }
-      if (currentlyFiring > -1 && movesToTargets.ContainsKey(best)) {
-        target = new DirectedPosition(movesToTargets[best].x, movesToTargets[best].y);
-        target = DirectedPosition.TurnToFace(best, movesToTargets[best]);
+      if (currentlyFiring > -1 && movesToTargets.contains(best)) {
+        target = DirectedPosition.TurnToFace(best, movesToTargets(best));
         //                                active.weaponry[currentlyFiring].minRange, active.weaponry[currentlyFiring].maxRange).Where(pos => PieceGrid[pos.x, pos.y] != null && active.isOpposed(PieceGrid[pos.x, pos.y])).RandomElement();
       }
-      else target = null;
-      /*if (best.x == active.x && best.y == active.y)// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
-      {
-          return new List<DirectedPosition> { }; //new DirectedPosition {x=active.x, y=active.y, dir= active.facing }
-      }*/
-      writeShowLog("Choice is: " + choice);
-      writeShowLog("Best is: " + best.x + ", " + best.y);
-      writeShowLog("Distance is: " + (rad[best.x + 1, best.y + 1] ) );
-      /*
-      foreach (Position p in bestMoves)
-      {
-          writeShowLog("    " + p.x + ", " + p.y + " with an occupant of " + ((placing[p.x, p.y] != null) ? placing[p.x, p.y].name : "EMPTY"));
-      }*/
-      DirectedPosition oldpos = new DirectedPosition(best.x, best.y);
-      path.Add(new DirectedPosition(best.x, best.y));
+      else {
+        target = null
+      }
+      var oldpos = DirectedPosition(Position(best.x, best.y), Direction.SE)
+      path+= DirectedPosition(Position(best.x, best.y), Direction.SE)
       if (best.x == active.x && best.y == active.y) {
 
       }
       else {
-        for (int f = 0;
-        f < active.speed;
-        f ++)
+        var f = 0
+        while(f < active.speed)
         {
-          Dictionary < Position, float > near = new Dictionary < Position, float > () {
-          {
-            oldpos, rad[oldpos.x + 1, oldpos.y + 1]
+          var near = HashMap[Position, Float](oldpos.p -> rad(oldpos.p.x + 1)(oldpos.p.y + 1))
+          for(pos <- oldpos.p.Adjacent(width, height)) {
+            near(pos) = rad(pos.x + 1)(pos.y + 1)
           }
-        }; // { { oldpos, rad[oldpos.x + 1, oldpos.y + 1] } }
-          foreach(Position pos in oldpos.Adjacent(width, height))
-          near[pos] = rad[pos.x + 1, pos.y + 1];
-          var ordered = near.OrderBy(kv => kv.Value);
-          newpos = ordered.TakeWhile(kv => kv.Value == ordered.First().Value).RandomElement().Key;
-          if (near.All(e => e.Value == near[newpos]))
-            return new List < DirectedPosition >();
-          #if DEBUG
-          StringBuilder sb = new StringBuilder();
-          for (int jj = height;
-          jj >= 1;
-          jj --)
-          {
-            for (int ii = 1;
-            ii < width + 1;
-            ii ++)
-            {
-              sb.AppendFormat("{0,5}", rad[ii, jj]);
-            }
-            sb.AppendLine();
+          var ordered = near.toSeq.sortBy(_._2)
+          newpos = ordered.takeWhile(kv => kv._2 == ordered(0)._2).RandomElement._1
+          if (near.forall(e => e._2 == near(newpos))) {
+            return ArrayBuffer[DirectedPosition]()
           }
-          writeShowLog(sb.ToString());
-          #endif
-
-          int newX = newpos.x, newY = newpos.y;
+          var newX = newpos.x
+          var newY = newpos.y
           if (!(newX == currentX && newY == currentY)) {
-            currentX = newX;
-            currentY = newY;
-            //                    d_inv = dijkstraInner(active, grid, placing, d_inv);
+            currentX = newX
+            currentY = newY
           }
-          DirectedPosition dp = new DirectedPosition(currentX, currentY, currentFacing);
-          if (dp.x == active.x && dp.y == active.y) //bestMoves.Any(b => b.x == dp.x && b.y == dp.y))// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color)) {
-            //oldpos = new DirectedPosition(currentX, currentY, currentFacing);
-            writeShowLog("Found target.");
-            path.Add(dp);
-            f = active.speed + 10;
+          var dp = DirectedPosition(Position(currentX, currentY), currentFacing)
+          if (dp.p.x == active.x && dp.p.y == active.y)
+          {
+            path += dp
+            f = active.speed + 10
           }
           else {
-            writeShowLog("Continuing pathfind, f is " + f + ", position is " + dp.x + ", " + dp.y);
-            if (path.Last().x == dp.x && path.Last().y == dp.y) {
-              writeShowLog("Tried to reach unreachable target!!!");
-            }
-            path.Add(dp);
+            path += dp
           }
-          oldpos = new DirectedPosition(currentX, currentY, currentFacing);
+          oldpos = new DirectedPosition(Position(currentX, currentY), currentFacing);
+          f = f+1
         }
       }
-      path.Reverse();
-      path[ 0].dir = active.facing;
-      DirectedPosition old2 = new DirectedPosition(path.First().x, path.First().y);
-      for (int i = 1;
-      i < path.Count;
-      i ++)
+      path.reverse;
+      path(0) = DirectedPosition(path(0).p, active.facing)
+      var old2 = DirectedPosition(Position(path(0).p.x, path(0).p.y), Direction.SE)
+      for (i <- 1 until path.size)
       {
-        currentX = old2.x;
-        currentY = old2.y;
-        int newX = path[i].x;
-        int newY = path[i].y;
+        currentX = old2.p.x;
+        currentY = old2.p.y;
+        var newX = path(i).p.x;
+        var newY = path(i).p.y;
         if (newY > currentY) {
-          path[i].dir = Direction.SE;
+          path(i) = DirectedPosition(path(i).p, Direction.SE)
         }
         else if (newY < currentY) {
-          path[i].dir = Direction.NW;
-
+          path(i) = DirectedPosition(path(i).p, Direction.NW)
         }
         else {
           if (newX < currentX)
-            path[i].dir = Direction.SW;
+            path(i) = DirectedPosition(path(i).p, Direction.SW)
           else
-            path[i].dir = Direction.NE;
+          path(i) = DirectedPosition(path(i).p, Direction.NE)
         }
-        old2 = new DirectedPosition(path[i].x, path[i].y);
+        old2 = new DirectedPosition(Position(path(i).p.x, path(i).p.y), Direction.SE)
       }
       /*while (placing[path.Last().x, path.Last().y] != null && path.Count > 0)
       {
@@ -1249,280 +1225,192 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                           dpos = path[i];
                       }
                   }*/
-      return path;
+      path
     }
-    List < DirectedPosition > getDijkstraPath(Piece active, int[, ] grid, Piece[, ] placing, int targetX, int targetY)
+    def getDijkstraPath(active :Piece, grid : IntMat, placing : PieceMat, targetX : Int, targetY : Int) : ArrayBuffer[DirectedPosition] =
     {
-      int width = grid.GetLength(0);
-      int height = grid.GetLength(1);
-      List < DirectedPosition > path = new List < DirectedPosition >();
-      int currentX = active.x, currentY = active.y;
-      Direction currentFacing = active.facing;
-      Position newpos = new Position(currentX, currentY);
-      int choice = -1;
-      switch((int) choice) {
-        case -1: bestMoves = new List < Position > {
-          new Position(targetX, targetY)
-        };
-        best = new Position(targetX, targetY);
-        movesToTargets = new Dictionary < Position, Position >();
-        currentlyFiring = -1;
-        //gradient.Fill(2222);
-        break;
-      }
-      target = null;
-      /*if (best.x == active.x && best.y == active.y)// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color))
-      {
-          return new List<DirectedPosition> { }; //new DirectedPosition {x=active.x, y=active.y, dir= active.facing }
-      }*/
-      writeShowLog("Choice is: " + choice);
-      writeShowLog("Best is: " + best.x + ", " + best.y);
-      /*
-      foreach (Position p in bestMoves)
-      {
-          writeShowLog("    " + p.x + ", " + p.y + " with an occupant of " + ((placing[p.x, p.y] != null) ? placing[p.x, p.y].name : "EMPTY"));
-      }*/
-      DirectedPosition oldpos = new DirectedPosition(best.x, best.y);
-      path.Add(new DirectedPosition(best.x, best.y));
+      val width = grid.length
+      val height = grid(0).length
+      var path = new ArrayBuffer[DirectedPosition]
+      var currentX = active.x
+      var currentY = active.y
+      var currentFacing = active.facing
+      var newpos = Position(currentX, currentY)
+      var rad = Array.ofDim[Float](width + 2, height + 2)
+      var choice = -1
+      bestMoves = ArrayBuffer(Position(targetX, targetY))
+      best = Position(targetX, targetY)
+      movesToTargets = new HashMap[Position, Position]
+      currentlyFiring = -1
+      target = null
+      var oldpos = DirectedPosition(Position(best.x, best.y), Direction.SE)
+      path+= DirectedPosition(Position(best.x, best.y), Direction.SE)
       if (best.x == active.x && best.y == active.y) {
 
       }
       else {
-        for (int f = 0;
-        f < active.speed;
-        f ++)
+        var f = 0
+        while(f < active.speed)
         {
-          Dictionary < Position, float > near = new Dictionary < Position, float > () {
-          {
-            oldpos, outward[oldpos.x + 1, oldpos.y + 1]
+          var near = HashMap[Position, Float](oldpos.p -> outward(oldpos.p.x + 1)(oldpos.p.y + 1))
+          for(pos <- oldpos.p.Adjacent(width, height)) {
+            near(pos) = outward(pos.x + 1)(pos.y + 1)
           }
-        }; // { { oldpos, rad[oldpos.x + 1, oldpos.y + 1] } }
-          foreach(Position pos in oldpos.Adjacent(width, height))
-          near[pos] = outward[pos.x + 1, pos.y + 1];
-          var ordered = near.OrderBy(kv => kv.Value);
-          newpos = ordered.TakeWhile(kv => kv.Value == ordered.First().Value).RandomElement().Key;
-          if (near.All(e => e.Value == near[newpos]))
-            return new List < DirectedPosition >();
-          #if DEBUG
-          StringBuilder sb = new StringBuilder();
-          for (int jj = height;
-          jj >= 1;
-          jj --)
-          {
-            for (int ii = 1;
-            ii < width + 1;
-            ii ++)
-            {
-              sb.AppendFormat("{0,5}", outward[ii, jj]);
-            }
-            sb.AppendLine();
+          rad
+          var ordered = near.toSeq.sortBy(_._2)
+          newpos = ordered.takeWhile(kv => kv._2 == ordered(0)._2).RandomElement._1
+          if (near.forall(e => e._2 == near(newpos))) {
+            return ArrayBuffer[DirectedPosition]()
           }
-          writeShowLog(sb.ToString());
-          #endif
-
-          int newX = newpos.x, newY = newpos.y;
+          var newX = newpos.x
+          var newY = newpos.y
           if (!(newX == currentX && newY == currentY)) {
-            currentX = newX;
-            currentY = newY;
-            //                    d_inv = dijkstraInner(active, grid, placing, d_inv);
+            currentX = newX
+            currentY = newY
           }
-          DirectedPosition dp = new DirectedPosition(currentX, currentY, currentFacing);
-          if (dp.x == active.x && dp.y == active.y) //bestMoves.Any(b => b.x == dp.x && b.y == dp.y))// && ((0 == placing[newX, newY].color) ? 0 != active.color : 0 == active.color)) {
-            //oldpos = new DirectedPosition(currentX, currentY, currentFacing);
-            writeShowLog("Found target.");
-            path.Add(dp);
-            f = active.speed + 10;
+          var dp = DirectedPosition(Position(currentX, currentY), currentFacing)
+          if (dp.p.x == active.x && dp.p.y == active.y)
+          {
+            path += dp
+            f = active.speed + 10
           }
           else {
-            writeShowLog("Continuing pathfind, f is " + f + ", position is " + dp.x + ", " + dp.y);
-            if (path.Last().x == dp.x && path.Last().y == dp.y) {
-              writeShowLog("Tried to reach unreachable target!!!");
-            }
-            path.Add(dp);
+            path += dp
           }
-          oldpos = new DirectedPosition(currentX, currentY, currentFacing);
+          oldpos = new DirectedPosition(Position(currentX, currentY), currentFacing)
+          f = f+1
         }
       }
-      path.Reverse();
-      path[ 0].dir = active.facing;
-      DirectedPosition old2 = new DirectedPosition(path.First().x, path.First().y);
-      for (int i = 1;
-      i < path.Count;
-      i ++)
+      path.reverse
+      path(0) = DirectedPosition(path(0).p, active.facing)
+      var old2 = DirectedPosition(Position(path(0).p.x, path(0).p.y), Direction.SE)
+      for (i <- 1 until path.size)
       {
-        currentX = old2.x;
-        currentY = old2.y;
-        int newX = path[i].x;
-        int newY = path[i].y;
+        currentX = old2.p.x
+        currentY = old2.p.y
+        var newX = path(i).p.x
+        var newY = path(i).p.y
         if (newY > currentY) {
-          path[i].dir = Direction.SE;
+          path(i) = DirectedPosition(path(i).p, Direction.SE)
         }
         else if (newY < currentY) {
-          path[i].dir = Direction.NW;
-
+          path(i) = DirectedPosition(path(i).p, Direction.NW)
         }
         else {
-          if (newX < currentX)
-            path[i].dir = Direction.SW;
-          else
-            path[i].dir = Direction.NE;
+          if (newX < currentX) {
+            path(i) = DirectedPosition(path(i).p, Direction.SW)
+          }
+          else {
+            path(i) = DirectedPosition(path(i).p, Direction.NE)
+          }
         }
-        old2 = new DirectedPosition(path[i].x, path[i].y);
+        old2 = new DirectedPosition(Position(path(i).p.x, path(i).p.y), Direction.SE)
       }
-      /*while (placing[path.Last().x, path.Last().y] != null && path.Count > 0)
-      {
-          path.RemoveAt(path.Count - 1);
-          if (path.Count == 0)
-              return path;
-          currentX = path.Last().x;
-          currentY = path.Last().y;
-          currentFacing = path.Last().dir;
-      }*/
-      /*            DirectedPosition dpos = path.First();
-                  for (int i = 1; i < path.Count; i++)
-                  {
-                      if (path[i].x == dpos.x && path[i].y == dpos.y)
-                      {
-                          path.RemoveAt(i - 1);
-                          i--;
-                      }
-                      else
-                      {
-                          dpos = path[i];
-                      }
-                  }*/
-      return path;
+      path
     }
-
-    private int failCount = 0;
-    void RetryPlacement () {
-      failCount ++;
-      Console.WriteLine("\n\n!!!!! P L A C E M E N T   F A I L U R E   " + failCount + " !!!!!\n\n");
+    def RetryPlacement ()
+    {
+      failCount = failCount + 1
+      println("\n\n!!!!! P L A C E M E N T   F A I L U R E   " + failCount + " !!!!!\n\n");
       if (failCount > 20) {
-        Console.WriteLine("Too many placement failures.");
-        Console.In.ReadLine();
-        return;
+        println("Too many placement failures.")
+        return
       }
-      PlacePieces();
+      PlacePieces()
+      return
     }
-    public void PlacePieces() {
-      int[] allcolors = {
+    def PlacePieces() {
+      val allcolors = Array(
         1, 2, 3, 4, 5, 6, 7
-      };
-      Colors = new int[ 4];
-      ReverseColors = new int[ 8];
-      bool[] taken = {
-        false, false, false, false, false, false, false
-      };
-      for (int i = 1;
-      i < 4;
-      i ++)
-      {
-        int col = (i == 1) ? r.Next(1, 7): r.Next (7);
-        while (taken[col])
-          col = (i == 1) ? r.Next(1, 7): r.Next (7);
-        Colors[i] = allcolors[col];
-        ReverseColors[Colors[i]] = i;
-        taken[col] = true;
-      }
-      Colors[ 0] = 0;
-      ReverseColors[ 0] = 0;
+      )
+      colors = new Array[Int](4)
+      reverseColors = new Array[Int](8)
+      var taken = Array(false, false, false, false, false, false, false)
 
-      for (int section = 0;
-      section < 2;
-      section ++)
+      for (i <- 1 until 4)
       {
-        int rx = (width / 4) + (width / 2) * (section % 2);
-        int ry = 3 + (height / 6);
-        //processSingleOutlined(facilityps[(colors[section] == 0) ? 3 : 2], colors[section], dirs[r.Next(4)])
-        if (Colors[section] == 0) {
-          PieceGrid[rx, ry] = new Piece("Estate", Colors[section], rx, ry);
-          targetX[ 1] = rx;
-          targetY[ 1] = ry;
-          targetX[ 2] = rx;
-          targetY[ 2] = ry;
-          targetX[ 3] = rx;
-          targetY[ 3] = ry;
+        var col = if (i == 1) r.nextIntMin(1, 7) else r.nextInt(7)
+        while (taken(col)) {
+          col = if (i == 1) r.nextIntMin(1, 7) else r.nextInt(7)
+        }
+        colors(i) = allcolors(col)
+        reverseColors(colors(i)) = i
+        taken(col) = true
+      }
+      colors(0) = 0
+      reverseColors(0) = 0
+
+      for (section <- 0 until 2)
+      {
+        val rx = (width / 4) + (width / 2) * (section % 2);
+        val ry = 3 + (height / 6);
+        if (colors(section) == 0) {
+          PieceGrid(rx)(ry) = new Piece(Piece.NameLookup("Estate"), colors(section), r.nextInt(4), rx, ry)
+          targetX(1) = rx;
+          targetY(1) = ry;
+          targetX(2) = rx;
+          targetY(2) = ry;
+          targetX(3) = rx;
+          targetY(3) = ry;
         }
         else {
-          PieceGrid[rx, ry] = new Piece("Castle", Colors[section], rx, ry);
-          targetX[ 0] = rx;
-          targetY[ 0] = ry;
+          PieceGrid(rx)(ry) = new Piece(Piece.NameLookup("Castle"), colors(section), r.nextInt(4), rx, ry)
+          targetX(0) = rx;
+          targetY(0) = ry;
         }
-        FieldMap.Land[rx, ry] = 10; // +Colors[section];
-        for (int i = rx - (width / 6);
-        i < rx + (width / 6);
-        i ++)
+        FieldMap.Land(rx)(ry) = 10; // +colors[section];
+        for (i <- rx - (width / 6) until rx + (width / 6))
         {
-          for (int j = ry - (height / 6);
-          j < ry + (height / 6);
-          j ++)
+          for (j <- ry - (height / 6) until ry + (height / 6))
           {
-            if (PieceGrid[i, j] != null)
-              continue;
-            //r.Next(14) <= 2
-            if (r.Next(14) <= 2 && (FieldMap.Land[i, j] == 0 || FieldMap.Land[i, j] == 1 || FieldMap.Land[i, j] == 2 || FieldMap.Land[i, j] == 4 || FieldMap.Land[i, j] == 8)) {
-              //
-              PieceGrid[i, j] = new Piece(r.Next(24, 28), Colors[section], i, j);
-              FieldMap.Land[i, j] = 10; // +Colors[section];
-              //processSingleOutlined(facilityps[r.Next(3) % 2], colors[section], dirs[r.Next(4)]);
+            if (PieceGrid(i)(j) == null) {
+              if (r.nextInt(14) <= 2 && (FieldMap.Land(i)(j) == 0 || FieldMap.Land(i)(j) == 1 || FieldMap.Land(i)(j) == 2 || FieldMap.Land(i)(j) == 4 || FieldMap.Land(i)(j) == 8)) {
+                PieceGrid(i)(j) = new Piece(r.nextIntMin(24, 28), colors(section), r.nextInt(4), i, j);
+                FieldMap.Land(i)(j) = 10; // +colors[section];
+                //processSingleOutlined(facilityps[r.Next(3) % 2], colors[section], dirs[r.Next(4)]);
+              }
             }
 
           }
         }
       }
-      for (int section = 2;
-      section < 4;
-      section ++)
+      for (section <- 2 until 4)
       {
-        int rx = (width / 4) + (width / 2) * (section % 2);
-        int ry = height - 3 - (height / 6);
-        PieceGrid[rx, ry] = new Piece(((Colors[section] == 0) ? Piece.PieceLookup[ "Estate"]: Piece.PieceLookup[ "Castle"] ), Colors[section], rx, ry);
-        FieldMap.Land[rx, ry] = 10; // +Colors[section];
-        for (int i = rx - (width / 8);
-        i < rx + (width / 8);
-        i ++)
+        val rx = (width / 4) + (width / 2) * (section % 2);
+        val ry = height - 3 - (height / 6);
+        PieceGrid(rx)(ry) = new Piece(if (colors(section) == 0) Piece.PieceLookup("Estate") else Piece.PieceLookup("Castle"), colors(section),  r.nextInt(4), rx, ry);
+        FieldMap.Land(rx)(ry) = 10; // +colors[section];
+        for (i <- rx - (width / 8) until rx + (width / 8))
         {
-          for (int j = ry - (height / 8);
-          j < ry + (height / 8);
-          j ++)
+          for (j <- ry - (height / 8) until ry + (height / 8))
           {
-            if (PieceGrid[i, j] != null)
-              continue;
-            //r.Next(14) <= 2
-            if (r.Next(14) <= 2 && (FieldMap.Land[i, j] == 0 || FieldMap.Land[i, j] == 1 || FieldMap.Land[i, j] == 2 || FieldMap.Land[i, j] == 4 || FieldMap.Land[i, j] == 8)) {
-              PieceGrid[i, j] = new Piece(r.Next(24, 28), Colors[section], i, j);
-              FieldMap.Land[i, j] = 10; // +Colors[section];
-
+            if (PieceGrid(i)(j) == null)
+            {
+              if (r.nextInt(14) <= 2 && (FieldMap.Land(i)(j) == 0 || FieldMap.Land(i)(j) == 1 || FieldMap.Land(i)(j) == 2 || FieldMap.Land(i)(j) == 4 || FieldMap.Land(i)(j) == 8)) {
+                PieceGrid(i)(j) = new Piece(r.nextIntMin(24, 28), colors(section), r.nextInt(4), i, j);
+                FieldMap.Land(i)(j) = 10; // +colors[section];
+              }
             }
-
           }
         }
       }
-      List < Tuple < int, int >> guarantee = new List < Tuple < int, int >>();
-      for (int section = 0;
-      section < 4;
-      section ++) // section < 4
-      {
-        for (int i = (width / 2) * (section % 2);
-        i < (width / 2) + (width / 2) * (section % 2);
-        i ++)
-        {
-          for (int j = (section / 2 == 0) ? 0: height / 2;
-          j < ((section / 2 == 0) ? height / 2: height);
-          j ++)
-          {
-            if (PieceGrid[i, j] != null)
-              continue;
-            int currentPiece = Piece.TerrainToPieces[FieldMap.Land[i, j]].RandomElement();
-            //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
-            if (r.Next(25) <= 3) {
-              //if(Piece.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.TreadsAmphi))
-              //    PieceGrid[i, j] = new Piece(Piece.PieceLookup["Tank_T"], Colors[section], section, i, j);
-              //else
-              PieceGrid[i, j] = new Piece(currentPiece, Colors[section], section, i, j);
-            }
 
+      for(section <- 0 until 4) // section < 4
+      {
+        for (i <- (width / 2) * (section % 2) until (width / 2) + (width / 2) * (section % 2))
+        {
+          for (j <- (if (section / 2 == 0) 0 else height / 2) until (if(section / 2 == 0) height / 2 else height))
+          {
+            if (PieceGrid(i)(j) == null) {
+              val currentPiece = Piece.TerrainToPieces(FieldMap.Land(i)(j)).RandomElement
+              //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
+              if (r.nextInt(25) <= 3) {
+                //if(Piece.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.TreadsAmphi))
+                //    PieceGrid[i, j] = new Piece(Piece.PieceLookup["Tank_T"], colors[section], section, i, j);
+                //else
+                PieceGrid(i)(j) = new Piece(currentPiece, colors(section), section, i, j);
+              }
+            }
           }
         }
         /*if (guarantee.Count == section)
@@ -1542,186 +1430,152 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                     return;
                 }
             }
-            PieceGrid[rgx, rgy] = new Piece(Piece.TerrainToPieces[FieldMap.Land[rgx, rgy]].RandomElement(), Colors[section], section, rgx, rgy);
+            PieceGrid[rgx, rgy] = new Piece(Piece.TerrainToPieces[FieldMap.Land[rgx, rgy]].RandomElement(), colors[section], section, rgx, rgy);
         }*/
-
       }
-      for (int i = 1;
-      i < width - 1;
-      i ++)
+      for (i <- 1 until width - 1)
       {
-        for (int j = 1;
-        j < height - 1;
-        j ++)
+        for (j <- 1 until height - 1)
         {
-          if (r.Next(30) <= 1 && PieceGrid[i, j] == null) {
-            int rs = 0; // r.Next(4);
-            int currentPiece = Piece.TerrainToPieces[FieldMap.Land[i, j]].RandomElement();
-            PieceGrid[i, j] = new Piece(currentPiece, Colors[rs], rs, i, j);
-
+          if (r.nextInt(30) <= 1 && PieceGrid(i)(j) == null) {
+            val rs = 0; // r.Next(4);
+            val currentPiece = Piece.TerrainToPieces(FieldMap.Land(i)(j)).RandomElement
+            PieceGrid(i)(j) = new Piece(currentPiece, colors(rs), rs, i, j);
           }
         }
       }
-      Piece temp = PieceGrid.RandomFactionPiece(Colors[ActingFaction]);
-      ActivePiece = new Piece(temp);
-      PieceGrid[temp.x, temp.y] = null;
+      val temp = PieceGrid.RandomFactionPiece(colors(ActingFaction));
+      ActivePiece = Piece.reset(temp)
+      PieceGrid(temp.x)(temp.y) = null;
     }
-    public List < DirectedPosition > BestPath;
-    public DirectedPosition FuturePosition, target;
-    public int currentlyFiring = -1;
-    private bool killSuccess = false, hitSuccess = false;
-    private int previousHP;
-    private Thread thr = null;
-    public void dispose() {
-      #if DEBUG
-      //File.WriteAllText("log.txt", log.ToString());
-      #endif
-      if (thr != null)
-        thr.Abort();
+    def dispose() = {
     }
-    public void ShowTargets(Piece u, Weapon w) {
-      for (int i = 0;
-      i < width;
-      i ++)
+    def ShowTargets(u:Piece, w:Weapon) =
+    {
+      for (i <- 0 until width)
       {
-        for (int j = 0;
-        j < height;
-        j ++)
+        for (j <- 0 until height)
         {
-          if (PieceGrid[i, j] != null && u.isOpposed(PieceGrid[i, j])
-            && Math.Abs(u.x - i) + Math.Abs(u.y - j) >= w.minRange
-            && Math.Abs(u.x - i) + Math.Abs(u.y - j) <= w.maxRange
-            && w.multipliers[Piece.PieceTypeAsNumber(PieceGrid[i, j].kind)] > 0)
+          if (PieceGrid(i)(j) != null && u.isOpposed(PieceGrid(i)(j))
+            && Math.abs(u.x - i) + Math.abs(u.y - j) >= w.minRange
+            && Math.abs(u.x - i) + Math.abs(u.y - j) <= w.maxRange
+            && w.multipliers(Piece.PieceTypeAsNumber(PieceGrid(i)(j).kind)) > 0)
           {
-            Speech s = new Speech {
-              large = false, x = i, y = j,
-              text = (100 - PieceGrid[i, j].dodge * 10) + "% / " +
-                (int)((w.multipliers[Piece.PieceTypeAsNumber(PieceGrid[i, j].kind)] -0.1f * PieceGrid[i, j].armor) * w.damage) +""
-            };
-            speaking.Add(s);
-            FieldMap.Highlight[i, j] = HighlightType.Bright;
+            val s =Speech(
+              large = false,
+              x = i,
+              y = j,
+              text = (100 - PieceGrid(i)(j).dodge * 10) + "% / " +
+                ((w.multipliers(Piece.PieceTypeAsNumber(PieceGrid(i)(j).kind)) -0.1f * PieceGrid(i)(j).armor) * w.damage).toInt)
+            speaking += s
+            FieldMap.Highlight(i)(j) = HighlightType.Bright
           }
           else
           {
-            FieldMap.Highlight[i, j] = HighlightType.Dim;
+            FieldMap.Highlight(i)(j) = HighlightType.Dim;
           }
         }
       }
     }
-    float[, ] outward;
-    public void advanceTurn() {
-      PieceGrid[ActivePiece.x, ActivePiece.y] = new Piece(ActivePiece);
-      ActingFaction = (ActingFaction + 1) % 4;
-      Piece temp = PieceGrid.RandomFactionPiece(Colors[ActingFaction]);
-      ActivePiece = new Piece(temp);
-      PieceGrid[temp.x, temp.y] = null;
-      speaking.Clear();
-      if (ActingFaction == 1) GameGDX.state = GameState.PC_Select_Move;
-      else GameGDX.state = GameState.NPC_Play;
+    def advanceTurn() = {
+      PieceGrid(ActivePiece.x)(ActivePiece.y) = Piece.reset(ActivePiece)
+      ActingFaction = (ActingFaction + 1) % 4
+      var temp = PieceGrid.RandomFactionPiece(colors(ActingFaction))
+      ActivePiece = Piece.reset(temp)
+      PieceGrid(temp.x)(temp.y) = null
+      speaking.clear()
+      if (ActingFaction == 1) {
+        state = GameState.PC_Select_Move
+      }
+      else {
+        state = GameState.NPC_Play
+      }
 
-      CurrentMode = Mode.Selecting;
-      TaskSteps = 0;
+      CurrentMode = Mode.Selecting
+      TaskSteps = 0
     }
 
-    public void ProcessStep() {
-      if (GameGDX.state == GameState.PC_Select_Move) {
-
+    def ProcessStep() = {
+      if (state == GameState.PC_Select_Move) {
         Effects.CenterCamera(ActivePiece.x, ActivePiece.y, 0.5F);
         outward = dijkstra(ActivePiece, FieldMap.Land, PieceGrid, ActivePiece.x, ActivePiece.y);
-        for (int i = 0;
-        i < width;
-        i ++)
+        for (i <- 0 until width)
         {
-          for (int j = 0;
-          j < height;
-          j ++)
+          for (j <- 0 until height)
           {
-            FieldMap.Highlight[i, j] = (outward[i + 1, j + 1] > 0 && outward[i + 1, j + 1] <= ActivePiece.speed) ? HighlightType.Bright: HighlightType.Dim;
+            FieldMap.Highlight(i)(j) = if (outward(i + 1)(j + 1) > 0 && outward(i + 1)(j + 1) <= ActivePiece.speed) HighlightType.Bright else HighlightType.Dim
           }
         }
-        FieldMap.Highlight[ActivePiece.x, ActivePiece.y] = HighlightType.Spectrum;
-        return;
+        FieldMap.Highlight(ActivePiece.)(ActivePiece.y) = HighlightType.Spectrum;
+        return
       }
-      if (GameGDX.state == GameState.PC_Select_UI) {
-        return;
+      if (state == GameState.PC_Select_UI) {
+        return
       }
-      if (GameGDX.state == GameState.PC_Select_Action) {
-        return;
+      if (state == GameState.PC_Select_Action) {
+        return
       }
-      TaskSteps ++;
-      switch(CurrentMode) {
-        case Mode.Selecting:
-
-        if (TaskSteps > 4 && GameGDX.state != GameState.PC_Play_Move && thr != null && thr.ThreadState == ThreadState.Stopped) {
-          FuturePosition = new DirectedPosition(ActivePiece.x, ActivePiece.y, ActivePiece.facing);
-          for (int i = 0;
-          i < width;
-          i ++)
+      TaskSteps = TaskSteps + 1
+      CurrentMode match {
+        case Mode.Selecting =>
+        if (TaskSteps > 4 && state != GameState.PC_Play_Move && thr != null && thr.isCompleted) {
+          FuturePosition = new DirectedPosition(Position(ActivePiece.x, ActivePiece.y), ActivePiece.facing);
+          for (i <- 0 until width)
           {
-            for (int j = 0;
-            j < height;
-            j ++)
+            for (j <- 0 until height)
             {
-              FieldMap.Highlight[i, j] = HighlightType.Plain;
+              FieldMap.Highlight(i)(j) = HighlightType.Plain;
             }
           }
-          TaskSteps = 0;
-          GameGDX.stateTime = 0;
-          CurrentMode = Mode.Moving;
+          TaskSteps = 0
+          GameGDX.stateTime = 0
+          CurrentMode = Mode.Moving
         }
-        else if (TaskSteps <= 1 && (thr == null || thr.ThreadState == ThreadState.Stopped) && GameGDX.state == GameState.NPC_Play) {
-          thr = new Thread(() => {
-            BestPath = getDijkstraPath(ActivePiece, FieldMap.Land, PieceGrid);
-          });
-          thr.Start();
-
+        else if (TaskSteps <= 1 && (thr == null || thr.isCompleted) && state == GameState.NPC_Play) {
+          thr = Future {
+            getDijkstraPath(ActivePiece, FieldMap.Land, PieceGrid)
+          }
+          thr onSuccess {
+            case path => BestPath = path
+          }
           Effects.CenterCamera(ActivePiece.x, ActivePiece.y, 0.5F);
           outward = dijkstra(ActivePiece, FieldMap.Land, PieceGrid, ActivePiece.x, ActivePiece.y);
-          for (int i = 0;
-          i < width;
-          i ++)
+          for (i <- 0 until width)
           {
-            for (int j = 0;
-            j < height;
-            j ++)
+            for (j <- 0 until height)
             {
-              FieldMap.Highlight[i, j] = (outward[i + 1, j + 1] > 0 && outward[i + 1, j + 1] <= ActivePiece.speed) ? HighlightType.Bright: HighlightType.Dim;
+              FieldMap.Highlight(i)(j) = if (outward(i + 1)(j + 1) > 0 && outward(i + 1)(j + 1) <= ActivePiece.speed) HighlightType.Bright else HighlightType.Dim
             }
           }
-          FieldMap.Highlight[ActivePiece.x, ActivePiece.y] = HighlightType.Spectrum;
+          FieldMap.Highlight(ActivePiece.x)(ActivePiece.y) = HighlightType.Spectrum
 
         }
-        else if (GameGDX.state == GameState.PC_Play_Move) {
+        else if (state == GameState.PC_Play_Move) {
           BestPath = getDijkstraPath(ActivePiece, FieldMap.Land, PieceGrid, GameGDX.cursor.x, GameGDX.cursor.y);
-          FuturePosition = new DirectedPosition(ActivePiece.x, ActivePiece.y, ActivePiece.facing);
-          for (int i = 0;
-          i < width;
-          i ++)
+          FuturePosition = new DirectedPosition(Position(ActivePiece.x, ActivePiece.y), ActivePiece.facing);
+          for (i <- 0 until width)
           {
-            for (int j = 0;
-            j < height;
-            j ++)
+            for (j <- 0 until height)
             {
-              FieldMap.Highlight[i, j] = HighlightType.Plain;
+              FieldMap.Highlight(i)(j) = HighlightType.Plain
             }
           }
-          TaskSteps = 0;
-          GameGDX.stateTime = 0;
-          CurrentMode = Mode.Moving;
+          TaskSteps = 0
+          GameGDX.stateTime = 0
+          CurrentMode = Mode.Moving
         }
-        else if (GameGDX.state == GameState.PC_Play_Action) {
-          target = DirectedPosition.TurnToFace(new Position(ActivePiece.x, ActivePiece.y), new Position(GameGDX.cursor.x, GameGDX.cursor.y));
-          CurrentMode = Mode.Attacking;
-          GameGDX.state = GameState.PC_Play_Action;
-          TaskSteps = 0;
+        else if (state == GameState.PC_Play_Action) {
+          target = DirectedPosition.TurnToFace(new Position(ActivePiece.x, ActivePiece.y), new Position(GameGDX.cursor.x, GameGDX.cursor.y))
+          CurrentMode = Mode.Attacking
+          state = GameState.PC_Play_Action
+          TaskSteps = 0
         }
         else {
         }
-        break;
-        case Mode.Moving:
-          ActivePiece.x = FuturePosition.x;
-        ActivePiece.y = FuturePosition.y;
-        if (BestPath.Count <= 0 || TaskSteps > ActivePiece.speed + 1) {
+        case Mode.Moving=>
+          ActivePiece.x = FuturePosition.p.x;
+        ActivePiece.y = FuturePosition.p.y;
+        if (BestPath.size <= 0 || TaskSteps > ActivePiece.speed + 1) {
           //false == (ActivePiece.weaponry[0].kind == WeaponType.None && ActivePiece.weaponry[1].kind == WeaponType.None)
           /*
 
@@ -1730,101 +1584,100 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           ActivePiece.weaponry[currentlyFiring].maxRange, ActivePiece.weaponry[currentlyFiring].maxRange).Any(
           pos => PieceGrid[pos.x, pos.y] != null && ActivePiece.isOpposed(PieceGrid[pos.x, pos.y])))
            */
-          if (GameGDX.state == GameState.PC_Play_Move) {
+          if (state == GameState.PC_Play_Move) {
             ActivePiece.worldX = 20 + ActivePiece.x * 64 + ActivePiece.y * 64;
             ActivePiece.worldY = 6 + ActivePiece.x * 32 - ActivePiece.y * 32;
-            GameGDX.state = GameState.PC_Select_UI;
-            List < MenuEntry > entries = new List < MenuEntry >();
-            if (ActivePiece.weaponry[ 0].kind != WeaponType.None)
-            entries.Add(new MenuEntry(ActivePiece.weaponry[ 0].kind.ToString(), () => {
-              currentlyFiring = 0;
-              ShowTargets(ActivePiece, ActivePiece.weaponry[ 0] );
+            state = GameState.PC_Select_UI;
+            var entries = new ArrayBuffer[MenuEntry]()
+            if (findWeapon(ActivePiece, 0).kind != WeaponType.Non)
+            entries += new MenuEntry(findWeapon(ActivePiece, 0).kind.toString, () =>
+            {
+              currentlyFiring = 0
+              ShowTargets(ActivePiece, findWeapon(ActivePiece, 0) )
               CurrentMode = Mode.Selecting;
               TaskSteps = 0;
-              GameGDX.state = GameState.PC_Select_Action;
-            }) );
-            if (ActivePiece.weaponry[ 1].kind != WeaponType.None)
-            entries.Add(new MenuEntry(ActivePiece.weaponry[ 1].kind.ToString(), () => {
-              currentlyFiring = 1;
-              ShowTargets(ActivePiece, ActivePiece.weaponry[ 1] );
-              CurrentMode = Mode.Selecting;
-              TaskSteps = 0;
-              GameGDX.state = GameState.PC_Select_Action;
-            }) );
+              state = GameState.PC_Select_Action;
+            })
+            if (findWeapon(ActivePiece, 1).kind != WeaponType.Non)
+            entries += new MenuEntry(findWeapon(ActivePiece, 1).kind.toString, () => {
+              currentlyFiring = 1
+              ShowTargets(ActivePiece, findWeapon(ActivePiece, 1) )
+              CurrentMode = Mode.Selecting
+              TaskSteps = 0
+              state = GameState.PC_Select_Action
+            })
 
-            UI.postActor(UI.makeMenu(entries, ActivePiece.color)); //, ActivePiece.worldX, ActivePiece.worldY);
-            TaskSteps = 0;
-            CurrentMode = Mode.Selecting;
-            break;
+            UI.postActor(UI.makeMenu(entries, ActivePiece.color)) //, ActivePiece.worldX, ActivePiece.worldY);
+            TaskSteps = 0
+            CurrentMode = Mode.Selecting
+            return
           }
-          else if (currentlyFiring > -1 && target != null && PieceGrid[target.x, target.y] != null && ActivePiece.isOpposed(PieceGrid[target.x, target.y])) {
+          else if (currentlyFiring > -1 && target != null && PieceGrid(target.p.x)(target.p.y) != null && ActivePiece.isOpposed(PieceGrid(target.p.x)(target.p.y))) {
             ActivePiece.worldX = 20 + ActivePiece.x * 64 + ActivePiece.y * 64;
             ActivePiece.worldY = 6 + ActivePiece.x * 32 - ActivePiece.y * 32;
             CurrentMode = Mode.Attacking;
-            TaskSteps = 0;
-            break;
+            TaskSteps = 0
+            return
           }
 
-          advanceTurn();
-          break;
+          advanceTurn()
+          return
         }
-        FuturePosition = new DirectedPosition(BestPath.First().x, BestPath.First().y, BestPath.First().dir);
-        int oldx = ActivePiece.x, oldy = ActivePiece.y;
+        FuturePosition = new DirectedPosition(BestPath(0).p.x, BestPath(0).p.y, BestPath(0).dir);
+        val oldx = ActivePiece.x
+        val oldy = ActivePiece.y
 
-        ActivePiece.facingNumber = ConvertDirection(FuturePosition.dir);
-        ActivePiece.facing = FuturePosition.dir;
-        NilTask n = new NilTask(() => {
-          ActivePiece.worldX += (FuturePosition.x - oldx) * 4 + (FuturePosition.y - oldy) * 4;
-          ActivePiece.worldY += (FuturePosition.x - oldx) * 2 - (FuturePosition.y - oldy) * 2;
-          ActivePiece.worldY += ((LocalMap.Depths[FieldMap.Land[FuturePosition.x, FuturePosition.y]] - LocalMap.Depths[FieldMap.Land[oldx, oldy]]) * 3F) / 16F;
-        });
+        ActivePiece.facingNumber = ConvertDirection(FuturePosition.dir)
+        ActivePiece.facing = FuturePosition.dir
+        val n = new Timer.Task{ def run() {
+          ActivePiece.worldX += (FuturePosition.p.x - oldx) * 4 + (FuturePosition.p.y - oldy) * 4
+          ActivePiece.worldY += (FuturePosition.p.x - oldx) * 2 - (FuturePosition.p.y - oldy) * 2
+          ActivePiece.worldY += (LocalMap.Depths(FieldMap.Land(FuturePosition.p.x)(FuturePosition.p.y) - LocalMap.Depths(FieldMap.Land(oldx)(oldy))) * 3F) / 16F
+         } }
         Timer.instance().scheduleTask(n, 0, GameGDX.updateStep / 16F, 15);
-
         Effects.CenterCamera(FuturePosition, 1F);
-
-        BestPath.RemoveAt(0);
-
-        break;
-        case Mode.Attacking:
-        if (TaskSteps <= 1) {
-          if (target.x - ActivePiece.x <= target.y - ActivePiece.y && (target.x - ActivePiece.x) * -1 <= target.y - ActivePiece.y) {
-            ActivePiece.facing = Direction.SE;
-            ActivePiece.facingNumber = 0;
-            if (PieceGrid[target.x, target.y].speed > 0) {
-              PieceGrid[target.x, target.y].facing = Direction.NW;
-              PieceGrid[target.x, target.y].facingNumber = 2;
+        BestPath.remove(0)
+        case Mode.Attacking =>
+        if (TaskSteps <= 1)
+        {
+          if (target.p.x - ActivePiece.x <= target.p.y - ActivePiece.y && (target.p.x - ActivePiece.x) * -1 <= target.p.y - ActivePiece.y) {
+            ActivePiece.facing = Direction.SE
+            ActivePiece.facingNumber = 0
+            if (PieceGrid(target.p.x)(target.p.y).speed > 0) {
+              PieceGrid(target.p.x)(target.p.y).facing = Direction.NW
+              PieceGrid(target.p.x)(target.p.y).facingNumber = 2
             }
           }
-          else if ((target.x - ActivePiece.x) * -1 <= target.y - ActivePiece.y && target.x - ActivePiece.x >= target.y - ActivePiece.y) {
-            ActivePiece.facing = Direction.NE;
-            ActivePiece.facingNumber = 3;
-            if (PieceGrid[target.x, target.y].speed > 0) {
-              PieceGrid[target.x, target.y].facing = Direction.SW;
-              PieceGrid[target.x, target.y].facingNumber = 1;
+          else if ((target.p.x - ActivePiece.x) * -1 <= target.p.y - ActivePiece.y && target.p.x - ActivePiece.x >= target.p.y - ActivePiece.y) {
+            ActivePiece.facing = Direction.NE
+            ActivePiece.facingNumber = 3
+            if (PieceGrid(target.p.x)(target.p.y).speed > 0) {
+              PieceGrid(target.p.x)(target.p.y).facing = Direction.SW
+              PieceGrid(target.p.x)(target.p.y).facingNumber = 1
             }
           }
-          else if (target.x - ActivePiece.x >= target.y - ActivePiece.y && (target.x - ActivePiece.x) * -1 >= target.y - ActivePiece.y) {
-            ActivePiece.facing = Direction.NW;
-            ActivePiece.facingNumber = 2;
-            if (PieceGrid[target.x, target.y].speed > 0) {
-              PieceGrid[target.x, target.y].facing = Direction.SE;
-              PieceGrid[target.x, target.y].facingNumber = 0;
+          else if (target.p.x - ActivePiece.x >= target.p.y - ActivePiece.y && (target.p.x - ActivePiece.x) * -1 >= target.p.y - ActivePiece.y) {
+            ActivePiece.facing = Direction.NW
+            ActivePiece.facingNumber = 2
+            if (PieceGrid(target.p.x)(target.p.y).speed > 0) {
+              PieceGrid(target.p.x)(target.p.y).facing = Direction.SE
+              PieceGrid(target.p.x)(target.p.y).facingNumber = 0
             }
           }
-          else if ((target.x - ActivePiece.x) * -1 >= target.y - ActivePiece.y && target.x - ActivePiece.x <= target.y - ActivePiece.y) {
+          else if ((target.p.x - ActivePiece.x) * -1 >= target.p.y - ActivePiece.y && target.p.x - ActivePiece.x <= target.p.y - ActivePiece.y) {
             ActivePiece.facing = Direction.SW;
             ActivePiece.facingNumber = 1;
-            if (PieceGrid[target.x, target.y].speed > 0) {
-              PieceGrid[target.x, target.y].facing = Direction.NE;
-              PieceGrid[target.x, target.y].facingNumber = 3;
+            if (PieceGrid(target.p.x)(target.p.y).speed > 0) {
+              PieceGrid(target.p.x)(target.p.y).facing = Direction.NE;
+              PieceGrid(target.p.x)(target.p.y).facingNumber = 3;
             }
           }
           else {
             ActivePiece.facing = Direction.SE;
             ActivePiece.facingNumber = 0;
-            if (PieceGrid[target.x, target.y].speed > 0) {
-              PieceGrid[target.x, target.y].facing = Direction.NW;
-              PieceGrid[target.x, target.y].facingNumber = 2;
+            if (PieceGrid(target.p.x)(target.p.y).speed > 0) {
+              PieceGrid(target.p.x)(target.p.y).facing = Direction.NW;
+              PieceGrid(target.p.x)(target.p.y).facingNumber = 2;
             }
           }
 
@@ -1836,84 +1689,82 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
               currentlyFiring = 0;
           else currentlyFiring = 1;*/
           if (currentlyFiring > -1) {
-            hitSuccess = PieceGrid[target.x, target.y].attemptDodge(ActivePiece.weaponry[currentlyFiring]);
+            hitSuccess = PieceGrid(target.p.x)(target.p.y).attemptDodge(findWeapon(ActivePiece, currentlyFiring));
             if (hitSuccess) {
-              previousHP = PieceGrid[target.x, target.y].currentHealth;
-              killSuccess = PieceGrid[target.x, target.y].takeDamage(ActivePiece.weaponry[currentlyFiring]);
+              previousHP = PieceGrid(target.p.x)(target.p.y).currentHealth;
+              killSuccess = PieceGrid(target.p.x)(target.p.y).takeDamage(findWeapon(ActivePiece, currentlyFiring));
             }
           }
           else {
-            hitSuccess = false;
-            killSuccess = false;
+            hitSuccess = false
+            killSuccess = false
           }
-          ActivePiece.visual = (ActivePiece.weaponry[ 1].kind == WeaponType.None && ActivePiece.weaponry[ 0].kind == WeaponType.None) ? VisualAction.Normal: VisualAction.Firing;
+          ActivePiece.visual = if(findWeapon(ActivePiece, 1).kind == WeaponType.Non &&
+            findWeapon(ActivePiece, 0).kind == WeaponType.Non) VisualAction.Normal else VisualAction.Firing;
         }
-        else if (TaskSteps > 4 + 1 * (Math.Abs(target.x - ActivePiece.x) + Math.Abs(target.y - ActivePiece.y))) {
-          currentlyFiring = -1;
+        else if (TaskSteps > 4 + 1 * (Math.abs(target.p.x - ActivePiece.x) + Math.abs(target.p.y - ActivePiece.y))) {
+          currentlyFiring = -1
           if (killSuccess)
-            PieceGrid[target.x, target.y] = null;
-          killSuccess = false;
-          hitSuccess = false;
-          advanceTurn();
-
-          break;
+            PieceGrid(target.p.x)(target.p.y) = null
+          killSuccess = false
+          hitSuccess = false
+          advanceTurn()
+          return
         }
-        else if (TaskSteps == 1 + 1 * (Math.Abs(target.x - ActivePiece.x) + Math.Abs(target.y - ActivePiece.y)) && currentlyFiring > -1) {
-          if (hitSuccess || Piece.WeaponDisplays[ActivePiece.unitIndex][currentlyFiring] == 1 || Piece.WeaponDisplays[ActivePiece.unitIndex][currentlyFiring] == 7) {
-            GameGDX.receiveTime = 0;
-            /*
-        int w = ((row < width) ? width - 1 - row + col : col); //height + (width - 1 - row) +
-        int h = (row < width) ? col : row - width + col;
-             */
+        else if (TaskSteps == 1 + 1 * (Math.abs(target.p.x - ActivePiece.x) + Math.abs(target.p.y - ActivePiece.y)) && currentlyFiring > -1) {
+          currentlyFiring match
+          {
+            case 0=>
+              if (hitSuccess || Piece.WeaponDisplays(ActivePiece.unitIndex)._1 == 1 || Piece.WeaponDisplays(ActivePiece.unitIndex)._1 == 7) {
+                GameGDX.receiveTime = 0
+                ActivePiece.targeting = ArrayBuffer[DirectedPosition](new DirectedPosition (target.p, target.dir))
+              }
 
-            ActivePiece.targeting = new List < DirectedPosition > {
-              new DirectedPosition(target.x, target.y, target.dir)
-            };
-
+            case 1=>
+              if (hitSuccess || Piece.WeaponDisplays(ActivePiece.unitIndex)._2 == 1 || Piece.WeaponDisplays(ActivePiece.unitIndex)._2 == 7) {
+                GameGDX.receiveTime = 0
+                ActivePiece.targeting = ArrayBuffer[DirectedPosition](new DirectedPosition (target.p, target.dir))
+              }
           }
-          if (!hitSuccess && PieceGrid[target.x, target.y].speed > 0) {
+          if (!hitSuccess && PieceGrid(target.p.x)(target.p.y).speed > 0) {
             //se 0 -> sw -x -y
             //sw 1 -> nw -x +y
             //nw 2 -> ne +x +y
             //ne 3 -> se +x -y
-            NilTask avoid = new NilTask(() => {
-              PieceGrid[target.x, target.y].worldX += ((PieceGrid[target.x, target.y].facingNumber) % 4 >= 2) ? 2: - 2;
-              PieceGrid[target.x, target.y].worldY += ((PieceGrid[target.x, target.y].facingNumber + 1) % 4 >= 2) ? 1: - 1;
-            });
+            val avoid = new Timer.Task{ def run() {
+              PieceGrid(target.p.x)(target.p.y).worldX = PieceGrid(target.p.x)(target.p.y).worldX +(if((PieceGrid(target.p.x)(target.p.y).facingNumber) % 4 >= 2) 2f else -2f);
+              PieceGrid(target.p.x)(target.p.y).worldY = PieceGrid(target.p.x)(target.p.y).worldY +(if((PieceGrid(target.p.x)(target.p.y).facingNumber + 1) % 4 >= 2) 1f else -1f);
+            }}
             Timer.instance().scheduleTask(avoid, 0, GameGDX.updateStep / 16F, 10);
-            NilTask calm = new NilTask(() => {
-              PieceGrid[target.x, target.y].worldX -= ((PieceGrid[target.x, target.y].facingNumber) % 4 >= 2) ? 2: - 2;
-              PieceGrid[target.x, target.y].worldY -= ((PieceGrid[target.x, target.y].facingNumber + 1) % 4 >= 2) ? 1: - 1;
-            });
+            val calm = new Timer.Task{ def run() {
+              PieceGrid(target.p.x)(target.p.y).worldX = PieceGrid(target.p.x)(target.p.y).worldX -(if((PieceGrid(target.p.x)(target.p.y).facingNumber) % 4 >= 2) 2f else -2f);
+              PieceGrid(target.p.x)(target.p.y).worldY = PieceGrid(target.p.x)(target.p.y).worldY -(if((PieceGrid(target.p.x)(target.p.y).facingNumber + 1) % 4 >= 2) 1f else -1f);
+            }}
             Timer.instance().scheduleTask(calm, GameGDX.updateStep, GameGDX.updateStep / 8F, 10);
-            NilTask reset = new NilTask(() => {
-              PieceGrid[target.x, target.y].worldX = 20 + PieceGrid[target.x, target.y].x * 64 + PieceGrid[target.x, target.y].y * 64;
-              PieceGrid[target.x, target.y].worldY = 6 + PieceGrid[target.x, target.y].x * 32 - PieceGrid[target.x, target.y].y * 32;
-            });
-            Timer.instance().scheduleTask(reset, GameGDX.updateStep * 19 / 8F);
+            val reset = new Timer.Task{ def run() {
+              PieceGrid(target.p.x)(target.p.y).worldX = 20 + PieceGrid(target.p.x)(target.p.y).x * 64 + PieceGrid(target.p.x)(target.p.y).y * 64
+              PieceGrid(target.p.x)(target.p.y).worldY = 6 + PieceGrid(target.p.x)(target.p.y).x * 32 - PieceGrid(target.p.x)(target.p.y).y * 32
+            }}
+            Timer.instance().scheduleTask(reset, GameGDX.updateStep * 19 / 8F)
 
           }
         }
-        else if (TaskSteps == 2 + 1 * (Math.Abs(target.x - ActivePiece.x) + Math.Abs(target.y - ActivePiece.y)) && currentlyFiring > -1) {
+        else if (TaskSteps == 2 + 1 * (Math.abs(target.p.x - ActivePiece.x) + Math.abs(target.p.y - ActivePiece.y)) && currentlyFiring > -1) {
           if (killSuccess) {
             GameGDX.explodeTime = 0;
-            PieceGrid[target.x, target.y].visual = VisualAction.Exploding;
-            speaking.Add(new Speech {
+            PieceGrid(target.p.x)(target.p.y).visual = VisualAction.Exploding;
+            speaking+= Speech(
               x = target.x, y = target.y, large = true, text = "DEAD"
-            });
+              )
           }
           else if (hitSuccess) {
-            speaking.Add(new Speech {
-              x = target.x, y = target.y, large = true, text = (previousHP - PieceGrid[target.x, target.y].currentHealth) + ""
-            });
+            speaking+= Speech(
+              x = target.x, y = target.y, large = true, text = (previousHP - PieceGrid(target.p.x)(target.p.y).currentHealth))
           }
 
         }
-        break;
       }
     }
   }
-
-}
 
 }

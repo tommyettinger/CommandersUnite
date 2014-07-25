@@ -53,24 +53,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Logic.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Logic.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Logic.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-15.785714" vertical-offset="17527" max-vertical-offset="32708">
-              <caret line="1057" column="0" selection-start-line="1057" selection-start-column="0" selection-end-line="1057" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.80497134" vertical-offset="29669" max-vertical-offset="30192">
+              <caret line="1770" column="0" selection-start-line="1770" selection-start-column="0" selection-end-line="1770" selection-end-column="0" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
-                <element signature="e#79#122#0" expanded="true" />
+                <element signature="e#79#114#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Extensions.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Extensions.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Extensions.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5868597" vertical-offset="0" max-vertical-offset="898">
-              <caret line="31" column="1" selection-start-line="31" selection-start-column="1" selection-end-line="31" selection-end-column="1" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="36" max-vertical-offset="765">
+              <caret line="30" column="87" selection-start-line="30" selection-start-column="87" selection-end-line="30" selection-end-column="87" />
               <folding>
                 <element signature="e#26#57#0" expanded="true" />
               </folding>
@@ -81,8 +81,8 @@
       <file leaf-file-name="Position.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Position.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-9.245614" vertical-offset="1955" max-vertical-offset="2941">
-              <caret line="146" column="9" selection-start-line="146" selection-start-column="9" selection-end-line="146" selection-end-column="9" />
+            <state vertical-scroll-proportion="-7.754386" vertical-offset="816" max-vertical-offset="2941">
+              <caret line="74" column="16" selection-start-line="74" selection-start-column="16" selection-end-line="74" selection-end-column="16" />
               <folding>
                 <element signature="e#26#69#0" expanded="true" />
               </folding>
@@ -93,8 +93,8 @@
       <file leaf-file-name="Enums.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Enums.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-3.5789473" vertical-offset="0" max-vertical-offset="697">
-              <caret line="12" column="28" selection-start-line="12" selection-start-column="28" selection-end-line="12" selection-end-column="28" />
+            <state vertical-scroll-proportion="-8.807017" vertical-offset="229" max-vertical-offset="833">
+              <caret line="43" column="1" selection-start-line="43" selection-start-column="1" selection-end-line="43" selection-end-column="1" />
               <folding />
             </state>
           </provider>
@@ -115,9 +115,9 @@
         <option value="$PROJECT_DIR$/core/src/main/scala/Logic.scala" />
         <option value="$PROJECT_DIR$/core/src/main/scala/commanders/unite/MovementType.scala" />
         <option value="$PROJECT_DIR$/core/src/main/scala/commanders/unite/Direction.scala" />
-        <option value="$PROJECT_DIR$/core/src/main/scala/commanders/unite/Enums.scala" />
         <option value="$PROJECT_DIR$/core/src/main/scala/commanders/unite/Position.scala" />
         <option value="$PROJECT_DIR$/core/src/main/scala/commanders/unite/Extensions.scala" />
+        <option value="$PROJECT_DIR$/core/src/main/scala/commanders/unite/Enums.scala" />
         <option value="$PROJECT_DIR$/core/src/main/scala/commanders/unite/Logic.scala" />
       </list>
     </option>
@@ -537,6 +537,7 @@
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32937366" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
@@ -554,7 +555,6 @@
       <window_info id="Documentation" active="true" anchor="right" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" x="92" y="92" width="1736" height="834" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -587,11 +587,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/android/src/main/scala/Main.scala">
+    <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Position.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="357">
-          <caret line="11" column="29" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
-          <folding />
+        <state vertical-scroll-proportion="-7.754386" vertical-offset="816" max-vertical-offset="2941">
+          <caret line="74" column="16" selection-start-line="74" selection-start-column="16" selection-end-line="74" selection-end-column="16" />
+          <folding>
+            <element signature="e#26#69#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -603,41 +605,39 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Enums.scala">
+    <entry file="file://$PROJECT_DIR$/android/src/main/scala/Main.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.5789473" vertical-offset="0" max-vertical-offset="697">
-          <caret line="12" column="28" selection-start-line="12" selection-start-column="28" selection-end-line="12" selection-end-column="28" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="357">
+          <caret line="11" column="29" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Position.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-9.245614" vertical-offset="1955" max-vertical-offset="2941">
-          <caret line="146" column="9" selection-start-line="146" selection-start-column="9" selection-end-line="146" selection-end-column="9" />
-          <folding>
-            <element signature="e#26#69#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Logic.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-15.785714" vertical-offset="17527" max-vertical-offset="32708">
-          <caret line="1057" column="0" selection-start-line="1057" selection-start-column="0" selection-end-line="1057" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-            <element signature="e#79#122#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Extensions.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5868597" vertical-offset="0" max-vertical-offset="898">
-          <caret line="31" column="1" selection-start-line="31" selection-start-column="1" selection-end-line="31" selection-end-column="1" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="36" max-vertical-offset="765">
+          <caret line="30" column="87" selection-start-line="30" selection-start-column="87" selection-end-line="30" selection-end-column="87" />
           <folding>
             <element signature="e#26#57#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Enums.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-8.807017" vertical-offset="229" max-vertical-offset="833">
+          <caret line="43" column="1" selection-start-line="43" selection-start-column="1" selection-end-line="43" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/src/main/scala/commanders/unite/Logic.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.80497134" vertical-offset="29669" max-vertical-offset="30192">
+          <caret line="1770" column="0" selection-start-line="1770" selection-start-column="0" selection-end-line="1770" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+            <element signature="e#79#114#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -25,8 +25,15 @@ object Extensions
   }
   implicit def richArr[T](i: Array[T]) = new RandItem[T](i)
 
-  class RandFactionUnit(p: Array[Array[Piece]], color:Int) {
-    def RandomFactionUnit:Piece = if(p.isEmpty) null else p.flatten.filter(pc => pc.color == color).RandomItem
+  class RandFactionPiece(p: Array[Array[Piece]], color:Int) {
+    def RandomFactionPiece(color:Int):Piece = if(p.isEmpty) null else p.flatten.filter(pc => pc.color == color).RandomItem
   }
-  implicit def richFac(p: Array[Array[Piece]])(implicit color:Int) = new RandFactionUnit(p, color)
+  implicit def richFac(p: Array[Array[Piece]])(implicit color:Int) = new RandFactionPiece(p, color)
+
+  class MinRand(l: Random, min:Int, max:Int) {
+    def nextIntMin(min:Int, max:Int):Int = r.nextInt(max - min) + min
+  }
+  implicit def richRand(i: Random)(implicit args : (Int, Int)) = new MinRand(i, args._1, args._2)
+
+
 }
