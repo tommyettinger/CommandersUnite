@@ -4,7 +4,7 @@
     <facet type="scala" name="Scala">
       <configuration>
         <option name="compilerLibraryLevel" value="Project" />
-        <option name="compilerLibraryName" value="SBT: org.scala-lang:scala-library:2.11.1" />
+        <option name="compilerLibraryName" value="SBT: scala:2.11.1" />
         <option name="compilerOptions" value="-unchecked -deprecation" />
         <option name="deprecationWarnings" value="true" />
         <option name="fsc" value="true" />

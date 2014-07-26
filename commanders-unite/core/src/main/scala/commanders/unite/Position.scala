@@ -3,7 +3,6 @@ package commanders.unite
 import commanders.unite.Direction.Direction
 
 import collection.mutable._
-import commanders.unite.Direction
 
 import scala.collection.mutable
 ;

@@ -7,10 +7,9 @@ import game.commanders.unite.CommandersUnite
 /**
  * Created by Tommy Ettinger on 7/25/2014.
  */
-case class Speech(x:Int, y:Int, large:Boolean, text:String, worldX:Float = 64 + x * 64 + y * 64,worldY:Float = 146 + x * 32 - y * 32){}
+case class Speech(x:Int, y:Int, large:Boolean, text:String)(var worldX:Float = 64 + x * 64 + y * 64, var worldY:Float = 146 + x * 32 - y * 32){}
 object Effects
 {
-
   var oldpos = CommandersUnite.game.camera.position
   var newpos= oldpos
   var midpos = oldpos

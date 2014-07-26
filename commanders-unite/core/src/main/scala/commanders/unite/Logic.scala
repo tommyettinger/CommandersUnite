@@ -15,7 +15,6 @@ import scala.concurrent._
 import ExecutionContext.Implicits.global
 
 import scala.collection.mutable._
-import scala.collection.{SortedMap, mutable}
 import scala.util.Random
 import commanders.unite.Extensions._
 /*
@@ -352,32 +351,32 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         TerrainToPieces(kv._1) = TerrainToPieces(kv._1).distinct
       }
     }
-    def reset(piece : Piece) : Piece =
+    def reset(p : Piece) : Piece =
     {
-      piece.copy(worldX = 20 + piece.x * 64 + piece.y * 6, worldY = 6 + piece.x * 32 - piece.y * 32)
+      Piece(p.unitIndex, p.color, p.facingNumber, p.x, p.y)(worldX = 20 + p.x * 64 + p.y * 6, worldY = 6 + p.x * 32 - p.y * 32)
     }
   }
-    case class Piece(val unitIndex:Int,
-               val color:Int,
+    case class Piece(unitIndex:Int,
+               color:Int,
                var facingNumber:Int,
                var x:Int,
-               var y:Int,
-
-               var name:String = Piece.CurrentPieces(unitIndex),
-               var facing:Direction = Direction.SE,
-  val speed:Int = Piece.AllSpeeds(unitIndex),
-  val mobility:MovementType = Piece.AllMobilities(unitIndex),
-  val kind:PieceType = Piece.AllPieceTypes(unitIndex),
-  val maxHealth:Int = Piece.AllHealths(unitIndex),
-  var currentHealth:Int = maxHealth,
-  val armor:Int = Piece.AllArmors(unitIndex),
-  val dodge:Int = Piece.AllDodges(unitIndex),
-  val weaponry:(Weapon, Weapon) = Piece.Weapons(unitIndex),
-  var visual:VisualAction = VisualAction.Normal,
-  var targeting:ArrayBuffer[DirectedPosition] = new ArrayBuffer[DirectedPosition],
-  var worldX:Float = 20 + x * 64 + y * 6,
-  var worldY:Float = 6 + x * 32 - y * 32
-  ) {
+               var y:Int)
+                    (
+                      var facing:Direction = Logic.directions(facingNumber),
+                      var name:String = Piece.CurrentPieces(unitIndex),
+               val speed:Int = Piece.AllSpeeds(unitIndex),
+               val mobility:MovementType = Piece.AllMobilities(unitIndex),
+               val kind:PieceType = Piece.AllPieceTypes(unitIndex),
+               val maxHealth:Int = Piece.AllHealths(unitIndex),
+               var currentHealth:Int = Piece.AllHealths(unitIndex),
+               val armor:Int = Piece.AllArmors(unitIndex),
+               val dodge:Int = Piece.AllDodges(unitIndex),
+               val weaponry:(Weapon, Weapon) = Piece.Weapons(unitIndex),
+               var visual:VisualAction = VisualAction.Normal,
+               var targeting:ArrayBuffer[DirectedPosition] = new ArrayBuffer[DirectedPosition],
+               var worldX:Float = 20 + x * 64 + y * 64,
+               var worldY:Float = 6 + x * 32 - y * 32)
+    {
       facingNumber match {
         case 0=>facing = Direction.SE
           facingNumber = 0
@@ -438,15 +437,15 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
     def DirectionNames = Array("SE", "SW", "NW", "NE")
 
     var BestPath = ArrayBuffer[DirectedPosition]()
-    var FuturePosition:DirectedPosition
-    var target:DirectedPosition
+    var FuturePosition:DirectedPosition = null
+    var target:DirectedPosition = null
     var currentlyFiring = -1
     var killSuccess = false
-    var hitSuccess = false;
-    var previousHP : Int
-    var thr : Future[ArrayBuffer[DirectedPosition]]
-    var failCount = 0;
-    
+    var hitSuccess = false
+    var previousHP : Int = 0
+    var thr : Future[ArrayBuffer[DirectedPosition]] = null
+    var failCount = 0
+    val directions = Array(Direction.SE, Direction.SW, Direction.NW, Direction.NE)
     //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
 
 
@@ -1347,7 +1346,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         val rx = (width / 4) + (width / 2) * (section % 2);
         val ry = 3 + (height / 6);
         if (colors(section) == 0) {
-          PieceGrid(rx)(ry) = new Piece(Piece.NameLookup("Estate"), colors(section), r.nextInt(4), rx, ry)
+          PieceGrid(rx)(ry) = new Piece(Piece.NameLookup("Estate"), colors(section), r.nextInt(4), rx, ry)()
           targetX(1) = rx;
           targetY(1) = ry;
           targetX(2) = rx;
@@ -1356,7 +1355,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           targetY(3) = ry;
         }
         else {
-          PieceGrid(rx)(ry) = new Piece(Piece.NameLookup("Castle"), colors(section), r.nextInt(4), rx, ry)
+          PieceGrid(rx)(ry) = new Piece(Piece.NameLookup("Castle"), colors(section), r.nextInt(4), rx, ry)()
           targetX(0) = rx;
           targetY(0) = ry;
         }
@@ -1367,7 +1366,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           {
             if (PieceGrid(i)(j) == null) {
               if (r.nextInt(14) <= 2 && (FieldMap.Land(i)(j) == 0 || FieldMap.Land(i)(j) == 1 || FieldMap.Land(i)(j) == 2 || FieldMap.Land(i)(j) == 4 || FieldMap.Land(i)(j) == 8)) {
-                PieceGrid(i)(j) = new Piece(r.nextIntMin(24, 28), colors(section), r.nextInt(4), i, j);
+                PieceGrid(i)(j) = new Piece(r.nextIntMin(24, 28), colors(section), r.nextInt(4), i, j)()
                 FieldMap.Land(i)(j) = 10; // +colors[section];
                 //processSingleOutlined(facilityps[r.Next(3) % 2], colors[section], dirs[r.Next(4)]);
               }
@@ -1380,7 +1379,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       {
         val rx = (width / 4) + (width / 2) * (section % 2);
         val ry = height - 3 - (height / 6);
-        PieceGrid(rx)(ry) = new Piece(if (colors(section) == 0) Piece.PieceLookup("Estate") else Piece.PieceLookup("Castle"), colors(section),  r.nextInt(4), rx, ry);
+        PieceGrid(rx)(ry) = new Piece(if (colors(section) == 0) Piece.PieceLookup("Estate") else Piece.PieceLookup("Castle"), colors(section),  r.nextInt(4), rx, ry)()
         FieldMap.Land(rx)(ry) = 10; // +colors[section];
         for (i <- rx - (width / 8) until rx + (width / 8))
         {
@@ -1389,7 +1388,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             if (PieceGrid(i)(j) == null)
             {
               if (r.nextInt(14) <= 2 && (FieldMap.Land(i)(j) == 0 || FieldMap.Land(i)(j) == 1 || FieldMap.Land(i)(j) == 2 || FieldMap.Land(i)(j) == 4 || FieldMap.Land(i)(j) == 8)) {
-                PieceGrid(i)(j) = new Piece(r.nextIntMin(24, 28), colors(section), r.nextInt(4), i, j);
+                PieceGrid(i)(j) = new Piece(r.nextIntMin(24, 28), colors(section), r.nextInt(4), i, j)()
                 FieldMap.Land(i)(j) = 10; // +colors[section];
               }
             }
@@ -1410,7 +1409,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                 //if(Piece.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.TreadsAmphi))
                 //    PieceGrid[i, j] = new Piece(Piece.PieceLookup["Tank_T"], colors[section], section, i, j);
                 //else
-                PieceGrid(i)(j) = new Piece(currentPiece, colors(section), section, i, j);
+                PieceGrid(i)(j) = new Piece(currentPiece, colors(section), section, i, j)()
               }
             }
           }
@@ -1442,7 +1441,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           if (r.nextInt(30) <= 1 && PieceGrid(i)(j) == null) {
             val rs = 0; // r.Next(4);
             val currentPiece = Piece.TerrainToPieces(FieldMap.Land(i)(j)).RandomElement
-            PieceGrid(i)(j) = new Piece(currentPiece, colors(rs), rs, i, j);
+            PieceGrid(i)(j) = new Piece(currentPiece, colors(rs), rs, i, j)()
           }
         }
       }
@@ -1464,11 +1463,11 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             && w.multipliers(Piece.PieceTypeAsNumber(PieceGrid(i)(j).kind)) > 0)
           {
             val s =Speech(
-              large = false,
-              x = i,
-              y = j,
-              text = (100 - PieceGrid(i)(j).dodge * 10) + "% / " +
-                ((w.multipliers(Piece.PieceTypeAsNumber(PieceGrid(i)(j).kind)) -0.1f * PieceGrid(i)(j).armor) * w.damage).toInt)
+              i,
+              j,
+              false,
+              (100 - PieceGrid(i)(j).dodge * 10) + "% / " +
+                ((w.multipliers(Piece.PieceTypeAsNumber(PieceGrid(i)(j).kind)) -0.1f * PieceGrid(i)(j).armor) * w.damage).toInt)()
             speaking += s
             FieldMap.Highlight(i)(j) = HighlightType.Bright
           }
@@ -1497,7 +1496,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       TaskSteps = 0
     }
 
-    def ProcessStep() = {
+    def ProcessStep():Unit = {
       if (state == GameState.PC_Select_Move) {
         Effects.CenterCamera(ActivePiece.x, ActivePiece.y, 0.5F);
         outward = dijkstra(ActivePiece, FieldMap.Land, PieceGrid, ActivePiece.x, ActivePiece.y);
@@ -1760,12 +1759,11 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             CommandersUnite.explodeTime = 0;
             PieceGrid(target.p.x)(target.p.y).visual = VisualAction.Exploding;
             speaking+= Speech(
-              x = target.p.x, y = target.p.y, large = true, text = "DEAD"
-              )
+              target.p.x, target.p.y, true, "DEAD"
+              )()
           }
           else if (hitSuccess) {
-            speaking+= Speech(
-              x = target.p.x, y = target.p.y, large = true, text = "" + (previousHP - PieceGrid(target.p.x)(target.p.y).currentHealth))
+            speaking+= Speech(target.p.x, target.p.y, true, "" + (previousHP - PieceGrid(target.p.x)(target.p.y).currentHealth))()
           }
 
         }
