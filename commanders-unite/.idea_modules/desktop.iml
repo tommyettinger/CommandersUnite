@@ -17,6 +17,9 @@
     <output url="file://$MODULE_DIR$/../desktop/target/scala-2.11/classes" />
     <output-test url="file://$MODULE_DIR$/../desktop/target/scala-2.11/test-classes" />
     <exclude-output />
+    <content url="file://$MODULE_DIR$/../android/assets">
+      <sourceFolder url="file://$MODULE_DIR$/../android/assets/Assets" isTestSource="false" />
+    </content>
     <content url="file://$MODULE_DIR$/../desktop">
       <sourceFolder url="file://$MODULE_DIR$/../desktop/src/main/scala" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../desktop/src/main/java" isTestSource="false" />

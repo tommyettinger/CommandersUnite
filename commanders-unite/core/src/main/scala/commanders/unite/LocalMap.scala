@@ -110,31 +110,59 @@ for (i <- 0 until width)
   }
   def Bresenham(start:Position, end:Position):ArrayBuffer[Position]=
   {
-    val x0 = start.x
-    val x1 = end.x
-    val y0 = start.y
-    val y1 = end.y
-    val dx=math.abs(x1-x0)
-    val sx=if (x0<x1) 1 else -1
-    val dy=math.abs(y1-y0)
-    val sy=if (y0<y1) 1 else -1
-    var ab = new ArrayBuffer[Position]()
-    def it=new Iterator[Position]{
-      var x=x0; var y=y0
-      var err=(if (dx>dy) dx else -dy)/2
-      def next={
-        val res=Position(x,y)
-        val e2=err;
-        if (e2 > -dx) {err-=dy; x+=sx}
-        if (e2<dy) {err+=dx; y+=sy}
-        res
+    var path = new ArrayBuffer[Position]()
+    var d = 0
+    var x1 = start.x
+    var x2 = end.x
+    var y1 = start.y
+    var y2 = end.y
+
+    var dy = Math.abs(y2 - y1);
+    var dx = Math.abs(x2 - x1);
+
+    var dy2 = dy << 1 // slope scaling factors to avoid floating
+    var dx2 = dx << 1 // point
+
+    var ix = if(x1 < x2) 1 else -1 // increment direction
+    var iy = if(y1 < y2) 1 else -1
+
+    if (dy <= dx)
+    {
+      var keepGoing = true
+      while(keepGoing) {
+        path += Position(x1, y1)
+        if (x1 == x2)
+          keepGoing = false
+        else {
+          x1 += ix
+          d += dy2
+          if (d > dx) {
+            path += Position(x1, y1)
+            y1 += iy
+            d -= dx2
+          }
+        }
       }
-      def hasNext=(x<=x1 && y<=y1)
     }
-    for(p <- it){
-      ab+=p
+    else {
+
+      var keepGoing = true
+      while (keepGoing) {
+        path += Position(x1, y1)
+        if (y1 == y2)
+          keepGoing = false
+        else {
+          y1 += iy
+          d += dx2
+          if (d > dy) {
+            path += Position(x1, y1)
+            x1 += ix
+            d -= dy2
+          }
+        }
+      }
     }
-    ab
+    path
   }
   def ValidatePosition(p:Position):Boolean=
   {
@@ -150,20 +178,20 @@ for (i <- 0 until width)
     var x = p.x
     var y = p.y
     if (p.x < 0)
-      x = 0;
+      x = 0
     if (p.x >= width)
-      x = width - 1;
+      x = width - 1
     if (p.y < 0)
-      y = 0;
+      y = 0
     if (p.y >= height)
-      y = height - 1;
+      y = height - 1
     Position(x,y)
   }
   def MakeSoftPath(start:Position, end:Position):ArrayBuffer[Position]=
   {
     var path = Bresenham(start, end)
     var path2 = new ArrayBuffer[Position]()
-
+    if(path.size == 0) return path
     var midpoint = path(path.size / 2)
     var early = path(path.size / 4)
     var late = path(path.size * 3 / 4)
@@ -276,7 +304,7 @@ for (i <- 0 until width)
         Land(rx)(ry) = r.nextIntMin(4, 6);
 
         var np = Position(rx, ry);
-        np = np.Adjacent(width, height).RandomElement
+        np = np.Adjacent(width, height).RandomElement.get
         rx = np.x;
         ry = np.y;
       }

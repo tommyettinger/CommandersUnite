@@ -11,6 +11,7 @@ import commanders.unite.VisualAction.VisualAction
 import commanders.unite.WeaponType.WeaponType
 import game.commanders.unite.CommandersUnite
 
+import scala.collection.mutable
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 
@@ -237,13 +238,13 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       (Weapon(WeaponType.Non, 0, Array(0f, 0f, 0f, 0f, 0f), ""),
         Weapon(WeaponType.Non, 0, Array(0f, 0f, 0f, 0f, 0f), ""))
     )
-    def PieceLookup = new HashMap[String, Int]
-    def TerrainLookup = new HashMap[String, Int]
-    def NameLookup = new HashMap[String, Int]
-    def MobilityToPieces = new HashMap[MovementType, ArrayBuffer[Int]]
-    def MobilityToTerrains = new HashMap[MovementType, ArrayBuffer[Int]]
-    def TerrainToPieces = new Array[ArrayBuffer[Int]](10)
-    def TerrainToMobilities = new HashMap[Int, ArrayBuffer[MovementType]];
+    var PieceLookup = new HashMap[String, Int]
+    var TerrainLookup = new HashMap[String, Int]
+    var NameLookup = new HashMap[String, Int]
+    var MobilityToPieces = new HashMap[MovementType, MutableList[Int]]
+    var MobilityToTerrains = new HashMap[MovementType, MutableList[Int]]
+    var TerrainToPieces = new Array[MutableList[Int]](11)
+    var TerrainToMobilities = new HashMap[Int, MutableList[MovementType]];
     val AllSpeeds = Array(
       3, 3, 5, 3,
       4, 3, 6, 4,
@@ -312,48 +313,48 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
     {
 
       for (v <- MovementType.values) {
-        MobilityToPieces(v) = new ArrayBuffer[Int](15)
+        MobilityToPieces += ((v, new MutableList[Int]()))
       }
       for (t <- 0 until LocalMap.Terrains.length) {
-        TerrainLookup(LocalMap.Terrains(t)) = t;
-        TerrainToMobilities(t) = new ArrayBuffer[MovementType]();
-        TerrainToPieces(t) = new ArrayBuffer[Int]();
+        TerrainLookup += ((LocalMap.Terrains(t), t))
+        TerrainToMobilities += ((t, new MutableList[MovementType]()))
+        TerrainToPieces(t) = new MutableList[Int]()
       }
       for (i <- 0 until CurrentPieces.length) {
-        PieceLookup(CurrentPieces(i)) = i;
-        NameLookup(PieceNames(i)) = i;
+        PieceLookup += ((CurrentPieces(i), i))
+        NameLookup += ((PieceNames(i), i))
         MobilityToPieces(AllMobilities(i)) += i;
       }
-      MobilityToTerrains(MovementType.Flight) =
-        ArrayBuffer(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
-      MobilityToTerrains(MovementType.FlightFlyby) =
-        ArrayBuffer(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
-      MobilityToTerrains(MovementType.Foot) =
-        ArrayBuffer(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
-      MobilityToTerrains(MovementType.Treads) =
-        ArrayBuffer(0, 1, 2, 3, 6, 7, 8)
-      MobilityToTerrains(MovementType.TreadsAmphi) =
-        ArrayBuffer(0, 1, 2, 3, 6, 7, 8, 9)
-      MobilityToTerrains(MovementType.Wheels) =
-        ArrayBuffer(0, 2, 7, 8)
-      MobilityToTerrains(MovementType.WheelsTraverse) =
-        ArrayBuffer(0, 1, 2, 3, 6, 7, 8)
-      MobilityToTerrains(MovementType.Immobile) =
-        ArrayBuffer[Int]()
+      MobilityToTerrains += ((MovementType.Flight,
+        MutableList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)))
+      MobilityToTerrains += ((MovementType.FlightFlyby,
+        MutableList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)))
+      MobilityToTerrains += ((MovementType.Foot,
+        MutableList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)))
+      MobilityToTerrains += ((MovementType.Treads,
+        MutableList(0, 1, 2, 3, 6, 7, 8)))
+      MobilityToTerrains += ((MovementType.TreadsAmphi,
+        MutableList(0, 1, 2, 3, 6, 7, 8, 9)))
+      MobilityToTerrains+=((MovementType.Wheels,
+        MutableList(0, 2, 7, 8)))
+      MobilityToTerrains += ((MovementType.WheelsTraverse,
+        MutableList(0, 1, 2, 3, 6, 7, 8)))
+      MobilityToTerrains+= ((MovementType.Immobile,
+        MutableList[Int]()))
       for (kv <- MobilityToTerrains) {
         for (t <- kv._2) {
-          TerrainToMobilities(t) += (kv._1);
+          TerrainToMobilities(t) += kv._1
         }
       }
       for (kv <- TerrainToMobilities) {
         for (m <- kv._2)
-          TerrainToPieces(kv._1) ++= (MobilityToPieces(m));
+          TerrainToPieces(kv._1) ++= MobilityToPieces(m)
         TerrainToPieces(kv._1) = TerrainToPieces(kv._1).distinct
       }
     }
     def reset(p : Piece) : Piece =
     {
-      Piece(p.unitIndex, p.color, p.facingNumber, p.x, p.y)(worldX = 20 + p.x * 64 + p.y * 6, worldY = 6 + p.x * 32 - p.y * 32)
+      Piece(p.unitIndex, p.color, p.facingNumber, p.x, p.y)(worldX = 20 + p.x * 64 + p.y * 64, worldY = 6 + p.x * 32 - p.y * 32)
     }
   }
     case class Piece(unitIndex:Int,
@@ -627,8 +628,8 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                 if (ability(grid(p.x - 1)(p.y - 1)) == 1 && placing(p.x - 1)(p.y - 1) == null)
                 {
                   d(p.x)(p.y) = goal
-                  open(p) = goal
-                  movesToTargets(Position(p.x - 1, p.y - 1)) = tgt
+                  open += ((p, goal))
+                  movesToTargets += ((Position(p.x - 1, p.y - 1), tgt))
                 }
               }
             }
@@ -649,7 +650,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             }*/
           }
           else if (d(i)(j) >= wall) {
-            closed(Position(i, j)) = wall
+            closed += ((Position(i, j), wall))
           }
         }
       }
@@ -669,7 +670,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             ability(grid(mov.x - 1)(mov.y - 1)) == 1
           && placing(mov.x - 1)(mov.y - 1) == null)
           {
-            fringe(mov) = idx_dijk._2 + 1
+            fringe += ((mov, idx_dijk._2 + 1))
             d(mov.x)(mov.y) = idx_dijk._2 + 1
           }
           else if (
@@ -680,18 +681,18 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                placing(mov.x - 1)(mov.y - 1).mobility != MovementType.Immobile)
           ) ) )
           {
-            fringe(mov) = idx_dijk._2 + 1
+            fringe += ((mov, idx_dijk._2 + 1))
             d(mov.x)(mov.y) = idx_dijk._2 + 1;
           }
         }
         for(kv <- open)
         {
-          closed(kv._1) = kv._2
+          closed += ((kv._1, kv._2))
         }
         open.clear()
         for(kv <- fringe)
         {
-          open(kv._1) = kv._2
+          open += ((kv._1, kv._2))
         }
         fringe.clear()
 
@@ -769,7 +770,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         for (j <- 0 until height)
         {
           if (radiate(i)(j) >= wall) {
-            closed(Position(i, j)) = wall
+            closed += ((Position(i, j), wall))
           }
         }
       }
@@ -799,7 +800,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                      ability(grid(mov.x - 1)(mov.y - 1)) == 1
                        && placing(mov.x - 1)(mov.y - 1) == null)
                    {
-                     fringe(mov) = idx_dijk._2 + 1
+                     fringe += ((mov, idx_dijk._2 + 1))
                      radiate(mov.x)(mov.y) = idx_dijk._2 + 1
                      if (gradient(mov.x)(mov.y) < lowest)
                      {
@@ -819,7 +820,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                              placing(mov.x - 1)(mov.y - 1).mobility != MovementType.Immobile)
                            ) ) )
                    {
-                     fringe(mov) = idx_dijk._2 + 1
+                     fringe += ((mov, idx_dijk._2 + 1))
                      radiate(mov.x)(mov.y) = idx_dijk._2 + 1;
                    }
 
@@ -827,12 +828,12 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
 
           for(kv <- open)
           {
-            closed(kv._1) = kv._2
+            closed += ((kv._1, kv._2))
           }
           open.clear()
           for(kv <- fringe)
           {
-            open(kv._1) = kv._2
+            open += ((kv._1, kv._2))
           }
           fringe.clear()
           furthest = furthest+1
@@ -868,10 +869,10 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       for (i <- 0 until width) {
         for (j <- 0 until height) {
           if (d(i)(j) == goal) {
-            open(Position(i, j)) = goal
+            open += ((Position(i, j), goal))
           }
           else if (d(i)(j) >= wall) {
-            closed(Position(i, j)) = wall
+            closed += ((Position(i, j), wall))
           }
         }
       }
@@ -890,7 +891,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                    ability(grid(mov.x - 1)(mov.y - 1)) == 1
                      && placing(mov.x - 1)(mov.y - 1) == null)
                  {
-                   fringe(mov) = idx_dijk._2 + 1
+                   fringe += ((mov, idx_dijk._2 + 1))
                    d(mov.x)(mov.y) = idx_dijk._2 + 1
                  }
             else if (
@@ -902,18 +903,19 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                            placing(mov.x - 1)(mov.y - 1).mobility != MovementType.Immobile)
                          ) ) ) )
                  {
-                   fringe(mov) = idx_dijk._2 + 1
+                   fringe += ((mov, idx_dijk._2 + 1))
                    d(mov.x)(mov.y) = idx_dijk._2 + 1;
                  }
         }
+
         for(kv <- open)
         {
-          closed(kv._1) = kv._2
+          closed += ((kv._1, kv._2))
         }
         open.clear()
         for(kv <- fringe)
         {
-          open(kv._1) = kv._2
+          open += ((kv._1, kv._2))
         }
         fringe.clear()
       }
@@ -1155,10 +1157,10 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         {
           var near = HashMap[Position, Float](oldpos.p -> rad(oldpos.p.x + 1)(oldpos.p.y + 1))
           for(pos <- oldpos.p.Adjacent(width, height)) {
-            near(pos) = rad(pos.x + 1)(pos.y + 1)
+            near += ((pos, rad(pos.x + 1)(pos.y + 1)))
           }
           var ordered = near.toSeq.sortBy(_._2)
-          newpos = ordered.takeWhile(kv => kv._2 == ordered(0)._2).RandomElement._1
+          newpos = ordered.takeWhile(kv => kv._2 == ordered(0)._2).RandomElement.get._1
           if (near.forall(e => e._2 == near(newpos))) {
             return ArrayBuffer[DirectedPosition]()
           }
@@ -1181,7 +1183,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           f = f+1
         }
       }
-      path.reverse;
+      path = path.reverse
       path(0) = DirectedPosition(path(0).p, active.facing)
       var old2 = DirectedPosition(Position(path(0).p.x, path(0).p.y), Direction.SE)
       for (i <- 1 until path.size)
@@ -1255,11 +1257,11 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         {
           var near = HashMap[Position, Float](oldpos.p -> outward(oldpos.p.x + 1)(oldpos.p.y + 1))
           for(pos <- oldpos.p.Adjacent(width, height)) {
-            near(pos) = outward(pos.x + 1)(pos.y + 1)
+            near += ((pos, outward(pos.x + 1)(pos.y + 1)))
           }
           rad
           var ordered = near.toSeq.sortBy(_._2)
-          newpos = ordered.takeWhile(kv => kv._2 == ordered(0)._2).RandomElement._1
+          newpos = ordered.takeWhile(kv => kv._2 == ordered(0)._2).RandomElement.get._1
           if (near.forall(e => e._2 == near(newpos))) {
             return ArrayBuffer[DirectedPosition]()
           }
@@ -1282,7 +1284,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           f = f+1
         }
       }
-      path.reverse
+      path = path.reverse
       path(0) = DirectedPosition(path(0).p, active.facing)
       var old2 = DirectedPosition(Position(path(0).p.x, path(0).p.y), Direction.SE)
       for (i <- 1 until path.size)
@@ -1403,7 +1405,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           for (j <- (if (section / 2 == 0) 0 else height / 2) until (if(section / 2 == 0) height / 2 else height))
           {
             if (PieceGrid(i)(j) == null) {
-              val currentPiece = Piece.TerrainToPieces(FieldMap.Land(i)(j)).RandomElement
+              val currentPiece = (Piece.TerrainToPieces(FieldMap.Land(i)(j))).RandomElement().get
               //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
               if (r.nextInt(25) <= 3) {
                 //if(Piece.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.TreadsAmphi))
@@ -1440,7 +1442,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         {
           if (r.nextInt(30) <= 1 && PieceGrid(i)(j) == null) {
             val rs = 0; // r.Next(4);
-            val currentPiece = Piece.TerrainToPieces(FieldMap.Land(i)(j)).RandomElement
+            val currentPiece = Piece.TerrainToPieces.apply(FieldMap.Land(i)(j)).RandomElement().get
             PieceGrid(i)(j) = new Piece(currentPiece, colors(rs), rs, i, j)()
           }
         }
@@ -1533,14 +1535,14 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           CurrentMode = Mode.Moving
         }
         else if (TaskSteps <= 1 && (thr == null || thr.isCompleted) && state == GameState.NPC_Play) {
-          thr = Future {
+          thr = Future({
             getDijkstraPath(ActivePiece, FieldMap.Land, PieceGrid)
-          }
+          })
           thr onSuccess {
             case path => BestPath = path
           }
-          Effects.CenterCamera(ActivePiece.x, ActivePiece.y, 0.5F);
-          outward = dijkstra(ActivePiece, FieldMap.Land, PieceGrid, ActivePiece.x, ActivePiece.y);
+          Effects.CenterCamera(ActivePiece.x, ActivePiece.y, 0.5F)
+          outward = dijkstra(ActivePiece, FieldMap.Land, PieceGrid, ActivePiece.x, ActivePiece.y)
           for (i <- 0 until width)
           {
             for (j <- 0 until height)
@@ -1586,9 +1588,9 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           pos => PieceGrid[pos.x, pos.y] != null && ActivePiece.isOpposed(PieceGrid[pos.x, pos.y])))
            */
           if (state == GameState.PC_Play_Move) {
-            ActivePiece.worldX = 20 + ActivePiece.x * 64 + ActivePiece.y * 64;
-            ActivePiece.worldY = 6 + ActivePiece.x * 32 - ActivePiece.y * 32;
-            state = GameState.PC_Select_UI;
+            ActivePiece.worldX = 20 + ActivePiece.x * 64 + ActivePiece.y * 64
+            ActivePiece.worldY = 6 + ActivePiece.x * 32 - ActivePiece.y * 32
+            state = GameState.PC_Select_UI
             var entries = new ArrayBuffer[MenuEntry]()
             if (findWeapon(ActivePiece, 0).kind != WeaponType.Non)
             entries += new MenuEntry(findWeapon(ActivePiece, 0).kind.toString, new Runnable {
@@ -1635,9 +1637,9 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         ActivePiece.facingNumber = ConvertDirection(FuturePosition.dir)
         ActivePiece.facing = FuturePosition.dir
         val n = new Timer.Task{ def run() {
-          ActivePiece.worldX += (FuturePosition.p.x - oldx) * 4 + (FuturePosition.p.y - oldy) * 4
-          ActivePiece.worldY += (FuturePosition.p.x - oldx) * 2 - (FuturePosition.p.y - oldy) * 2
-          ActivePiece.worldY += (LocalMap.Depths(FieldMap.Land(FuturePosition.p.x)(FuturePosition.p.y) - LocalMap.Depths(FieldMap.Land(oldx)(oldy))) * 3F) / 16F
+          ActivePiece.worldX = ActivePiece.worldX + (FuturePosition.p.x - oldx) * 4 + (FuturePosition.p.y - oldy) * 4
+          ActivePiece.worldY = ActivePiece.worldY + (FuturePosition.p.x - oldx) * 2 - (FuturePosition.p.y - oldy) * 2 +
+            ((LocalMap.Depths(FieldMap.Land(FuturePosition.p.x)(FuturePosition.p.y)) - LocalMap.Depths(FieldMap.Land(oldx)(oldy))) * 3F) / 16F
          } }
         Timer.instance().scheduleTask(n, 0, CommandersUnite.updateStep / 16F, 15);
         Effects.CenterCamera(FuturePosition.p, 1F);

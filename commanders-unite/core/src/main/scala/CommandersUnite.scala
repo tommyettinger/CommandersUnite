@@ -10,14 +10,14 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.utils.{GdxRuntimeException, Timer}
-import com.badlogic.gdx.utils.viewport.StretchViewport
+import com.badlogic.gdx.utils.viewport._
 import commanders.unite._
 
 import scala.util.control.Exception
 
 class CommandersUnite extends Game
 {
-  var camera:OrthographicCamera
+  var camera:OrthographicCamera = new OrthographicCamera()
   override def create()
   {
     camera = new OrthographicCamera(Gdx.graphics.getWidth, Gdx.graphics.getHeight)
@@ -29,30 +29,25 @@ class CommandersUnite extends Game
     val width=24
     val height=24
     val parts = Array(
-      new Texture(Gdx.files.local("Assets/pack.png"), Pixmap.Format.RGBA8888, false),
-      new Texture(Gdx.files.local("Assets/pack2.png"), Pixmap.Format.RGBA8888, false))
-    var terrains: Array[Array[TextureRegion]]
-    var pieces:Array[Array[Array[Array[TextureAtlas.AtlasRegion]]]]
-    var animations:Array[Array[Array[Animation]]]
-    var currentFrame:TextureAtlas.AtlasRegion
-    var shader:ShaderProgram
-    var multi:InputMultiplexer
-    var inp:InputProc
+      new Texture(Gdx.files.internal("pack.png"), Pixmap.Format.RGBA8888, false),
+      new Texture(Gdx.files.internal("pack2.png"), Pixmap.Format.RGBA8888, false))
+    var currentFrame:TextureAtlas.AtlasRegion = null
+    val atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"))
+    val palette = new Texture(Gdx.files.internal("PaletteDark.png"), Pixmap.Format.RGBA8888, false);
+    var shader:ShaderProgram = createChannelShader()
+    val font = new BitmapFont(Gdx.files.internal("Monology.fnt"));
+    val largeFont = new BitmapFont(Gdx.files.internal("MonologyLarge.fnt"));
     Logic.PlacePieces();
-    val atlas = new TextureAtlas(Gdx.files.internal("Assets/pack.atlas"))
-    val palette = new Texture(Gdx.files.internal("Assets/PaletteDark.png"), Pixmap.Format.RGBA8888, false);
     palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-    val font = new BitmapFont(Gdx.files.internal("Assets/Monology.fnt"));
-    val largeFont = new BitmapFont(Gdx.files.internal("Assets/MonologyLarge.fnt"));
 
-    terrains = Array.ofDim[TextureRegion](11, 2)
+    var terrains = Array.ofDim[TextureRegion](11, 2)
     for (i <- 0 until 11)
     {
       terrains(i)(0) = atlas.findRegion(LocalMap.Terrains(i)); //"Terrain/" +
       terrains(i)(1) = atlas.findRegion(LocalMap.Terrains(i) + "_bold")
     }
-    pieces = new Array[Array[Array[Array[TextureAtlas.AtlasRegion]]]](Piece.CurrentPieces.length)
-    animations = new Array[Array[Array[Animation]]](Piece.CurrentPieces.length)
+    var pieces = new Array[Array[Array[Array[TextureAtlas.AtlasRegion]]]](Piece.CurrentPieces.length)
+    var animations = new Array[Array[Array[Animation]]](Piece.CurrentPieces.length)
     val clear = atlas.findRegion("clear")
     val clearLarge = atlas.findRegion("clear_large")
     for(name <- Piece.CurrentPieces)
@@ -173,16 +168,15 @@ class CommandersUnite extends Game
     CommandersUnite.game.camera.update()
     val batch = new SpriteBatch();
 
-    shader = createChannelShader()
     CommandersUnite.cursor = Position(Logic.ActivePiece.x, Logic.ActivePiece.y)
-    inp = new InputProc()
-    UI.skin = new Skin(Gdx.files.local("Assets/ui.json"), new TextureAtlas(Gdx.files.local("Assets/ui.atlas")));
-    UI.stage = new Stage(new StretchViewport(Gdx.graphics.getWidth, Gdx.graphics.getHeight))
-    multi = new InputMultiplexer(UI.stage, inp)
+    UI.skin = new Skin(Gdx.files.local("ui.json"), new TextureAtlas(Gdx.files.local("ui.atlas")));
+    UI.stage = new Stage(new ScreenViewport())
+    var inp:InputProc = new InputProc()
+    var multi = new InputMultiplexer(UI.stage, inp)
     Gdx.input.setInputProcessor(multi);
     Timer.instance().scheduleTask(new Timer.Task{ def run() {Logic.ProcessStep}}, 0F, CommandersUnite.updateStep);
-  
-  override def render () {
+  override def render (delta : Float) {
+    CommandersUnite.initialized = true;
     Timer.instance().start()
     Gdx.gl.glClearColor(0.45F, 0.7F, 1f, 1)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
@@ -255,7 +249,7 @@ class CommandersUnite extends Game
     {
       for (col <- 0 to (if(row < width) row else (width + height - 1) - row))
       {
-        var w = (if(row < width) width - 1 - row + col else col); //height + (width - 1 - row) +
+        var w = (if(row < width) width - 1 - row + col else col)
         var h = (if(row < width) col else row - width + col)
         if (Logic.PieceGrid(w)(h) != null) {
           faction.r = (Logic.PieceGrid(w)(h).color + 1) / 32.0F;
@@ -283,7 +277,6 @@ class CommandersUnite extends Game
           for(dp <- Logic.ActivePiece.targeting)
           {
             if (Logic.currentlyFiring > -1 && dp.p.x == w && dp.p.y == h) {
-
               val tx = 20 - 80 + dp.p.x * 64 + dp.p.y * 64
               val ty = 6 - 40 + dp.p.x * 32 - dp.p.y * 32
               currentFrame = animations(Logic.ActivePiece.unitIndex)(Logic.ConvertDirection(dp.dir))(4+Logic.currentlyFiring).getKeyFrame(CommandersUnite.receiveTime, false).asInstanceOf[TextureAtlas.AtlasRegion]
@@ -302,7 +295,7 @@ class CommandersUnite extends Game
               batch.draw(currentFrame, (Logic.ActivePiece.worldX).toInt + currentFrame.offsetX, (Logic.ActivePiece.worldY).toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
             case VisualAction.Exploding=>
               currentFrame = animations(Logic.ActivePiece.unitIndex)(Logic.ActivePiece.facingNumber)(1).getKeyFrame(CommandersUnite.explodeTime, false).asInstanceOf[TextureAtlas.AtlasRegion]
-              batch.draw(currentFrame, (Logic.ActivePiece.worldX - 80).toInt + currentFrame.offsetX, (Logic.PieceGrid(w)(h).worldY - 40).toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
+              batch.draw(currentFrame, (Logic.ActivePiece.worldX - 80).toInt + currentFrame.offsetX, (Logic.ActivePiece.worldY - 40).toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
             case VisualAction.Firing=>
             if (Logic.currentlyFiring > -1) {
               currentFrame = animations(Logic.ActivePiece.unitIndex)(Logic.ActivePiece.facingNumber)(2+Logic.currentlyFiring).getKeyFrame(CommandersUnite.attackTime, false).asInstanceOf[TextureAtlas.AtlasRegion]
@@ -401,20 +394,26 @@ class CommandersUnite extends Game
         "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0; \n" +
         "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" +
         "}                            \n";
-      val fragment = """
-      #ifdef GL_ES#define LOWP lowp
-      precision mediump float;
-      #else#define LOWP#endif
-      varying LOWP vec4 v_color;
-      varying vec2 v_texCoords;
-      uniform sampler2D u_texture;
-      uniform sampler2D u_texPalette;
+      val fragment =
+"""
+#ifdef GL_ES
+#define LOWP lowp
+precision mediump float;
+#else
+#define LOWP
+#endif
+varying LOWP vec4 v_color;
+varying vec2 v_texCoords;
+uniform sampler2D u_texture;
+uniform sampler2D u_texPalette;
 
-      void main () {
+void main()
+{
         vec4 color = texture2D(u_texture, v_texCoords);
         vec2 index = vec2(color.r, v_color.r);
         gl_FragColor = vec4(texture2D(u_texPalette, index).rgb, color.a);
-      }"""
+}
+"""
       val shader = new ShaderProgram(vertex, fragment);
       if (shader.isCompiled() == false) throw new GdxRuntimeException("Error compiling shader: " + shader.getLog());
       return shader;
@@ -425,6 +424,8 @@ class CommandersUnite extends Game
   {
     def keyDown(keycode: Int): Boolean =
     {
+      if(CommandersUnite.initialized == false)
+        return false
       if (keycode == Input.Keys.SPACE) {
         if (Logic.state != GameState.Paused) {
           CommandersUnite.game.getScreen.pause();
@@ -448,6 +449,8 @@ class CommandersUnite extends Game
 
     def touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean =
     {
+      if(CommandersUnite.initialized == false)
+        return false
       if (Logic.state == GameState.PC_Select_Move || Logic.state == GameState.PC_Select_Action) {
         var v3 = CommandersUnite.game.camera.unproject(new Vector3(x, y, 0))
 
@@ -488,7 +491,10 @@ class CommandersUnite extends Game
       return false;
     }
 
-    def mouseMoved(x: Int, y: Int) :Boolean = {
+    def mouseMoved(x: Int, y: Int) :Boolean =
+    {
+      if(CommandersUnite.initialized == false)
+        return false
       if (Logic.state == GameState.PC_Select_Move) {
         var v3 = CommandersUnite.game.camera.unproject(new Vector3(x, y, 0));
 
@@ -515,6 +521,7 @@ class CommandersUnite extends Game
 }
 object CommandersUnite
 {
+  var initialized = false
   var game:CommandersUnite = null
   val updateStep = 0.33F
   var stateTime, attackTime, explodeTime, receiveTime = 0.0f
