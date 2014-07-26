@@ -3,7 +3,10 @@ package commanders.unite
 import commanders.unite.Direction.Direction
 
 import collection.mutable._
-import commanders.unite.Direction;
+import commanders.unite.Direction
+
+import scala.collection.mutable
+;
 
 /**
  * Created by Tommy Ettinger on 7/22/2014.
@@ -19,6 +22,21 @@ case class Position(x: Int, y: Int) {
       l += new Position(x + 1, y)
     if (y < height - 1)
       l += new Position(x, y + 1)
+    l
+  }
+
+  def Nearby(width: Int, height: Int, radius:Int):mutable.MutableList[Position]=
+  {
+    var l: MutableList[Position] = new MutableList[Position]();
+    for (i <- (if(x - radius >= 0) x - radius else 0) to (if(x + radius < width - 1) x+radius else width -1))
+    {
+      for (j <- (if(y - radius >= 0) y - radius else 0) to (if(y + radius < height - 1) y+radius else height -1))
+      {
+        if (!(Math.abs(i - x) + Math.abs(j - y) > radius || (x == i && y == j))) {
+          l += Position(i, j)
+        }
+      }
+    }
     l
   }
   def WithinRange(lowerX: Int, lowerY: Int, width: Int, height: Int, min: Int, max: Int): MutableList[Position] = {
@@ -47,7 +65,20 @@ object Position
       l += new Position(x, y + 1)
     l
   }
-
+  def Nearby(x: Int, y: Int, width: Int, height: Int, radius:Int):mutable.MutableList[Position]=
+  {
+    var l: MutableList[Position] = new MutableList[Position]();
+    for (i <- (if(x - radius >= 0) x - radius else 0) to (if(x + radius < width - 1) x+radius else width -1))
+    {
+      for (j <- (if(y - radius >= 0) y - radius else 0) to (if(y + radius < height - 1) y+radius else height -1))
+      {
+        if (!(Math.abs(i - x) + Math.abs(j - y) > radius || (x == i && y == j))) {
+          l += Position(i, j)
+        }
+      }
+    }
+    l
+  }
   def WithinRange(x: Int, y: Int, lowerX: Int, lowerY: Int, width: Int, height: Int, min: Int, max: Int): MutableList[Position] = {
     var l: MutableList[Position] = new MutableList[Position]()
     for (i <- (if (x - max >= lowerX) x - max else lowerX) to x + max if i < width) {

@@ -424,7 +424,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
     var CurrentMode = Mode.Selecting
     def width = 24
     def height = 24
-    var FieldMap : LocalMap(width, height)
+    var FieldMap = new LocalMap(width, height)
     var PieceGrid = Array.ofDim[Piece](width, height)
     var ActivePiece:Piece = null
     var colors = new Array[Int](4)
@@ -1508,7 +1508,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             FieldMap.Highlight(i)(j) = if (outward(i + 1)(j + 1) > 0 && outward(i + 1)(j + 1) <= ActivePiece.speed) HighlightType.Bright else HighlightType.Dim
           }
         }
-        FieldMap.Highlight(ActivePiece.)(ActivePiece.y) = HighlightType.Spectrum;
+        FieldMap.Highlight(ActivePiece.x)(ActivePiece.y) = HighlightType.Spectrum;
         return
       }
       if (state == GameState.PC_Select_UI) {
@@ -1592,21 +1592,25 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             state = GameState.PC_Select_UI;
             var entries = new ArrayBuffer[MenuEntry]()
             if (findWeapon(ActivePiece, 0).kind != WeaponType.Non)
-            entries += new MenuEntry(findWeapon(ActivePiece, 0).kind.toString, () =>
-            {
-              currentlyFiring = 0
-              ShowTargets(ActivePiece, findWeapon(ActivePiece, 0) )
-              CurrentMode = Mode.Selecting;
-              TaskSteps = 0;
-              state = GameState.PC_Select_Action;
-            })
+            entries += new MenuEntry(findWeapon(ActivePiece, 0).kind.toString, new Runnable {
+              override def run(): Unit = {
+                currentlyFiring = 0
+                ShowTargets(ActivePiece, findWeapon(ActivePiece, 0) )
+                CurrentMode = Mode.Selecting;
+                TaskSteps = 0;
+                state = GameState.PC_Select_Action;
+              }
+            }
+            )
             if (findWeapon(ActivePiece, 1).kind != WeaponType.Non)
-            entries += new MenuEntry(findWeapon(ActivePiece, 1).kind.toString, () => {
-              currentlyFiring = 1
-              ShowTargets(ActivePiece, findWeapon(ActivePiece, 1) )
-              CurrentMode = Mode.Selecting
-              TaskSteps = 0
-              state = GameState.PC_Select_Action
+            entries += new MenuEntry(findWeapon(ActivePiece, 1).kind.toString, new Runnable {
+              override def run(): Unit = {
+                currentlyFiring = 1
+                ShowTargets(ActivePiece, findWeapon(ActivePiece, 1) )
+                CurrentMode = Mode.Selecting
+                TaskSteps = 0
+                state = GameState.PC_Select_Action
+              }
             })
 
             UI.postActor(UI.makeMenu(entries, ActivePiece.color)) //, ActivePiece.worldX, ActivePiece.worldY);
@@ -1625,7 +1629,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           advanceTurn()
           return
         }
-        FuturePosition = new DirectedPosition(BestPath(0).p.x, BestPath(0).p.y, BestPath(0).dir);
+        FuturePosition = new DirectedPosition(Position(BestPath(0).p.x, BestPath(0).p.y), BestPath(0).dir);
         val oldx = ActivePiece.x
         val oldy = ActivePiece.y
 
@@ -1637,7 +1641,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           ActivePiece.worldY += (LocalMap.Depths(FieldMap.Land(FuturePosition.p.x)(FuturePosition.p.y) - LocalMap.Depths(FieldMap.Land(oldx)(oldy))) * 3F) / 16F
          } }
         Timer.instance().scheduleTask(n, 0, CommandersUnite.updateStep / 16F, 15);
-        Effects.CenterCamera(FuturePosition, 1F);
+        Effects.CenterCamera(FuturePosition.p, 1F);
         BestPath.remove(0)
         case Mode.Attacking =>
         if (TaskSteps <= 1)
@@ -1756,12 +1760,12 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             CommandersUnite.explodeTime = 0;
             PieceGrid(target.p.x)(target.p.y).visual = VisualAction.Exploding;
             speaking+= Speech(
-              x = target.x, y = target.y, large = true, text = "DEAD"
+              x = target.p.x, y = target.p.y, large = true, text = "DEAD"
               )
           }
           else if (hitSuccess) {
             speaking+= Speech(
-              x = target.x, y = target.y, large = true, text = (previousHP - PieceGrid(target.p.x)(target.p.y).currentHealth))
+              x = target.p.x, y = target.p.y, large = true, text = "" + (previousHP - PieceGrid(target.p.x)(target.p.y).currentHealth))
           }
 
         }

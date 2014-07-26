@@ -327,7 +327,7 @@ class CommandersUnite extends Game
     {
       batch.setColor(Color.BLACK)
       (if(sp.large) largeFont else font).setColor(Color.BLACK)
-      (if(sp.large) largeFont else font).draw(batch, sp.text, sp.worldX - (sp.text.Length * (if(sp.large) 8 else 4) ), (if(sp.large) sp.worldY else sp.worldY - 32))
+      (if(sp.large) largeFont else font).draw(batch, sp.text, sp.worldX - (sp.text.length * (if(sp.large) 8 else 4) ), (if(sp.large) sp.worldY else sp.worldY - 32))
     }
     //            worldX = 20 + x * 64 + y * 64;
     //            worldY = 8 + x * 32 - y * 32;

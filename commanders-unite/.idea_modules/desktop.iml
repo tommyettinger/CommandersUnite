@@ -4,7 +4,7 @@
     <facet type="scala" name="Scala">
       <configuration>
         <option name="compilerLibraryLevel" value="Project" />
-        <option name="compilerLibraryName" value="SBT: scala:2.11.1" />
+        <option name="compilerLibraryName" value="SBT: org.scala-lang:scala-library:2.11.1" />
         <option name="compilerOptions" value="-unchecked -deprecation" />
         <option name="deprecationWarnings" value="true" />
         <option name="fsc" value="true" />
@@ -21,7 +21,6 @@
       <sourceFolder url="file://$MODULE_DIR$/../desktop/src/main/scala" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../desktop/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../desktop/src/main/resources" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../android/assets" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../desktop/src/test/scala" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../desktop/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../desktop/src/test/resources" isTestSource="true" />

@@ -8,9 +8,7 @@ object Settings {
   lazy val nativeExtractions = SettingKey[Seq[(String, NameFilter, File)]](
     "native-extractions", "(jar name partial, sbt.NameFilter of files to extract, destination directory)"
   )
-
   lazy val desktopJarName = SettingKey[String]("desktop-jar-name", "name of JAR file for desktop")
-
   lazy val core = plugins.JvmPlugin.projectSettings ++ Seq(
     version := "0.1",
     scalaVersion := "2.11.1",
