@@ -1,5 +1,3 @@
-commanders-unite/.idea/*
-
 *~
 *#*#
 *#*.*#
@@ -195,4 +193,4 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
-
+commanders-unite/.idea/workspace.xml
