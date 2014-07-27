@@ -3,12 +3,12 @@
  */
 package commanders.unite {
 
-import com.badlogic.gdx.utils.Timer
 import commanders.unite.Direction.Direction
 import commanders.unite.MovementType.MovementType
 import commanders.unite.PieceType.PieceType
 import commanders.unite.VisualAction.VisualAction
 import commanders.unite.WeaponType.WeaponType
+import commanders.unite.utils.Timer
 import game.commanders.unite.CommandersUnite
 
 import scala.collection.mutable
@@ -1646,7 +1646,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           ActivePiece.worldY = ActivePiece.worldY + (FuturePosition.p.x - oldx) * 2 - (FuturePosition.p.y - oldy) * 2 +
             ((LocalMap.Depths(FieldMap.Land(FuturePosition.p.x)(FuturePosition.p.y)) - LocalMap.Depths(FieldMap.Land(oldx)(oldy))) * 3F) / 16F
          } }
-        Timer.instance().scheduleTask(n, 0, CommandersUnite.updateStep / 16F, 15);
+        Timer.instance.scheduleTask(n, 0, CommandersUnite.updateStep / 16F, 15);
         Effects.CenterCamera(FuturePosition.p, 1F);
         BestPath.remove(0)
         case Mode.Attacking =>
@@ -1747,17 +1747,17 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
               PieceGrid(target.p.x)(target.p.y).worldX = PieceGrid(target.p.x)(target.p.y).worldX +(if((PieceGrid(target.p.x)(target.p.y).facingNumber) % 4 >= 2) 2f else -2f);
               PieceGrid(target.p.x)(target.p.y).worldY = PieceGrid(target.p.x)(target.p.y).worldY +(if((PieceGrid(target.p.x)(target.p.y).facingNumber + 1) % 4 >= 2) 1f else -1f);
             }}
-            Timer.instance().scheduleTask(avoid, 0, CommandersUnite.updateStep / 16F, 10);
+            Timer.instance.scheduleTask(avoid, 0, CommandersUnite.updateStep / 16F, 10);
             val calm = new Timer.Task{ def run() {
               PieceGrid(target.p.x)(target.p.y).worldX = PieceGrid(target.p.x)(target.p.y).worldX -(if((PieceGrid(target.p.x)(target.p.y).facingNumber) % 4 >= 2) 2f else -2f);
               PieceGrid(target.p.x)(target.p.y).worldY = PieceGrid(target.p.x)(target.p.y).worldY -(if((PieceGrid(target.p.x)(target.p.y).facingNumber + 1) % 4 >= 2) 1f else -1f);
             }}
-            Timer.instance().scheduleTask(calm, CommandersUnite.updateStep, CommandersUnite.updateStep / 8F, 10);
+            Timer.instance.scheduleTask(calm, CommandersUnite.updateStep, CommandersUnite.updateStep / 8F, 10);
             val reset = new Timer.Task{ def run() {
               PieceGrid(target.p.x)(target.p.y).worldX = 20 + PieceGrid(target.p.x)(target.p.y).x * 64 + PieceGrid(target.p.x)(target.p.y).y * 64
               PieceGrid(target.p.x)(target.p.y).worldY = 6 + PieceGrid(target.p.x)(target.p.y).x * 32 - PieceGrid(target.p.x)(target.p.y).y * 32
             }}
-            Timer.instance().scheduleTask(reset, CommandersUnite.updateStep * 19 / 8F)
+            Timer.instance.scheduleTask(reset, CommandersUnite.updateStep * 19 / 8F)
 
           }
         }

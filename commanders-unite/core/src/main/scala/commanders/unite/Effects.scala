@@ -17,13 +17,13 @@ object Effects
   {
     oldpos = new Vector3(CommandersUnite.game.camera.position);
     newpos = new Vector3(64 * (gridX + gridY), 32 * (gridX - gridY) + 32, 0);
-    val n = new Timer.Task{ def run() {
+    val n = new utils.Timer.Task{ def run() {
       midpos = midpos.add(((newpos.x - oldpos.x) / 16F).toInt, ((newpos.y - oldpos.y) / 16F).toInt, 0);
       CommandersUnite.game.camera.position.set(midpos)
       CommandersUnite.game.camera.update()
     }}
-    Timer.instance().scheduleTask(n, 0, stepPortion * CommandersUnite.updateStep / 16F, 15);
-    Timer.instance().start()
+    utils.Timer.instance.scheduleTask(n, 0, stepPortion * CommandersUnite.updateStep / 16F, 15);
+    utils.Timer.instance.start()
   }
   def CenterCamera(pos:Position, stepPortion:Float)
   {

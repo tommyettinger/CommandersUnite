@@ -9,9 +9,10 @@ import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.badlogic.gdx.utils.{GdxRuntimeException, Timer}
+import com.badlogic.gdx.utils.{GdxRuntimeException}
 import com.badlogic.gdx.utils.viewport._
 import commanders.unite._
+import commanders.unite.utils.Timer
 
 import scala.util.control.Exception
 
@@ -32,19 +33,27 @@ class CommandersUnite extends Game
     Gdx.app.exit()
     System.exit(0)
   }
+  override def pause()
+  {
+    this.getScreen().pause()
+  }
+  override def resume()
+  {
+    this.getScreen().resume()
+  }
   class GameScreen extends Screen
   {
     val width=24
     val height=24
     val parts = Array(
-      new Texture(Gdx.files.internal("pack.png"), Pixmap.Format.RGBA8888, false),
-      new Texture(Gdx.files.internal("pack2.png"), Pixmap.Format.RGBA8888, false))
+      new Texture(Gdx.files.local("pack.png"), Pixmap.Format.RGBA8888, false),
+      new Texture(Gdx.files.local("pack2.png"), Pixmap.Format.RGBA8888, false))
     var currentFrame:TextureAtlas.AtlasRegion = null
-    val atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"))
-    val palette = new Texture(Gdx.files.internal("PaletteDark.png"), Pixmap.Format.RGBA8888, false);
+    val atlas = new TextureAtlas(Gdx.files.local("pack.atlas"))
+    val palette = new Texture(Gdx.files.local("PaletteDark.png"), Pixmap.Format.RGBA8888, false);
     var shader:ShaderProgram = createChannelShader()
-    val font = new BitmapFont(Gdx.files.internal("Monology.fnt"));
-    val largeFont = new BitmapFont(Gdx.files.internal("MonologyLarge.fnt"));
+    val font = new BitmapFont(Gdx.files.local("Monology.fnt"));
+    val largeFont = new BitmapFont(Gdx.files.local("MonologyLarge.fnt"));
     Logic.PlacePieces();
     palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
@@ -172,30 +181,30 @@ class CommandersUnite extends Game
     }
 
     CommandersUnite.game.camera.position.set(Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2, 0)
-    CommandersUnite.game.camera.setToOrtho(false, 1280, 720);
+    CommandersUnite.game.camera.setToOrtho(false, 1280, 720)
     CommandersUnite.game.camera.update()
-    val batch = new SpriteBatch();
+    val batch = new SpriteBatch()
 
     CommandersUnite.cursor = Position(Logic.ActivePiece.x, Logic.ActivePiece.y)
-    UI.skin = new Skin(Gdx.files.local("ui.json"), new TextureAtlas(Gdx.files.local("ui.atlas")));
+    UI.skin = new Skin(Gdx.files.local("ui.json"), new TextureAtlas(Gdx.files.local("ui.atlas")))
     UI.stage = new Stage(new ScreenViewport())
     var inp:InputProc = new InputProc()
     var multi = new InputMultiplexer(UI.stage, inp)
-    Gdx.input.setInputProcessor(multi);
-    Timer.instance().scheduleTask(new Timer.Task{ def run() {Logic.ProcessStep}}, 0F, CommandersUnite.updateStep);
+    Gdx.input.setInputProcessor(multi)
+    Timer.instance.scheduleTask(new Timer.Task{ def run() {Logic.ProcessStep}}, 0F, CommandersUnite.updateStep)
   override def render (delta : Float) {
-    CommandersUnite.initialized = true;
-    Timer.instance().start()
+    CommandersUnite.initialized = true
+    Timer.instance.start()
     Gdx.gl.glClearColor(0.45F, 0.7F, 1f, 1)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-    camera.update();
+    camera.update()
     if (Logic.state == GameState.Paused) {}
     else if (Logic.state == GameState.NPC_Play || Logic.state == GameState.PC_Play_Move || Logic.state == GameState.PC_Play_Action) {
-      CommandersUnite.stateTime += Gdx.graphics.getDeltaTime();
-      CommandersUnite.attackTime += Gdx.graphics.getDeltaTime();
-      CommandersUnite.explodeTime += Gdx.graphics.getDeltaTime();
-      CommandersUnite.receiveTime += Gdx.graphics.getDeltaTime();
-      UI.stage.act(Gdx.graphics.getDeltaTime());
+      CommandersUnite.stateTime += Gdx.graphics.getDeltaTime()
+      CommandersUnite.attackTime += Gdx.graphics.getDeltaTime()
+      CommandersUnite.explodeTime += Gdx.graphics.getDeltaTime()
+      CommandersUnite.receiveTime += Gdx.graphics.getDeltaTime()
+      UI.stage.act(Gdx.graphics.getDeltaTime())
     }
     else if (Logic.state == GameState.PC_Select_Move || Logic.state == GameState.PC_Select_UI || Logic.state == GameState.PC_Select_Action) {
       CommandersUnite.stateTime += Gdx.graphics.getDeltaTime();
@@ -340,10 +349,14 @@ class CommandersUnite extends Game
   }
 
     def show() =
-    {}
+    {
+      resumeGame()
+    }
 
     def hide() =
-    {}
+    {
+      pauseGame()
+    }
 
     override def pause() =
     {
@@ -358,14 +371,14 @@ class CommandersUnite extends Game
 
     def resumeGame () {
       if (Logic.state == GameState.Paused) {
-        Timer.instance().start()
+        Timer.instance.resume()
         Logic.state = Logic.previousState
       }
     }
     def pauseGame () {
 
       if (Logic.state != GameState.Paused) {
-        Timer.instance().stop()
+        Timer.instance.pause()
         Logic.previousState = Logic.state;
         Logic.state = GameState.Paused;
       }
@@ -373,7 +386,7 @@ class CommandersUnite extends Game
     def dispose () {
     try {
       Logic.dispose()
-      Timer.instance().stop();
+      Timer.instance.stop();
     }
     catch{
       case e:Exception =>
