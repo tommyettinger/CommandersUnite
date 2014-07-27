@@ -471,7 +471,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
     }
 
 
-    var bestMoves = new ArrayBuffer[Position]
+    var bestMoves = new ArrayBuffer[Position]()
     var movesToTargets = new HashMap[Position, Position]
     var best:Position = null
     var gradient = Array.ofDim[Float](width+2, height+2)
@@ -1067,12 +1067,12 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       var eff1:Float = 0
       if (findWeapon(active, 1).kind != WeaponType.Non)
       {
-        rad1 = ViableMoves(active, 1, grid, placing);
+        rad1 = ViableMoves(active, 1, grid, placing)
         bests1 = bestMoves.clone()
         mtt1 = movesToTargets.clone()
         val bd1 = bests1.sortBy(p => if(movesToTargets.contains(p))
           findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind))
-          else 0.005F * rad1(p.x + 1)(p.y + 1) )
+          else 0.005F * rad1(p.x + 1)(p.y + 1) ).reverse
         best1 = bd1.takeWhile(p => if(movesToTargets.contains(p))
                                     findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind)) ==
                                     findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(bd1(0)).x)(movesToTargets(bd1(0)).y).kind))
@@ -1090,7 +1090,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         mtt0 = movesToTargets.clone()
         val bd0 = bests0.sortBy(p => if(movesToTargets.contains(p))
                                       findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind))
-                                    else 0.005F * rad0(p.x + 1)(p.y + 1) )
+                                    else 0.005F * rad0(p.x + 1)(p.y + 1) ).reverse
         best0 = bd0.takeWhile(p => if(movesToTargets.contains(p))
                                     findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind)) ==
                                       findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(bd0(0)).x)(movesToTargets(bd0(0)).y).kind))
@@ -1123,20 +1123,26 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         choice = if(findWeapon(active, 1).kind == WeaponType.Non) -1 else 1
       }
       choice match {
-        case -1=> bestMoves = ArrayBuffer(Position(active.x, active.y))
-        best = Position(active.x, active.y)
-        movesToTargets = new HashMap[Position, Position]
-        currentlyFiring = -1;
-        case 0=> bestMoves = bests0.clone()
-        rad = rad0
-        best = Position(best0.x, best0.y)
-        movesToTargets = mtt0.clone()
-        currentlyFiring = 0
-        case 1=> bestMoves = bests1.clone()
+        case -1 => {
+          bestMoves = ArrayBuffer(Position(active.x, active.y))
+          best = Position(active.x, active.y)
+          movesToTargets = new HashMap[Position, Position]
+          currentlyFiring = -1
+        }
+        case 0=> {
+          bestMoves = bests0.clone()
+          rad = rad0
+          best = Position(best0.x, best0.y)
+          movesToTargets = mtt0.clone()
+          currentlyFiring = 0
+        }
+        case 1=> {
+          bestMoves = bests1.clone()
           rad = rad1
           best = Position(best1.x, best1.y)
           movesToTargets = mtt1.clone()
           currentlyFiring = 1
+        }
       }
       if (currentlyFiring > -1 && movesToTargets.contains(best)) {
         target = DirectedPosition.TurnToFace(best, movesToTargets(best));
@@ -1538,8 +1544,7 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
             getDijkstraPath(ActivePiece, FieldMap.Land, PieceGrid)
           })
           thr onSuccess {
-            case path:ArrayBuffer[DirectedPosition] => println(path)
-              BestPath = path
+            case path:ArrayBuffer[DirectedPosition] => BestPath = path
           }
           Effects.CenterCamera(ActivePiece.x, ActivePiece.y, 0.5F)
           outward = dijkstra(ActivePiece, FieldMap.Land, PieceGrid, ActivePiece.x, ActivePiece.y)
