@@ -4,9 +4,6 @@ import commanders.unite.Direction.Direction
 
 import collection.mutable._
 
-import scala.collection.mutable
-;
-
 /**
  * Created by Tommy Ettinger on 7/22/2014.
  */
@@ -24,7 +21,7 @@ case class Position(x: Int, y: Int) {
     l
   }
 
-  def Nearby(width: Int, height: Int, radius:Int):mutable.MutableList[Position]=
+  def Nearby(width: Int, height: Int, radius:Int):MutableList[Position]=
   {
     var l: MutableList[Position] = new MutableList[Position]();
     for (i <- (if(x - radius >= 0) x - radius else 0) to (if(x + radius < width - 1) x+radius else width -1))
@@ -64,7 +61,7 @@ object Position
       l += new Position(x, y + 1)
     l
   }
-  def Nearby(x: Int, y: Int, width: Int, height: Int, radius:Int):mutable.MutableList[Position]=
+  def Nearby(x: Int, y: Int, width: Int, height: Int, radius:Int):MutableList[Position]=
   {
     var l: MutableList[Position] = new MutableList[Position]();
     for (i <- (if(x - radius >= 0) x - radius else 0) to (if(x + radius < width - 1) x+radius else width -1))

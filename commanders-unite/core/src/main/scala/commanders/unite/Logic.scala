@@ -1127,7 +1127,6 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         best = Position(active.x, active.y)
         movesToTargets = new HashMap[Position, Position]
         currentlyFiring = -1;
-
         case 0=> bestMoves = bests0.clone()
         rad = rad0
         best = Position(best0.x, best0.y)
@@ -1535,11 +1534,12 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
           CurrentMode = Mode.Moving
         }
         else if (TaskSteps <= 1 && (thr == null || thr.isCompleted) && state == GameState.NPC_Play) {
-          thr = Future({
+          thr = Future[ArrayBuffer[DirectedPosition]]({
             getDijkstraPath(ActivePiece, FieldMap.Land, PieceGrid)
           })
           thr onSuccess {
-            case path => BestPath = path
+            case path:ArrayBuffer[DirectedPosition] => println(path)
+              BestPath = path
           }
           Effects.CenterCamera(ActivePiece.x, ActivePiece.y, 0.5F)
           outward = dijkstra(ActivePiece, FieldMap.Land, PieceGrid, ActivePiece.x, ActivePiece.y)

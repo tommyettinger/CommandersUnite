@@ -21,8 +21,16 @@ class CommandersUnite extends Game
   override def create()
   {
     camera = new OrthographicCamera(Gdx.graphics.getWidth, Gdx.graphics.getHeight)
-    CommandersUnite.game = this;
+    CommandersUnite.game = this
     this.setScreen(new GameScreen)
+  }
+  override def dispose()
+  {
+    this.getScreen().dispose()
+    CommandersUnite.game = null
+    this.setScreen(null)
+    Gdx.app.exit()
+    System.exit(0)
   }
   class GameScreen extends Screen
   {
@@ -372,6 +380,7 @@ class CommandersUnite extends Game
     }
     batch.dispose()
     atlas.dispose()
+      println("Wrapping up!")
   }
     def resize (wide:Int, high:Int) {
     Effects.CenterCamera(new Position(Logic.ActivePiece.x, Logic.ActivePiece.y), 1)
