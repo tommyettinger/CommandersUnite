@@ -9,9 +9,9 @@ import scala.util.Random
  */
 object Extensions
 {
-  val r = new Random
+  val r = new Random()
   implicit class RandElement[T](l: Seq[T]) {
-    def RandomElement():Option[T] = if(l.isEmpty) None else Some(l(new Random().nextInt(l.length)))
+    def RandomElement():Option[T] = if(l.isEmpty) None else Some(l(r.nextInt(l.length)))
   }
 
 /*

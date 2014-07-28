@@ -46,14 +46,14 @@ class CommandersUnite extends Game
     val width=24
     val height=24
     val parts = Array(
-      new Texture(Gdx.files.local("pack.png"), Pixmap.Format.RGBA8888, false),
-      new Texture(Gdx.files.local("pack2.png"), Pixmap.Format.RGBA8888, false))
+      new Texture(Gdx.files.internal("pack.png"), Pixmap.Format.RGBA8888, false),
+      new Texture(Gdx.files.internal("pack2.png"), Pixmap.Format.RGBA8888, false))
     var currentFrame:TextureAtlas.AtlasRegion = null
-    val atlas = new TextureAtlas(Gdx.files.local("pack.atlas"))
-    val palette = new Texture(Gdx.files.local("PaletteDark.png"), Pixmap.Format.RGBA8888, false);
+    val atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"))
+    val palette = new Texture(Gdx.files.internal("PaletteDark.png"), Pixmap.Format.RGBA8888, false);
     var shader:ShaderProgram = createChannelShader()
-    val font = new BitmapFont(Gdx.files.local("Monology.fnt"));
-    val largeFont = new BitmapFont(Gdx.files.local("MonologyLarge.fnt"));
+    val font = new BitmapFont(Gdx.files.internal("Monology.fnt"));
+    val largeFont = new BitmapFont(Gdx.files.internal("MonologyLarge.fnt"));
     Logic.PlacePieces();
     palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
@@ -186,7 +186,7 @@ class CommandersUnite extends Game
     val batch = new SpriteBatch()
 
     CommandersUnite.cursor = Position(Logic.ActivePiece.x, Logic.ActivePiece.y)
-    UI.skin = new Skin(Gdx.files.local("ui.json"), new TextureAtlas(Gdx.files.local("ui.atlas")))
+    UI.skin = new Skin(Gdx.files.internal("ui.json"), new TextureAtlas(Gdx.files.internal("ui.atlas")))
     UI.stage = new Stage(new ScreenViewport())
     var inp:InputProc = new InputProc()
     var multi = new InputMultiplexer(UI.stage, inp)
