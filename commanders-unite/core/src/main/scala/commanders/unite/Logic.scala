@@ -779,12 +779,14 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
       val pass = movementPass(self.mobility)
       var furthest:Float = 0;
       var lowest:Float = 1000;
+      /*
       if (gradient(self.x + 1)(self.y + 1) <= goal)
       {
         radiate = Array.fill[Float](width, height)(wall)
         radiate(self.x + 1)(self.y + 1) = goal
       }
       else
+      */
       {
         while (open.size > 0 && furthest < self.speed) {
           for(idx_dijk <- open)
@@ -808,8 +810,8 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
                        bestMoves += Position(mov.x - 1,mov.y - 1)
                        lowest = gradient(mov.x)(mov.y)
                      }
-                     else if (gradient(mov.x)(mov.y) == lowest) {
-                       bestMoves+= Position(mov.x - 1, mov.y - 1)
+                     else { // else  if (gradient(mov.x)(mov.y) == lowest)
+                       bestMoves += Position(mov.x - 1, mov.y - 1)
                      }
                    }
               else if (
@@ -1073,6 +1075,14 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         val bd1 = bests1.sortBy(p => if(movesToTargets.contains(p))
           findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind))
           else 0.005F * rad1(p.x + 1)(p.y + 1) ).reverse
+        /*
+        println(active.name)
+
+        bd1.map(p => if(movesToTargets.contains(p))
+                       println("Found! " + findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind)))
+                     else println("Not found. " + 0.005F * rad1(p.x + 1)(p.y + 1) ))
+        println()
+        */
         best1 = bd1.takeWhile(p => if(movesToTargets.contains(p))
                                     findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind)) ==
                                     findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(bd1(0)).x)(movesToTargets(bd1(0)).y).kind))
@@ -1091,6 +1101,13 @@ xs.Zip(ys, f) -> (xs, ys).zipped.map(f) // When f = identity, use `xs.zip(ys)`.
         val bd0 = bests0.sortBy(p => if(movesToTargets.contains(p))
                                       findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind))
                                     else 0.005F * rad0(p.x + 1)(p.y + 1) ).reverse
+        /*
+        println(active.name)
+        bd0.map(p => if(movesToTargets.contains(p))
+                       println("Found! " + findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind)))
+                     else println("Not found. " + 0.005F * rad0(p.x + 1)(p.y + 1) ))
+        println()
+        */
         best0 = bd0.takeWhile(p => if(movesToTargets.contains(p))
                                     findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind)) ==
                                       findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(bd0(0)).x)(movesToTargets(bd0(0)).y).kind))
