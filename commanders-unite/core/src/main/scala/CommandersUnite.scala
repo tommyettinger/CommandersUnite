@@ -486,7 +486,10 @@ void main()
 
         var gridX = (worldX / 128 + worldY / 64).toInt
         var gridY = (worldX / 128 - worldY / 64).toInt
-
+        if(gridX < 0) gridX = 0
+        if(gridX >= Logic.width) gridX = Logic.width - 1
+        if(gridY < 0) gridY = 0
+        if(gridY >= Logic.height) gridY = Logic.height - 1
         CommandersUnite.cursor = Position(gridX, gridY)
         if (Logic.PieceGrid(CommandersUnite.cursor.x)(CommandersUnite.cursor.y) == null && Logic.state == GameState.PC_Select_Move) {
           Logic.state = GameState.PC_Play_Move;
@@ -530,7 +533,10 @@ void main()
 
         var gridX = (worldX / 128 + worldY / 64).toInt
         var gridY = (worldX / 128 - worldY / 64).toInt
-
+        if(gridX < 0) gridX = 0
+        if(gridX >= Logic.width) gridX = Logic.width - 1
+        if(gridY < 0) gridY = 0
+        if(gridY >= Logic.height) gridY = Logic.height - 1
         CommandersUnite.cursor = Position(gridX, gridY)
       }
       false
