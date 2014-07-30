@@ -76,18 +76,23 @@ class Timer()
       Timer.wake
     }
   }
+
   def resume()
   {
-    if (Timer.thread == null)
+    if (Timer.thread == null) {
       return
+    }
     Timer.thread.resume()
   }
+
   def pause()
   {
-    if (Timer.thread == null)
+    if (Timer.thread == null) {
       return
+    }
     Timer.thread.pause()
   }
+
   /** Cancels all tasks. */
   def clear()
   {
@@ -133,7 +138,7 @@ class Timer()
                 task.executeTimeMillis = timeMillis + task.intervalMillis
                 waitMillis = Math.min(waitMillis, task.intervalMillis)
                 if (task.repeatCount > 0) {
-                    task.repeatCount -= 1;
+                  task.repeatCount -= 1;
                 }
               }
             }
@@ -272,7 +277,7 @@ object Timer
   {
     private[utils] var app: Application = null
     private var pauseMillis: Long = System.nanoTime / 1000000
-      //Gdx.app.addLifecycleListener(this)
+    //Gdx.app.addLifecycleListener(this)
     this.resume()
 
     def run()
@@ -282,18 +287,18 @@ object Timer
           if (app ne Gdx.app) return
           val timeMillis: Long = System.nanoTime / 1000000
           var waitMillis: Long = 5000
-            var i: Int = 0
-            val n: Int = instances.size
-            while (i < n) {
-                try {
-                  waitMillis = instances(i).update(timeMillis, waitMillis)
-                }
-                catch {
-                  case ex: Throwable =>
-                    throw new GdxRuntimeException("Task failed: " + instances(i).getClass.getName, ex)
-                }
-              i += 1
+          var i: Int = 0
+          val n: Int = instances.size
+          while (i < n) {
+            try {
+              waitMillis = instances(i).update(timeMillis, waitMillis)
             }
+            catch {
+              case ex: Throwable =>
+                throw new GdxRuntimeException("Task failed: " + instances(i).getClass.getName, ex)
+            }
+            i += 1
+          }
           if (app ne Gdx.app) return
           try {
             if (waitMillis > 0) instances.wait(waitMillis)
@@ -305,6 +310,7 @@ object Timer
         }
       }
     }
+
     def resume()
     {
       val delayMillis: Long = System.nanoTime / 1000000 - pauseMillis
