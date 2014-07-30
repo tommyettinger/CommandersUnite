@@ -766,9 +766,9 @@ object Logic
       eff0 = if (mtt0.contains(best0)) {
         findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(mtt0(best0).x)(mtt0(best0).y).kind))
       }
-             else {
-               0
-             }
+      else {
+        0
+      }
       //choice = (choice == 2222) ? 1 : (best1 != null && rad1[best1.x + 1, best1.y + 1] > rad0[best0.x + 1, best0.y + 1]) ? 1 : 0;
       if (eff1 > eff0) {
         choice = 1
@@ -777,10 +777,10 @@ object Logic
         choice = 0
       }
       else if (findWeapon(active, 1).damage > findWeapon(active, 0).damage) {
-        choice = 1;
+        choice = 1
       }
       else if (findWeapon(active, 0).damage > findWeapon(active, 1).damage) {
-        choice = 0;
+        choice = 0
       }
       else {
         choice = if (best1 != null && rad1(best1.x + 1)(best1.y + 1) > rad0(best0.x + 1)(best0.y + 1)) 1 else 0
@@ -790,29 +790,26 @@ object Logic
       choice = if (findWeapon(active, 1).kind == WeaponType.Non) -1 else 1
     }
     choice match {
-      case -1 => {
+      case -1 =>
         bestMoves = ArrayBuffer(Position(active.x, active.y))
         best = Position(active.x, active.y)
         movesToTargets = new HashMap[Position, Position]
         currentlyFiring = -1
-      }
-      case 0 => {
+      case 0 =>
         bestMoves = bests0.clone()
         rad = rad0
         best = Position(best0.x, best0.y)
         movesToTargets = mtt0.clone()
         currentlyFiring = 0
-      }
-      case 1 => {
+      case 1 =>
         bestMoves = bests1.clone()
         rad = rad1
         best = Position(best1.x, best1.y)
         movesToTargets = mtt1.clone()
         currentlyFiring = 1
-      }
     }
     if (currentlyFiring > -1 && movesToTargets.contains(best)) {
-      target = DirectedPosition.TurnToFace(best, movesToTargets(best));
+      target = DirectedPosition.TurnToFace(best, movesToTargets(best))
       //                                active.weaponry[currentlyFiring].minRange, active.weaponry[currentlyFiring].maxRange).Where(pos => PieceGrid[pos.x, pos.y] != null && active.isOpposed(PieceGrid[pos.x, pos.y])).RandomElement();
     }
     else {
@@ -821,7 +818,6 @@ object Logic
     var oldpos = DirectedPosition(Position(best.x, best.y), Direction.SE)
     path += DirectedPosition(Position(best.x, best.y), Direction.SE)
     if (best.x == active.x && best.y == active.y) {
-
     }
     else {
       var f = 0
@@ -1013,8 +1009,6 @@ object Logic
     }
     colors(0) = 0
     reverseColors(0) = 0
-    colors(1) = 1
-    reverseColors(1) = 1
 
     for (section <- 0 until 2) {
       val rx = (width / 4) + (width / 2) * (section % 2);
@@ -1071,9 +1065,9 @@ object Logic
             val currentPiece = (Piece.TerrainToPieces(FieldMap.Land(i)(j))).RandomElement().get
             //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
             if (r.nextInt(25) <= 3) {
-              //if(Piece.TerrainToMobilities[FieldMap.Land[i,j]].Contains(MovementType.TreadsAmphi))
-              //    PieceGrid[i, j] = new Piece(Piece.PieceLookup["Tank_T"], colors[section], section, i, j);
-              //else
+              if(Piece.TerrainToMobilities(FieldMap.Land(i)(j)).contains(MovementType.Foot))
+                  PieceGrid(i)(j) = new Piece(Piece.PieceLookup("Infantry_T"), colors(section), section, i, j)()
+              else
               PieceGrid(i)(j) = new Piece(currentPiece, colors(section), section, i, j)()
             }
           }

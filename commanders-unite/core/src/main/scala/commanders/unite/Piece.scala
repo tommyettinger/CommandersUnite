@@ -88,7 +88,7 @@ object Piece
     "Light Artillery", "Defensive Artillery", "AA Artillery", "Stealth Artillery",
     "Light Tank", "Heavy Tank", "AA Tank", "Recon Tank",
     "Prop Plane", "Ground Bomber", "Fighter Jet", "Stealth Bomber",
-    "Supply Truck", "Rig", "Amphi Transport", "Jammer",
+    "Supply Truck", "Build Rig", "Amphi Transport", "Jammer",
     "Transport Copter", "Gunship Copter", "Blitz Copter", "Comm Copter",
     "City", "Factory", "Airport", "Laboratory", "Castle", "Estate"
   )
