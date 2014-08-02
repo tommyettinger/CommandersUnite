@@ -2,7 +2,7 @@ package game.commanders.unite
 
 import com.badlogic.gdx.backends.lwjgl._
 
-object Main extends App {
+object DesktopMain extends App {
     val cfg = new LwjglApplicationConfiguration
     cfg.title = "Commanders Unite"
     cfg.height = 720

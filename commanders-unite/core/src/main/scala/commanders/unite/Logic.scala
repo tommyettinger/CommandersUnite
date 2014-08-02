@@ -462,7 +462,7 @@ object Logic
                 bestMoves += Position(mov.x - 1, mov.y - 1)
                 lowest = gradient(mov.x)(mov.y)
               }
-              else {
+              else if (gradient(mov.x)(mov.y) == lowest) {
                 // else  if (gradient(mov.x)(mov.y) == lowest)
                 bestMoves += Position(mov.x - 1, mov.y - 1)
               }
@@ -713,7 +713,7 @@ object Logic
         findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind))
       }
                                    else {
-                                     0.005F * rad1(p.x + 1)(p.y + 1)
+                                     0.003F * rad1(p.x + 1)(p.y + 1)
                                    }).reverse
       /*
       println(active.name)
@@ -728,7 +728,7 @@ object Logic
           findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(bd1(0)).x)(movesToTargets(bd1(0)).y).kind))
       }
                                  else {
-                                   0.005F * rad1(p.x + 1)(p.y + 1) == 0.005F * rad1(bd1(0).x + 1)(bd1(0).y + 1)
+                                   0.003F * rad1(p.x + 1)(p.y + 1) == 0.003F * rad1(bd1(0).x + 1)(bd1(0).y + 1)
                                  }).toArray[Position].RandomItem
       eff1 = if (mtt1.contains(best1)) {
         findWeapon(active, 1).multipliers(Piece.PieceTypeAsNumber(placing(mtt1(best1).x)(mtt1(best1).y).kind))
@@ -747,7 +747,7 @@ object Logic
         findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(p).x)(movesToTargets(p).y).kind))
       }
                                    else {
-                                     0.005F * rad0(p.x + 1)(p.y + 1)
+                                     0.003F * rad0(p.x + 1)(p.y + 1)
                                    }).reverse
       /*
       println(active.name)
@@ -761,7 +761,7 @@ object Logic
           findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(movesToTargets(bd0(0)).x)(movesToTargets(bd0(0)).y).kind))
       }
                                  else {
-                                   0.005F * rad0(p.x + 1)(p.y + 1) == 0.005F * rad0(bd0(0).x + 1)(bd0(0).y + 1)
+                                   0.003F * rad0(p.x + 1)(p.y + 1) == 0.003F * rad0(bd0(0).x + 1)(bd0(0).y + 1)
                                  }).toArray[Position].RandomItem
       eff0 = if (mtt0.contains(best0)) {
         findWeapon(active, 0).multipliers(Piece.PieceTypeAsNumber(placing(mtt0(best0).x)(mtt0(best0).y).kind))
@@ -1062,12 +1062,12 @@ object Logic
       for (i <- (width / 2) * (section % 2) until (width / 2) + (width / 2) * (section % 2)) {
         for (j <- (if (section / 2 == 0) 0 else height / 2) until (if (section / 2 == 0) height / 2 else height)) {
           if (PieceGrid(i)(j) == null) {
-            val currentPiece = (Piece.TerrainToPieces(FieldMap.Land(i)(j))).RandomElement().get
+            val currentPiece = Piece.TerrainToPieces(FieldMap.Land(i)(j)).RandomElement().get
             //foot 0-0, treads 1-5, wheels 6-8, flight 9-10
             if (r.nextInt(25) <= 3) {
-              if(Piece.TerrainToMobilities(FieldMap.Land(i)(j)).contains(MovementType.Foot))
-                  PieceGrid(i)(j) = new Piece(Piece.PieceLookup("Infantry_T"), colors(section), section, i, j)()
-              else
+              //if(Piece.TerrainToMobilities(FieldMap.Land(i)(j)).contains(MovementType.Foot))
+              //    PieceGrid(i)(j) = new Piece(Piece.PieceLookup("Infantry_T"), colors(section), section, i, j)()
+              //else
               PieceGrid(i)(j) = new Piece(currentPiece, colors(section), section, i, j)()
             }
           }
@@ -1296,12 +1296,12 @@ object Logic
         {
           def run()
           {
-            ActivePiece.worldX = ActivePiece.worldX + (FuturePosition.p.x - oldx) * 4 + (FuturePosition.p.y - oldy) * 4
-            ActivePiece.worldY = ActivePiece.worldY + (FuturePosition.p.x - oldx) * 2 - (FuturePosition.p.y - oldy) * 2 +
-              ((LocalMap.Depths(FieldMap.Land(FuturePosition.p.x)(FuturePosition.p.y)) - LocalMap.Depths(FieldMap.Land(oldx)(oldy))) * 3F) / 16F
+            ActivePiece.worldX = ActivePiece.worldX + (FuturePosition.p.x - oldx) * 64 / CommandersUnite.smoothMove + (FuturePosition.p.y - oldy) * 64 / CommandersUnite.smoothMove
+            ActivePiece.worldY = ActivePiece.worldY + (FuturePosition.p.x - oldx) * 32 / CommandersUnite.smoothMove - (FuturePosition.p.y - oldy) * 32 / CommandersUnite.smoothMove +
+              ((LocalMap.Depths(FieldMap.Land(FuturePosition.p.x)(FuturePosition.p.y)) - LocalMap.Depths(FieldMap.Land(oldx)(oldy))) * 3F) / CommandersUnite.smoothMove.toFloat
           }
         }
-        Timer.instance.scheduleTask(n, 0, CommandersUnite.updateStep / 16F, 15);
+        Timer.instance.scheduleTask(n, 0, CommandersUnite.updateStep / CommandersUnite.smoothMove.toFloat, CommandersUnite.smoothMove - 1);
         Effects.CenterCamera(FuturePosition.p, 1F);
         BestPath.remove(0)
       case Mode.Attacking =>
@@ -1401,20 +1401,25 @@ object Logic
             {
               def run()
               {
-                PieceGrid(target.p.x)(target.p.y).worldX = PieceGrid(target.p.x)(target.p.y).worldX + (if ((PieceGrid(target.p.x)(target.p.y).facingNumber) % 4 >= 2) 2f else -2f);
-                PieceGrid(target.p.x)(target.p.y).worldY = PieceGrid(target.p.x)(target.p.y).worldY + (if ((PieceGrid(target.p.x)(target.p.y).facingNumber + 1) % 4 >= 2) 1f else -1f);
+                PieceGrid(target.p.x)(target.p.y).worldX = PieceGrid(target.p.x)(target.p.y).worldX + (if
+                                                                                                       (PieceGrid(target.p.x)(target.p.y).facingNumber % 4 >= 2) 32 / CommandersUnite.smoothMove.toFloat
+                                                                                                       else -32 / CommandersUnite.smoothMove.toFloat)
+                PieceGrid(target.p.x)(target.p.y).worldY = PieceGrid(target.p.x)(target.p.y).worldY + (if ((PieceGrid(target.p.x)(target.p.y).facingNumber + 1) % 4 >= 2) 16 / CommandersUnite.smoothMove.toFloat
+                                                                                                       else -16 / CommandersUnite.smoothMove.toFloat)
               }
             }
-            Timer.instance.scheduleTask(avoid, 0, CommandersUnite.updateStep / 16F, 10);
+            Timer.instance.scheduleTask(avoid, 0, CommandersUnite.updateStep / CommandersUnite.smoothMove.toFloat, CommandersUnite.smoothMove * 5 / 8)
             val calm = new Timer.Task
             {
               def run()
               {
-                PieceGrid(target.p.x)(target.p.y).worldX = PieceGrid(target.p.x)(target.p.y).worldX - (if ((PieceGrid(target.p.x)(target.p.y).facingNumber) % 4 >= 2) 2f else -2f);
-                PieceGrid(target.p.x)(target.p.y).worldY = PieceGrid(target.p.x)(target.p.y).worldY - (if ((PieceGrid(target.p.x)(target.p.y).facingNumber + 1) % 4 >= 2) 1f else -1f);
+                PieceGrid(target.p.x)(target.p.y).worldX = PieceGrid(target.p.x)(target.p.y).worldX - (if (PieceGrid(target.p.x)(target.p.y).facingNumber % 4 >= 2) 32 / CommandersUnite.smoothMove.toFloat
+                                                                                                       else -32 / CommandersUnite.smoothMove.toFloat)
+                PieceGrid(target.p.x)(target.p.y).worldY = PieceGrid(target.p.x)(target.p.y).worldY - (if ((PieceGrid(target.p.x)(target.p.y).facingNumber + 1) % 4 >= 2) 16 / CommandersUnite.smoothMove.toFloat
+                                                                                                       else -16 / CommandersUnite.smoothMove.toFloat)
               }
             }
-            Timer.instance.scheduleTask(calm, CommandersUnite.updateStep, CommandersUnite.updateStep / 8F, 10);
+            Timer.instance.scheduleTask(calm, CommandersUnite.updateStep, CommandersUnite.updateStep / CommandersUnite.smoothMove.toFloat * 2, CommandersUnite.smoothMove * 5 / 8);
             val reset = new Timer.Task
             {
               def run()
@@ -1423,20 +1428,20 @@ object Logic
                 PieceGrid(target.p.x)(target.p.y).worldY = 6 + PieceGrid(target.p.x)(target.p.y).x * 32 - PieceGrid(target.p.x)(target.p.y).y * 32
               }
             }
-            Timer.instance.scheduleTask(reset, CommandersUnite.updateStep * 19 / 8F)
+            Timer.instance.scheduleTask(reset, CommandersUnite.updateStep * 19 / CommandersUnite.smoothMove.toFloat * 2)
 
           }
         }
         else if (TaskSteps == 2 + 1 * (Math.abs(target.p.x - ActivePiece.x) + Math.abs(target.p.y - ActivePiece.y)) && currentlyFiring > -1) {
           if (killSuccess) {
-            CommandersUnite.explodeTime = 0;
-            PieceGrid(target.p.x)(target.p.y).visual = VisualAction.Exploding;
+            CommandersUnite.explodeTime = 0
+            PieceGrid(target.p.x)(target.p.y).visual = VisualAction.Exploding
             speaking += Speech(
-              target.p.x, target.p.y, true, "DEAD"
+              target.p.x, target.p.y, large=true, "DEAD"
             )()
           }
           else if (hitSuccess) {
-            speaking += Speech(target.p.x, target.p.y, true, "" + (previousHP - PieceGrid(target.p.x)(target.p.y).currentHealth))()
+            speaking += Speech(target.p.x, target.p.y, large = true, "" + (previousHP - PieceGrid(target.p.x)(target.p.y).currentHealth))()
           }
 
         }

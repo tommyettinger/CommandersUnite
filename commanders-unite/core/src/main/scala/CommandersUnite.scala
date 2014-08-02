@@ -10,13 +10,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.viewport._
 import commanders.unite._
-import commanders.unite.utils.Timer
+import commanders.unite.utils.{CustomViewport, Timer}
 
 class CommandersUnite extends Game
 {
   println("LibGDX version " + Version.VERSION)
   var camera: OrthographicCamera = new OrthographicCamera()
-
   override def create()
   {
     camera = new OrthographicCamera(Gdx.graphics.getWidth, Gdx.graphics.getHeight)
@@ -547,6 +546,7 @@ object CommandersUnite
 {
   var initialized = false
   var game: CommandersUnite = null
+  var smoothMove = 16
   val updateStep = 0.33F
   var stateTime, attackTime, explodeTime, receiveTime = 0.0f
   var cursor: Position = null;

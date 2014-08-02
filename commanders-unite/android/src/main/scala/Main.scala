@@ -11,6 +11,7 @@ class Main extends AndroidApplication {
     config.useCompass = false
     config.useWakelock = true
     config.hideStatusBar = true
+    CommandersUnite.smoothMove = 8
     initialize(new CommandersUnite, config)
   }
 }

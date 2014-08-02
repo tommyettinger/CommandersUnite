@@ -1,10 +1,11 @@
 package commanders.unite
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d._
 import com.badlogic.gdx.scenes.scene2d.ui._
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent
-
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -14,7 +15,16 @@ object UI
 {
   var skin = new Skin()
   var stage = new Stage()
-
+  def formatActors()
+  { val it = stage.getActors.iterator()
+    while(it.hasNext)
+    {
+      var a = it.next
+      a.setScale(Math.round(Gdx.graphics.getDensity * 1.5))
+      a.setX(Gdx.graphics.getWidth - a.getWidth * 3)
+      a.setY(Gdx.graphics.getHeight / 2 - a.getHeight / 2)
+    }
+  }
   def makeMenu(entries: ArrayBuffer[MenuEntry], color: Int): ScrollPane =
   {
     val vg = new VerticalGroup()
@@ -44,16 +54,17 @@ object UI
 
   def postActor(a: Actor)
   {
-    a.setX(700)
-    a.setY(360)
+//    a.setX(700)
+//    a.setY(360)
     stage.addActor(a)
+    formatActors()
+
   }
 
   def postActor(a: Actor, x: Float, y: Float)
   {
-    a.setX(x)
-    a.setY(y)
     stage.addActor(a)
+    formatActors()
   }
 
   def draw()

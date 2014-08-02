@@ -23,12 +23,12 @@ object Effects
     {
       def run()
       {
-        midpos = midpos.add(((newpos.x - oldpos.x) / 16F).toInt, ((newpos.y - oldpos.y) / 16F).toInt, 0);
+        midpos = midpos.add(((newpos.x - oldpos.x) / CommandersUnite.smoothMove.toFloat).toInt, ((newpos.y - oldpos.y) / CommandersUnite.smoothMove.toFloat).toInt, 0);
         CommandersUnite.game.camera.position.set(midpos)
         CommandersUnite.game.camera.update()
       }
     }
-    utils.Timer.instance.scheduleTask(n, 0, stepPortion * CommandersUnite.updateStep / 16F, 15);
+    utils.Timer.instance.scheduleTask(n, 0, stepPortion * CommandersUnite.updateStep / CommandersUnite.smoothMove.toFloat, CommandersUnite.smoothMove - 1);
     utils.Timer.instance.start()
   }
 
