@@ -7,10 +7,12 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.badlogic.gdx.utils.GdxRuntimeException
+import com.badlogic.gdx.utils.{TimeUtils, GdxRuntimeException}
 import com.badlogic.gdx.utils.viewport._
 import commanders.unite._
-import commanders.unite.utils.{CustomViewport, Timer}
+import commanders.unite.utils.{SmoothAction, RepeatedAction, Timer}
+
+import scala.collection.mutable.ArrayBuffer
 
 class CommandersUnite extends Game
 {
@@ -51,12 +53,14 @@ class CommandersUnite extends Game
       new Texture(Gdx.files.internal("pack2.png"), Pixmap.Format.RGBA8888, false))
     var currentFrame: TextureAtlas.AtlasRegion = null
     val atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"))
-    val palette = new Texture(Gdx.files.internal("PaletteDark.png"), Pixmap.Format.RGBA8888, false);
+    val palette = new Texture(Gdx.files.internal("PaletteDark.png"), Pixmap.Format.RGBA8888, false)
     var shader: ShaderProgram = createChannelShader()
-    val font = new BitmapFont(Gdx.files.internal("Monology.fnt"));
-    val largeFont = new BitmapFont(Gdx.files.internal("MonologyLarge.fnt"));
-    Logic.PlacePieces();
-    palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    val font = new BitmapFont(Gdx.files.internal("Monology.fnt"))
+    font.setScale(Math.round(Gdx.graphics.getDensity * 1.5))
+    val largeFont = new BitmapFont(Gdx.files.internal("MonologyLarge.fnt"))
+    largeFont.setScale(Math.round(Gdx.graphics.getDensity * 1.5))
+    Logic.PlacePieces()
+    palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest)
 
     var terrains = Array.ofDim[TextureRegion](11, 2)
     for (i <- 0 until 11) {
@@ -169,33 +173,72 @@ class CommandersUnite extends Game
     var inp: InputProc = new InputProc()
     var multi = new InputMultiplexer(UI.stage, inp)
     Gdx.input.setInputProcessor(multi)
-    Timer.instance.scheduleTask(new Timer.Task
+    CommandersUnite.repeatedActions += RepeatedAction(Logic.ProcessStep, 0, CommandersUnite.updateStep, -1)
+    /*Timer.instance.scheduleTask(new Timer.Task
     {
       def run()
       {
         Logic.ProcessStep
       }
-    }, 0F, CommandersUnite.updateStep)
+    }, 0F, CommandersUnite.updateStep)*/
 
     override def render(delta: Float)
     {
+      val millis = TimeUtils.millis()
       CommandersUnite.initialized = true
-      Timer.instance.start()
+      //Timer.instance.start()
       Gdx.gl.glClearColor(0.45F, 0.7F, 1f, 1)
       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
       camera.update()
       if (Logic.state == GameState.Paused) {}
       else if (Logic.state == GameState.NPC_Play || Logic.state == GameState.PC_Play_Move || Logic.state == GameState.PC_Play_Action) {
-        CommandersUnite.stateTime += Gdx.graphics.getDeltaTime()
-        CommandersUnite.attackTime += Gdx.graphics.getDeltaTime()
-        CommandersUnite.explodeTime += Gdx.graphics.getDeltaTime()
-        CommandersUnite.receiveTime += Gdx.graphics.getDeltaTime()
-        UI.stage.act(Gdx.graphics.getDeltaTime())
+        CommandersUnite.stateTime += Gdx.graphics.getDeltaTime
+        CommandersUnite.attackTime += Gdx.graphics.getDeltaTime
+        CommandersUnite.explodeTime += Gdx.graphics.getDeltaTime
+        CommandersUnite.receiveTime += Gdx.graphics.getDeltaTime
+        UI.stage.act(Gdx.graphics.getDeltaTime)
       }
       else if (Logic.state == GameState.PC_Select_Move || Logic.state == GameState.PC_Select_UI || Logic.state == GameState.PC_Select_Action) {
-        CommandersUnite.stateTime += Gdx.graphics.getDeltaTime();
+        CommandersUnite.stateTime += Gdx.graphics.getDeltaTime
       }
-      batch.setProjectionMatrix(camera.combined);
+      if(Logic.state != GameState.Paused) {
+        for (a <- CommandersUnite.repeatedActions) {
+          a.delaySeconds -= Gdx.graphics.getDeltaTime
+          if (a.delaySeconds <= 0) {
+            a.counter += Gdx.graphics.getDeltaTime
+            if (a.counter >= a.intervalSeconds) {
+              a.run()
+              a.counter -= a.intervalSeconds
+              if (a.repeatCount > 0)
+                a.repeatTotal += 1
+              if (a.repeatCount != -1 && a.repeatTotal >= a.repeatCount)
+                CommandersUnite.canceledRepeated += a
+            }
+            if (a.intervalSeconds > 0 && (a.repeatCount == -1 || a.repeatTotal < a.repeatCount)) {
+              while (a.counter >= a.intervalSeconds) {
+                a.run()
+                a.counter -= a.intervalSeconds
+                if (a.repeatCount > 0)
+                  a.repeatTotal += 1
+                if (a.repeatCount != -1 && a.repeatTotal >= a.repeatCount)
+                  CommandersUnite.canceledRepeated += a
+              }
+            }
+          }
+        }
+        for (a <- CommandersUnite.smoothActions) {
+          a.run(if((millis - a.startTime) * 1.0f / (a.endTime - a.startTime) <= 1.0f) (millis - a.startTime) * 1.0f / (a.endTime - a.startTime) else 1.0f)
+          if(millis > a.endTime)
+            CommandersUnite.canceledSmooth += a
+        }
+      }
+      CommandersUnite.repeatedActions --= CommandersUnite.canceledRepeated
+      CommandersUnite.canceledRepeated.clear()
+
+      CommandersUnite.smoothActions --= CommandersUnite.canceledSmooth
+      CommandersUnite.canceledSmooth.clear()
+
+      batch.setProjectionMatrix(camera.combined)
 
       //shader.begin();
 
@@ -351,7 +394,7 @@ class CommandersUnite extends Game
     def resumeGame()
     {
       if (Logic.state == GameState.Paused) {
-        Timer.instance.resume()
+        //Timer.instance.resume()
         Logic.state = Logic.previousState
       }
     }
@@ -360,7 +403,7 @@ class CommandersUnite extends Game
     {
 
       if (Logic.state != GameState.Paused) {
-        Timer.instance.pause()
+        //Timer.instance.pause()
         Logic.previousState = Logic.state;
         Logic.state = GameState.Paused;
       }
@@ -370,7 +413,7 @@ class CommandersUnite extends Game
     {
       try {
         Logic.dispose()
-        Timer.instance.stop();
+        //Timer.instance.stop();
       }
       catch {
         case e: Exception =>
@@ -547,7 +590,13 @@ object CommandersUnite
   var initialized = false
   var game: CommandersUnite = null
   var smoothMove = 16
-  val updateStep = 0.33F
+  val updateStep = 0.32F
+  val updateMillis : Long = 320
   var stateTime, attackTime, explodeTime, receiveTime = 0.0f
   var cursor: Position = null;
+
+  var repeatedActions = new ArrayBuffer[RepeatedAction](16)
+  var canceledRepeated = new ArrayBuffer[RepeatedAction](16)
+  var smoothActions = new ArrayBuffer[SmoothAction](16)
+  var canceledSmooth = new ArrayBuffer[SmoothAction](16)
 }

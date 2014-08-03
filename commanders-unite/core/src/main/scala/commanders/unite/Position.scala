@@ -9,6 +9,14 @@ import scala.collection.mutable._
  */
 case class Position(x: Int, y: Int)
 {
+  def toWorld() : Position =
+  {
+    Position(20 + x * 64 + y * 64, 6+ x * 32 - y * 32)
+  }
+  def add(p2 : Position) : Position =
+  {
+    Position(x + p2.x, y + p2.y)
+  }
   def Adjacent(width: Int, height: Int): MutableList[Position] =
   {
     var l: MutableList[Position] = new MutableList[Position]();
