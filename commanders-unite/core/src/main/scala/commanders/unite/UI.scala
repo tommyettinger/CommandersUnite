@@ -21,8 +21,8 @@ object UI
     {
       var a = it.next
       a.setScale(Math.round(Gdx.graphics.getDensity * 1.5))
-      a.setX(Gdx.graphics.getWidth - a.getWidth * 3)
-      a.setY(Gdx.graphics.getHeight / 2 - a.getHeight)
+      a.setX(Gdx.graphics.getWidth - a.getWidth * 3 * Gdx.graphics.getDensity * 1.5f)
+      a.setY(Gdx.graphics.getHeight / 2 - a.getHeight * Gdx.graphics.getDensity * 1.5f)
     }
   }
   def makeMenu(entries: ArrayBuffer[MenuEntry], color: Int): ScrollPane =

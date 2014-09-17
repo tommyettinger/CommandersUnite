@@ -1,6 +1,7 @@
 ## Entry point
 
 -keep public class game.commanders.unite.Main
+-keep public class game.commanders.unite.DesktopMain
 
 ## LibGDX
 

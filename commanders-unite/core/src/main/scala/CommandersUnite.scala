@@ -10,13 +10,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.utils.{TimeUtils, GdxRuntimeException}
 import com.badlogic.gdx.utils.viewport._
 import commanders.unite._
-import commanders.unite.utils.{SmoothAction, RepeatedAction, Timer}
+import commanders.unite.utils.{SmoothAction, RepeatedAction}
 
 import scala.collection.mutable.ArrayBuffer
 
 class CommandersUnite extends Game
 {
-  println("LibGDX version " + Version.VERSION)
+  //println("LibGDX version " + Version.VERSION)
   var camera: OrthographicCamera = new OrthographicCamera()
   override def create()
   {
@@ -27,7 +27,7 @@ class CommandersUnite extends Game
 
   override def dispose()
   {
-    this.getScreen().dispose()
+    this.getScreen.dispose()
     CommandersUnite.game = null
     this.setScreen(null)
     Gdx.app.exit()
@@ -36,12 +36,12 @@ class CommandersUnite extends Game
 
   override def pause()
   {
-    this.getScreen().pause()
+    this.getScreen.pause()
   }
 
   override def resume()
   {
-    this.getScreen().resume()
+    this.getScreen.resume()
   }
 
   class GameScreen extends Screen
@@ -117,17 +117,17 @@ class CommandersUnite extends Game
                   pieces(Piece.PieceLookup(name))(dir)(j)(k) = atlas.findRegion(name + "_Receive_0_face" + dir, k)
                 }
                 else {
-                  pieces(Piece.PieceLookup(name))(dir)(j)(k) = clearLarge;
+                  pieces(Piece.PieceLookup(name))(dir)(j)(k) = clearLarge
                 }
               }
             case 5 =>
               pieces(Piece.PieceLookup(name))(dir)(j) = new Array[TextureAtlas.AtlasRegion](if (Piece.AllMobilities(Piece.PieceLookup(name)) == MovementType.Immobile) 2 else 16)
               for (k <- 0 until (if (Piece.AllMobilities(Piece.PieceLookup(name)) == MovementType.Immobile) 2 else 16)) {
                 if (Piece.WeaponDisplays(Piece.PieceLookup(name))._2 > -1) {
-                  pieces(Piece.PieceLookup(name))(dir)(j)(k) = atlas.findRegion(name + "_Receive_1_face" + dir, k);
+                  pieces(Piece.PieceLookup(name))(dir)(j)(k) = atlas.findRegion(name + "_Receive_1_face" + dir, k)
                 }
                 else {
-                  pieces(Piece.PieceLookup(name))(dir)(j)(k) = clearLarge;
+                  pieces(Piece.PieceLookup(name))(dir)(j)(k) = clearLarge
                 }
               }
           }
@@ -135,7 +135,7 @@ class CommandersUnite extends Game
         animations(Piece.PieceLookup(name))(dir) = new Array[Animation](if (Piece.AllMobilities(Piece.PieceLookup(name)) == MovementType.Immobile) 2 else 6)
         for (j <- 0 until (if (Piece.AllMobilities(Piece.PieceLookup(name)) == MovementType.Immobile) 2 else 6)) {
           j match {
-            case 0 => animations(Piece.PieceLookup(name))(dir)(j) = new Animation((if (Piece.AllMobilities(Piece.PieceLookup(name)) == MovementType.Immobile) 0.4F else 0.15F),
+            case 0 => animations(Piece.PieceLookup(name))(dir)(j) = new Animation(if (Piece.AllMobilities(Piece.PieceLookup(name)) == MovementType.Immobile) 0.4F else 0.15F,
               pieces(Piece.PieceLookup(name))(dir)(j): _*)
             case 1 => animations(Piece.PieceLookup(name))(dir)(j) = new Animation(0.11F,
               pieces(Piece.PieceLookup(name))(dir)(j): _*)
@@ -242,14 +242,14 @@ class CommandersUnite extends Game
 
       //shader.begin();
 
-      var faction = new Color()
+      val faction = new Color()
       faction.a = 1F
       faction.b = 0.5F
       faction.g = 0.9F
       faction.r = 9 / 32F
 
       batch.setShader(shader)
-      Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
+      Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0)
       batch.begin()
 
       palette.bind(3)
@@ -263,8 +263,8 @@ class CommandersUnite extends Game
       //            for (int h = 0; h < height; h++)
       for (row <- 0 until width + height) {
         for (col <- 0 to (if (row < width) row else (width + height - 1) - row)) {
-          var w = (if (row < width) width - 1 - row + col else col) //height + (width - 1 - row) +
-          var h = (if (row < width) col else row - width + col)
+          val w = if (row < width) width - 1 - row + col else col
+          val h = if (row < width) col else row - width + col
           var boldness = 0
           var highlighter: Float = 10
           Logic.FieldMap.Highlight(w)(h) match {
@@ -281,7 +281,7 @@ class CommandersUnite extends Game
               highlighter = 13 + ((CommandersUnite.stateTime * 9) % 6).toInt
           }
           if (Logic.state == GameState.PC_Select_Move && Logic.FieldMap.Highlight(w)(h) != HighlightType.Dim && CommandersUnite.cursor.x == w && CommandersUnite.cursor.y == h) {
-            boldness = 1;
+            boldness = 1
             highlighter = 13 + ((CommandersUnite.stateTime * 9) % 6).toInt
           }
           faction.r = highlighter / 32.0F
@@ -291,15 +291,15 @@ class CommandersUnite extends Game
       }
       for (row <- 0 until width + height) {
         for (col <- 0 to (if (row < width) row else (width + height - 1) - row)) {
-          var w = (if (row < width) width - 1 - row + col else col)
-          var h = (if (row < width) col else row - width + col)
+          val w = if (row < width) width - 1 - row + col else col
+          val h = if (row < width) col else row - width + col
           if (Logic.PieceGrid(w)(h) != null) {
             faction.r = (Logic.PieceGrid(w)(h).color + 1) / 32.0F
             batch.setColor(faction)
             Logic.PieceGrid(w)(h).visual match {
               case VisualAction.Normal =>
                 currentFrame = animations(Logic.PieceGrid(w)(h).unitIndex)(Logic.PieceGrid(w)(h).facingNumber)(0).getKeyFrame(CommandersUnite.stateTime, true).asInstanceOf[TextureAtlas.AtlasRegion]
-                batch.draw(currentFrame, (Logic.PieceGrid(w)(h).worldX).toInt + currentFrame.offsetX, (Logic.PieceGrid(w)(h).worldY).toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
+                batch.draw(currentFrame, Logic.PieceGrid(w)(h).worldX.toInt + currentFrame.offsetX, Logic.PieceGrid(w)(h).worldY.toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
               case VisualAction.Exploding =>
                 currentFrame = animations(Logic.PieceGrid(w)(h).unitIndex)(Logic.PieceGrid(w)(h).facingNumber)(1).getKeyFrame(CommandersUnite.explodeTime, false).asInstanceOf[TextureAtlas.AtlasRegion]
                 batch.draw(currentFrame, (Logic.PieceGrid(w)(h).worldX - 80).toInt + currentFrame.offsetX, (Logic.PieceGrid(w)(h).worldY - 40).toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
@@ -310,7 +310,7 @@ class CommandersUnite extends Game
                 }
                 else {
                   currentFrame = animations(Logic.PieceGrid(w)(h).unitIndex)(Logic.PieceGrid(w)(h).facingNumber)(0).getKeyFrame(CommandersUnite.stateTime, true).asInstanceOf[TextureAtlas.AtlasRegion]
-                  batch.draw(currentFrame, (Logic.PieceGrid(w)(h).worldX).toInt + currentFrame.offsetX, (Logic.PieceGrid(w)(h).worldY).toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
+                  batch.draw(currentFrame, Logic.PieceGrid(w)(h).worldX.toInt + currentFrame.offsetX, Logic.PieceGrid(w)(h).worldY.toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
                 }
             }
 
@@ -325,14 +325,14 @@ class CommandersUnite extends Game
             }
           }
           if (Logic.ActivePiece.x == w && Logic.ActivePiece.y == h) {
-            faction.r = (Logic.ActivePiece.color + 1) / 32.0F;
-            batch.setColor(faction);
+            faction.r = (Logic.ActivePiece.color + 1) / 32.0F
+            batch.setColor(faction)
             //[Logic.ReverseColors[Logic.ActivePiece.color]]
 
             Logic.ActivePiece.visual match {
               case VisualAction.Normal =>
                 currentFrame = animations(Logic.ActivePiece.unitIndex)(Logic.ActivePiece.facingNumber)(0).getKeyFrame(CommandersUnite.stateTime, true).asInstanceOf[TextureAtlas.AtlasRegion]
-                batch.draw(currentFrame, (Logic.ActivePiece.worldX).toInt + currentFrame.offsetX, (Logic.ActivePiece.worldY).toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
+                batch.draw(currentFrame, Logic.ActivePiece.worldX.toInt + currentFrame.offsetX, Logic.ActivePiece.worldY.toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
               case VisualAction.Exploding =>
                 currentFrame = animations(Logic.ActivePiece.unitIndex)(Logic.ActivePiece.facingNumber)(1).getKeyFrame(CommandersUnite.explodeTime, false).asInstanceOf[TextureAtlas.AtlasRegion]
                 batch.draw(currentFrame, (Logic.ActivePiece.worldX - 80).toInt + currentFrame.offsetX, (Logic.ActivePiece.worldY - 40).toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
@@ -343,7 +343,7 @@ class CommandersUnite extends Game
                 }
                 else {
                   currentFrame = animations(Logic.ActivePiece.unitIndex)(Logic.ActivePiece.facingNumber)(0).getKeyFrame(CommandersUnite.stateTime, true).asInstanceOf[TextureAtlas.AtlasRegion]
-                  batch.draw(currentFrame, (Logic.ActivePiece.worldX).toInt + currentFrame.offsetX, (Logic.ActivePiece.worldY).toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
+                  batch.draw(currentFrame, Logic.ActivePiece.worldX.toInt + currentFrame.offsetX, Logic.ActivePiece.worldY.toInt + currentFrame.offsetY + LocalMap.Depths(Logic.FieldMap.Land(w)(h)) * 3)
                 }
             }
           }
@@ -359,14 +359,16 @@ class CommandersUnite extends Game
       for (sp <- Logic.speaking) {
         batch.setColor(Color.BLACK)
         (if (sp.large) largeFont else font).setColor(Color.BLACK)
-        (if (sp.large) largeFont else font).draw(batch, sp.text, sp.worldX - (sp.text.length * (if (sp.large) 8 else 4)), (if (sp.large) sp.worldY else sp.worldY - 32))
+        (if (sp.large) largeFont else font).draw(batch, sp.text,
+          sp.worldX - (sp.text.length * (if (sp.large) 8 else 4) * Gdx.graphics.getDensity * 1.5f),
+          if (sp.large) sp.worldY else sp.worldY - 32 * Gdx.graphics.getDensity * 1.5f)
       }
       //            worldX = 20 + x * 64 + y * 64;
       //            worldY = 8 + x * 32 - y * 32;
 
-      batch.end();
+      batch.end()
 
-      UI.draw();
+      UI.draw()
       //shader.end();
     }
 
@@ -382,7 +384,7 @@ class CommandersUnite extends Game
 
     override def pause() =
     {
-      pauseGame();
+      pauseGame()
 
     }
 
@@ -404,8 +406,8 @@ class CommandersUnite extends Game
 
       if (Logic.state != GameState.Paused) {
         //Timer.instance.pause()
-        Logic.previousState = Logic.state;
-        Logic.state = GameState.Paused;
+        Logic.previousState = Logic.state
+        Logic.state = GameState.Paused
       }
     }
 
@@ -426,7 +428,7 @@ class CommandersUnite extends Game
     def resize(wide: Int, high: Int)
     {
       Effects.CenterCamera(new Position(Logic.ActivePiece.x, Logic.ActivePiece.y), 1)
-      UI.stage.getViewport().update(wide, high, true)
+      UI.stage.getViewport.update(wide, high, true)
       camera.setToOrtho(false, wide, high)
       camera.update()
     }
@@ -445,7 +447,7 @@ class CommandersUnite extends Game
         "   v_color.a = v_color.a * (256.0/255.0);\n" +
         "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0; \n" +
         "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" +
-        "}                            \n";
+        "}                            \n"
       val fragment =
         """
 #ifdef GL_ES
@@ -466,9 +468,9 @@ void main()
         gl_FragColor = vec4(texture2D(u_texPalette, index).rgb, color.a);
 }
         """
-      val shader = new ShaderProgram(vertex, fragment);
-      if (shader.isCompiled() == false) throw new GdxRuntimeException("Error compiling shader: " + shader.getLog());
-      return shader;
+      val shader = new ShaderProgram(vertex, fragment)
+      if (!shader.isCompiled) throw new GdxRuntimeException("Error compiling shader: " + shader.getLog)
+      shader
     }
   }
 
@@ -476,15 +478,15 @@ void main()
   {
     def keyDown(keycode: Int): Boolean =
     {
-      if (CommandersUnite.initialized == false) {
+      if (!CommandersUnite.initialized) {
         return false
       }
       if (keycode == Input.Keys.SPACE) {
         if (Logic.state != GameState.Paused) {
-          CommandersUnite.game.getScreen.pause();
+          CommandersUnite.game.getScreen.pause()
         }
         else {
-          CommandersUnite.game.getScreen.resume();
+          CommandersUnite.game.getScreen.resume()
         }
       }
       false
@@ -502,17 +504,16 @@ void main()
 
     def touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean =
     {
-      if (CommandersUnite.initialized == false) {
+      if (!CommandersUnite.initialized) {
         return false
       }
       if (Logic.state == GameState.PC_Select_Move || Logic.state == GameState.PC_Select_Action) {
-        var v3 = CommandersUnite.game.camera.unproject(new Vector3(x, y, 0))
+        val v3 = CommandersUnite.game.camera.unproject(new Vector3(x, y, 0))
 
-        var worldX = v3.x
-        var worldY = v3.y
+        val worldX = v3.x
+        val worldY = v3.y - 32
 
         //Console.WriteLine("screenX: " + screenX + ", screenY: " + screenY);
-        worldY = worldY - 32;
         //screenX /= 64;
         //screenY /= 32;
 
@@ -524,45 +525,45 @@ void main()
         if (gridY >= Logic.height) gridY = Logic.height - 1
         CommandersUnite.cursor = Position(gridX, gridY)
         if (Logic.PieceGrid(CommandersUnite.cursor.x)(CommandersUnite.cursor.y) == null && Logic.state == GameState.PC_Select_Move) {
-          Logic.state = GameState.PC_Play_Move;
+          Logic.state = GameState.PC_Play_Move
         }
         else if (Logic.ActivePiece.x == CommandersUnite.cursor.x && Logic.ActivePiece.y == CommandersUnite.cursor.y && Logic.state == GameState.PC_Select_Action) {
-          Logic.advanceTurn();
-          Logic.state = GameState.NPC_Play;
+          Logic.advanceTurn()
+          Logic.state = GameState.NPC_Play
         }
         else if (Logic.PieceGrid(CommandersUnite.cursor.x)(CommandersUnite.cursor.y) != null
           && Logic.FieldMap.Highlight(CommandersUnite.cursor.x)(CommandersUnite.cursor.y) == HighlightType.Bright
           && Logic.state == GameState.PC_Select_Action) {
-          Logic.speaking.clear();
-          Logic.state = GameState.PC_Play_Action;
+          Logic.speaking.clear()
+          Logic.state = GameState.PC_Play_Action
         }
       }
-      return false;
+      false
     }
 
     def touchUp(x: Int, y: Int, pointer: Int, button: Int): Boolean =
     {
-      return false;
+      false
     }
 
     def touchDragged(x: Int, y: Int, pointer: Int): Boolean =
     {
-      return false;
+      false
     }
 
     def mouseMoved(x: Int, y: Int): Boolean =
     {
-      if (CommandersUnite.initialized == false) {
+      if (!CommandersUnite.initialized) {
         return false
       }
       if (Logic.state == GameState.PC_Select_Move) {
-        var v3 = CommandersUnite.game.camera.unproject(new Vector3(x, y, 0));
+        val v3 = CommandersUnite.game.camera.unproject(new Vector3(x, y, 0))
 
-        var worldX = v3.x;
-        var worldY = v3.y;
+        val worldX = v3.x
+        val worldY = v3.y - 32
 
         //Console.WriteLine("screenX: " + screenX + ", screenY: " + screenY);
-        worldY = worldY - 32;
+
         //screenX /= 64;
         //screenY /= 32;
 
@@ -593,7 +594,7 @@ object CommandersUnite
   val updateStep = 0.32F
   val updateMillis : Long = 320
   var stateTime, attackTime, explodeTime, receiveTime = 0.0f
-  var cursor: Position = null;
+  var cursor: Position = null
 
   var repeatedActions = new ArrayBuffer[RepeatedAction](16)
   var canceledRepeated = new ArrayBuffer[RepeatedAction](16)

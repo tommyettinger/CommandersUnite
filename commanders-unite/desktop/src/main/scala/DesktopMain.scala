@@ -7,6 +7,6 @@ object DesktopMain extends App {
     cfg.title = "Commanders Unite"
     cfg.height = 720
     cfg.width = 1280
-    cfg.forceExit = false
+    cfg.forceExit = true
     new LwjglApplication(new CommandersUnite, cfg)
 }

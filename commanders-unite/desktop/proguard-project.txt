@@ -2,7 +2,7 @@
 -libraryjars <java.home>/lib/rt.jar
 
 # keep main method
--keepclasseswithmembers public class game.commanders.unite.Main {
+-keepclasseswithmembers public class game.commanders.unite.DesktopMain {
     public static void main(java.lang.String[]);
 }
 
