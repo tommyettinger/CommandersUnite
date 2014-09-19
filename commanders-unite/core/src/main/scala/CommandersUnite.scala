@@ -53,7 +53,7 @@ class CommandersUnite extends Game
       new Texture(Gdx.files.internal("pack2.png"), Pixmap.Format.RGBA8888, false))
     var currentFrame: TextureAtlas.AtlasRegion = null
     val atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"))
-    val palette = new Texture(Gdx.files.internal("PaletteDark.png"), Pixmap.Format.RGBA8888, false)
+    val palette = new Texture(Gdx.files.internal("Palette.png"), Pixmap.Format.RGBA8888, false)
     var shader: ShaderProgram = createChannelShader()
     val font = new BitmapFont(Gdx.files.internal("Monology.fnt"))
     font.setScale(Math.round(Gdx.graphics.getDensity * 1.5))
