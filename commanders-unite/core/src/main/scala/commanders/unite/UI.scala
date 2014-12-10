@@ -1,10 +1,13 @@
 package commanders.unite
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d._
 import com.badlogic.gdx.scenes.scene2d.ui._
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent
+import game.commanders.unite.CommandersUnite
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
@@ -69,6 +72,28 @@ object UI
 
   def draw()
   {
+    stage.getBatch().begin()
+    if (Logic.state == GameState.Paused) {
+//      largeFont.setColor(Color.BLACK); //(sp.large ? largeFont : font).
+//      font.setColor(Color.BLACK); //(sp.large ? largeFont : font).
+      val bigLabel = new Label("PAUSED", skin, "title-text")
+      bigLabel.setX(Gdx.graphics.getWidth / 2 + 12)
+      bigLabel.setY(Gdx.graphics.getHeight / 2 + 50)
+      val smallLabel = new Label("Press Space to continue", skin, "normal-text")
+      smallLabel.setX(Gdx.graphics.getWidth / 2 - 46)
+      smallLabel.setY(Gdx.graphics.getHeight / 2)
+
+      bigLabel.draw(stage.getBatch(), 1.0f)
+      smallLabel.draw(stage.getBatch(), 1.0f)
+    }
+    for (sp <- Logic.speaking) {
+      val speak = new Label(sp.text, skin, (if (sp.large) "title-text" else "normal-text"))
+      val vec = CommandersUnite.game.camera.project(new Vector3(sp.worldX, sp.worldY, 0))
+      speak.setX(vec.x - (sp.text.length * (if (sp.large) 8 else 4) * Gdx.graphics.getDensity * 1.5f))
+      speak.setY( if (sp.large) vec.y else vec.y - 32 * Gdx.graphics.getDensity * 1.5f)
+      speak.draw(stage.getBatch(), 1.0f)
+    }
+    stage.getBatch().end()
     stage.draw()
   }
 }

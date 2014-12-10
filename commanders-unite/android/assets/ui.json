@@ -48,7 +48,7 @@
   com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
    default: { font: normaltext, fontColor: white },
    normal-text: { font: normaltext, fontColor: white },
-   title-text: { font: titletext, fontColor: red }
+   title-text: { font: titletext, fontColor: white }
   },
   com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
    default: { up: button, down: button-down, checked: button-down, disabled: button-disabled },

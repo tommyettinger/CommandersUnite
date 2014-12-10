@@ -53,11 +53,11 @@ class CommandersUnite extends Game
       new Texture(Gdx.files.internal("pack2.png"), Pixmap.Format.RGBA8888, false))
     var currentFrame: TextureAtlas.AtlasRegion = null
     val atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"))
-    val palette = new Texture(Gdx.files.internal("Palette.png"), Pixmap.Format.RGBA8888, false)
+    val palette = new Texture(Gdx.files.internal("PaletteVivid.png"), Pixmap.Format.RGBA8888, false)
     var shader: ShaderProgram = createChannelShader()
-    val font = new BitmapFont(Gdx.files.internal("Monology.fnt"))
+    val font = new BitmapFont(Gdx.files.internal("MonologyUI.fnt"))
     font.setScale(Math.round(Gdx.graphics.getDensity * 1.5))
-    val largeFont = new BitmapFont(Gdx.files.internal("MonologyLarge.fnt"))
+    val largeFont = new BitmapFont(Gdx.files.internal("MonologyLargeUI.fnt"))
     largeFont.setScale(Math.round(Gdx.graphics.getDensity * 1.5))
     Logic.PlacePieces()
     palette.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest)
@@ -85,11 +85,11 @@ class CommandersUnite extends Game
                 pieces(Piece.PieceLookup(name))(dir)(j)(k) = atlas.findRegion(name + "_face" + dir, k)
               }
             case 1 =>
-              pieces(Piece.PieceLookup(name))(dir)(j) = new Array[TextureAtlas.AtlasRegion](9)
-              for (k <- 0 until 8) {
+              pieces(Piece.PieceLookup(name))(dir)(j) = new Array[TextureAtlas.AtlasRegion](13)
+              for (k <- 0 until 12) {
                 pieces(Piece.PieceLookup(name))(dir)(j)(k) = atlas.findRegion(name + "_Explode_face" + dir, k)
               }
-              pieces(Piece.PieceLookup(name))(dir)(j)(8) = clearLarge
+              pieces(Piece.PieceLookup(name))(dir)(j)(12) = clearLarge
             case 2 =>
               pieces(Piece.PieceLookup(name))(dir)(j) = new Array[TextureAtlas.AtlasRegion](if (Piece.AllMobilities(Piece.PieceLookup(name)) == MovementType.Immobile) 2 else 16)
               for (k <- 0 until (if (Piece.AllMobilities(Piece.PieceLookup(name)) == MovementType.Immobile) 2 else 16)) {
@@ -349,6 +349,7 @@ class CommandersUnite extends Game
           }
         }
       }
+      /*
       if (Logic.state == GameState.Paused) {
         batch.setColor(new Color(20 / 32f, 0, 0, 1))
         largeFont.setColor(Color.BLACK); //(sp.large ? largeFont : font).
@@ -363,6 +364,7 @@ class CommandersUnite extends Game
           sp.worldX - (sp.text.length * (if (sp.large) 8 else 4) * Gdx.graphics.getDensity * 1.5f),
           if (sp.large) sp.worldY else sp.worldY - 32 * Gdx.graphics.getDensity * 1.5f)
       }
+      */
       //            worldX = 20 + x * 64 + y * 64;
       //            worldY = 8 + x * 32 - y * 32;
 
